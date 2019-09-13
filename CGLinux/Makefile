@@ -16,14 +16,14 @@ ifeq ($(config),debug)
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/CGLinux
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG
-  INCLUDES += -Isrc -I../Dependencies/GLFW/include
+  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lGL -lGLU -lglfw3 -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
+  LIBS += ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -43,14 +43,14 @@ ifeq ($(config),release)
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/CGLinux
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_RELEASE
-  INCLUDES += -Isrc -I../Dependencies/GLFW/include
+  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lGL -lGLU -lglfw3 -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
+  LIBS += ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -70,14 +70,14 @@ ifeq ($(config),dist)
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Dist-linux-x86_64/CGLinux
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DIST
-  INCLUDES += -Isrc -I../Dependencies/GLFW/include
+  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
-  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
-  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
+  ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
+  ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a -lGL -lGLU -lglfw3 -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a
+  LIBS += ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -92,7 +92,9 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/graphics_buffer.o \
 	$(OBJDIR)/main.o \
+	$(OBJDIR)/varray.o \
 	$(OBJDIR)/vbinary_tree.o \
 	$(OBJDIR)/vdynamic_array_i32.o \
 	$(OBJDIR)/vdynamic_table.o \
@@ -159,7 +161,13 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
+$(OBJDIR)/graphics_buffer.o: src/graphics/graphics_buffer.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/varray.o: src/vlib/core/varray.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/vbinary_tree.o: src/vlib/core/vbinary_tree.c

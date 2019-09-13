@@ -2,34 +2,18 @@
 #include <stdlib.h>
 //#define _GLFW_X11
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 
 #include "vlib/core/vtypes.h"
+
+#include "graphics/graphics_buffer.h"
+#include "graphics/graphics_shader.h"
 
 // WINDOW GLOBAL
 static int8 g_is_cursor_position_visible = 0;
 static int8 g_is_cursor_enabled = 1;
 static int8 g_is_freqency_visible = 0;
 static uint64 g_freqency;
-
-//OPENGL FUNCTIONS
-//void vertex_buffer_bind(uint32 vertex_buffer_id);
-//void vertex_buffer_unbind();
-//uint32 vertex_buffer_create(float* buffer_data, int32 length);
-//void vertex_array_enable(int8 vertex_array_index);
-//void vertex_array_disable(int8 vertex_array_index);
-//int8 vertex_array_create(uint32 vertex_buffer_id, int32 size);
-
-typedef struct { int8 handled; } event;
-
-typedef void (*event_callback)(event e);
-
-typedef struct {
-	const char* title;
-	uint32 width;
-	uint32 height;
-	uint8 vsync;
-	event_callback event_handler;
-} window_data;
 
 void window_key_callback(GLFWwindow* window, int32 key, int32 scancode, int32 action, int32 mods)
 {
@@ -252,37 +236,9 @@ void window_drop_callback(GLFWwindow* window, int32 count, const char** paths)
 	}
 }
 
-#define to_string(x) #x
-
-void on_event(event e)
-{
-	printf("event handled = %c\n", e.handled);
-}
-
-typedef struct
-{
-	int32 number_1;
-	int32 number_2;
-	int32 number_3;
-} A;
-
 int main()
 {
-#if 0
-
-	A* a = malloc(sizeof(A));
-	a->number_1 = 10;
-	a->number_2 = 20;
-	a->number_3 = 30;
-	printf("a = %d\n", (int32) a);
-	printf("number_1 = %d\n", ((A*)&a->number_1)->number_2);
-	printf("number_2 = %d\n", (int32)&a->number_2);
-	printf("number_3 = %d\n", (int32)&a->number_3);
-
-
-#else
 	GLFWwindow* window;
-	window_data wdata;
 	if (!glfwInit())
 	{
 		printf("GLFW is not initialized!\n");
@@ -291,27 +247,21 @@ int main()
 	int32 major, minor, revision;
 	glfwGetVersion(&major, &minor, &revision);
 	printf("GLFW version: %d.%d.%d\n", major, minor, revision);
-	wdata.title = "Demo";
-	wdata.width = 1280;
-	wdata.height = 720;
-	wdata.vsync = 1;
-	wdata.event_handler = on_event;
-	window = glfwCreateWindow(wdata.width, wdata.height, wdata.title, 0, 0);
+	window = glfwCreateWindow(1280, 720, "Demo", 0, 0);
 	if (!window)
 	{
 		glfwTerminate();
 		return(-1);
 	}
 	glfwMakeContextCurrent(window);
-	glfwSwapInterval(wdata.vsync);
-	glfwSetWindowUserPointer(window, &wdata);
+	glfwSwapInterval(1);
 	glfwSetKeyCallback(window, window_key_callback);
 	glfwSetMouseButtonCallback(window, window_mouse_button_callback);
 	glfwSetScrollCallback(window, window_mouse_scroll_callback);
 	glfwSetDropCallback(window, window_drop_callback);
 	
 	//OpenGL
-    /*
+    #if 1
 	int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	if (status == 0)
 	{
@@ -338,18 +288,16 @@ int main()
 	graphics_index_buffer* ib = graphics_index_buffer_create(indices, 3);
 	graphics_index_buffer_bind(ib);
 	graphics_shader_source shader_source;
-	shader_source = graphics_shader_load(
-		"E://General//Programming//C//ComputerGraphic2//ComputerGraphic2//source//simple_vertex_shader.txt", 
-		"E://General//Programming//C//ComputerGraphic2//ComputerGraphic2//source//simple_fragment_shader.txt");
+	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
 	uint32 shader = graphics_shader_compile(shader_source);
-    */
+    
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
 	{
 		g_freqency = glfwGetTimerFrequency();
 		if (g_is_freqency_visible)
 		{
-			printf("%lld hz\n", g_freqency);
+			printf("%ld hz\n", g_freqency);
 		}
 		if (g_is_cursor_position_visible)
 		{
@@ -357,15 +305,15 @@ int main()
 			printf("Mouse position: {%f,%f}\n", mouse_x_pos, mouse_y_pos);
 		}
 
-        /*
 		glClearColor(0.1f, 0.1f, 0.1f, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
-		
+
+        /*
 		graphics_shader_bind(shader);
 		glBindVertexArray(m_VertexArray);
 		glDrawElements(GL_TRIANGLES, ib->count, GL_UNSIGNED_INT, NULL);
         */
-
+	   	
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

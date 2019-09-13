@@ -13,15 +13,18 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 -- Include dirs
 IncludeDirs = {}
 IncludeDirs["GLFW"] = "Dependencies/GLFW/include" 
+IncludeDirs["GLAD"] = "Dependencies/glad/include" 
 
 group "Dependencies"
 	include "Dependencies/GLFW"
+	include "Dependencies/glad"
 
 project "CGLinux"
 	location "CGLinux"
 	kind "ConsoleApp"
 	language "C"
 
+	buildoptions { "-std=c99" }
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin/Intermidiates/" .. outputdir .. "/%{prj.name}")
 
@@ -31,8 +34,8 @@ project "CGLinux"
 		"%{prj.name}/src/**.c",
 		"%{prj.name}/src/vlib/core/**.h",
 		"%{prj.name}/src/vlib/core/**.c",
-		"%{prj.name}/src/vlib/graphics/**.h",
-		"%{prj.name}/src/vlib/graphics/**.c"
+		"%{prj.name}/src/graphics/**.h",
+		"%{prj.name}/src/graphics/**.c"
 	}
 
 	defines
@@ -44,13 +47,15 @@ project "CGLinux"
 	includedirs
 	{
 		"%{prj.name}/src",
-		"%{IncludeDirs.GLFW}"
+		"%{IncludeDirs.GLFW}",
+		"%{IncludeDirs.GLAD}"
 	}
 
 	links
 	{
 		"GLFW",
-		"GL", "GLU", "glfw3", "X11",
+		"GLAD",
+		"GL", "GLU", "X11",
 		"dl", "Xinerama", "Xcursor", "m",
 		"Xxf86vm", "Xrandr", "pthread", "Xi"
 	}
