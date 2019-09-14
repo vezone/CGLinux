@@ -53,10 +53,11 @@ project "CGLinux"
 
 	links
 	{
-		"GLFW",
 		"GLAD",
-		"GL", "GLU", "X11",
-		"dl", "Xinerama", "Xcursor", "m",
+		"GLFW",
+		"GL", "GLU",
+		"X11","dl",
+		"Xinerama", "Xcursor", "m",
 		"Xxf86vm", "Xrandr", "pthread", "Xi"
 	}
 

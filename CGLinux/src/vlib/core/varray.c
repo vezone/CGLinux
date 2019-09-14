@@ -3,7 +3,6 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include <assert.h>
 
 void* varray_grow(const void* array, size_t new_len, size_t elem_size)
 {

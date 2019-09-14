@@ -22,8 +22,8 @@ ifeq ($(config),debug)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a
+  LIBS += ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -49,8 +49,8 @@ ifeq ($(config),release)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a
+  LIBS += ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -76,8 +76,8 @@ ifeq ($(config),dist)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a
+  LIBS += ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS

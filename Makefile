@@ -44,7 +44,7 @@ ifneq (,$(glad_config))
 	@${MAKE} --no-print-directory -C Dependencies/glad -f Makefile config=$(glad_config)
 endif
 
-CGLinux: GLFW glad
+CGLinux: glad GLFW
 ifneq (,$(CGLinux_config))
 	@echo "==== Building CGLinux ($(CGLinux_config)) ===="
 	@${MAKE} --no-print-directory -C CGLinux -f Makefile config=$(CGLinux_config)
