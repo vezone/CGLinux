@@ -308,12 +308,11 @@ int main()
 		glClearColor(0.1f, 0.1f, 0.1f, 1);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-        /*
+        
 		graphics_shader_bind(shader);
-		glBindVertexArray(m_VertexArray);
+		//glBindVertexArray(m_VertexArray);
 		glDrawElements(GL_TRIANGLES, ib->count, GL_UNSIGNED_INT, NULL);
-        */
-	   	
+        
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

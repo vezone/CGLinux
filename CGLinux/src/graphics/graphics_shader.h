@@ -28,7 +28,7 @@ static const char* file_read_string(const char* file_path)
 		fseek(file, 0, SEEK_SET);
 		char* result = (char*)malloc((file_length + 1) * sizeof(char));
 		memset(result, '\0', (file_length + 1));
-		fread(result, sizeof(char), (file_length - 1), file);
+		fread(result, sizeof(char), (file_length), file);
 		result[file_length] = '\0';
 		fclose(file);
 		return((const char*)result);
@@ -46,7 +46,6 @@ graphics_shader_source graphics_shader_load(
 	const char* shader_path)
 {
 	const char* shader_source = file_read_string(shader_path);
-	//printf("source:\n%s\n",shader_source);
 	if (vstring_compare(shader_source, "file_open_error"))
 	{
 		asserts(0, BRIGHTRED("shader file open error!"));
@@ -59,12 +58,11 @@ graphics_shader_source graphics_shader_load(
 
 	const char* vertex_shader_source = 
 		vstring_substring_range(shader_source, 
-			vertex_index + vstring_length("#vertex shader") + 1, fragment_index);
-	printf(GREEN("%s"), vertex_shader_source);
-	//FIXME: shader_source.length != real_shader_source.length
+			vertex_index + vstring_length("#vertex shader") + 1, (fragment_index-1));
+	printf(GREEN("%s\n"), vertex_shader_source);
 	const char* fragment_shader_source = 
-		vstring_substring(shader_source, fragment_index + vstring_length("#fragment shader")+2);
-	printf(GREEN("%s"), fragment_shader_source);
+		vstring_substring(shader_source, 
+		fragment_index + vstring_length("#fragment shader")+1);
 
 	assert(vstring_length(vertex_shader_source) > 0);
 	assert(vstring_length(fragment_shader_source) > 0);
