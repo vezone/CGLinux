@@ -14,10 +14,12 @@ outputdir = "%{cfg.buildcfg}-%{cfg.system}-%{cfg.architecture}"
 IncludeDirs = {}
 IncludeDirs["GLFW"] = "Dependencies/GLFW/include" 
 IncludeDirs["GLAD"] = "Dependencies/glad/include" 
+IncludeDirs["CGLM"] = "Dependencies/CGLM/include" 
 
 group "Dependencies"
 	include "Dependencies/GLFW"
 	include "Dependencies/glad"
+	include "Dependencies/CGLM"
 
 project "CGLinux"
 	location "CGLinux"
@@ -48,7 +50,8 @@ project "CGLinux"
 	{
 		"%{prj.name}/src",
 		"%{IncludeDirs.GLFW}",
-		"%{IncludeDirs.GLAD}"
+		"%{IncludeDirs.GLAD}",
+		"%{IncludeDirs.CGLM}"
 	}
 
 	links

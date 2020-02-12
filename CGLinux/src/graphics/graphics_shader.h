@@ -9,7 +9,8 @@
 #include "../vlib/core/vtypes.h"
 #include "../vlib/core/vstring.h"
 
-static void file_write_string(char* file_path, char* data, int len)
+static void 
+file_write_string(char* file_path, char* data, int len)
 {
 	FILE* file;
 	file = fopen(file_path, "w");
@@ -17,33 +18,39 @@ static void file_write_string(char* file_path, char* data, int len)
 	fclose(file);
 }
 
-static const char* file_read_string(const char* file_path)
+static const char* 
+file_read_string(const char* file_path)
 {
 	FILE* file;
 	file = fopen(file_path, "r");
 	if (file)
 	{
+		char* result;
+		long file_length;
+
 		fseek(file, 0, SEEK_END);
-		long file_length = (ftell(file));
+		file_length = (ftell(file));
 		fseek(file, 0, SEEK_SET);
-		char* result = (char*)malloc((file_length + 1) * sizeof(char));
+		result = malloc((file_length + 1) * sizeof(char));
 		memset(result, '\0', (file_length + 1));
 		fread(result, sizeof(char), (file_length), file);
 		result[file_length] = '\0';
+		
 		fclose(file);
 		return((const char*)result);
 	}
 	return("file_open_error");
 }
 
-typedef struct {
+typedef struct graphics_shader_source
+{
 	const char* vertex_shader;
 	const char* fragment_shader;
 } graphics_shader_source;
 
 
-graphics_shader_source graphics_shader_load(
-	const char* shader_path)
+graphics_shader_source 
+graphics_shader_load(const char* shader_path)
 {
 	const char* shader_source = file_read_string(shader_path);
 	if (vstring_compare(shader_source, "file_open_error"))
@@ -59,20 +66,24 @@ graphics_shader_source graphics_shader_load(
 	const char* vertex_shader_source = 
 		vstring_substring_range(shader_source, 
 			vertex_index + vstring_length("#vertex shader") + 1, (fragment_index-1));
-	printf(GREEN("%s\n"), vertex_shader_source);
+	printf(YELLOW("vertex shader:\n%s\n"), vertex_shader_source);
 	const char* fragment_shader_source = 
 		vstring_substring(shader_source, 
 		fragment_index + vstring_length("#fragment shader")+1);
-
+	printf(GREEN("shader shader:\n%s\n"), fragment_shader_source);
+	
 	assert(vstring_length(vertex_shader_source) > 0);
 	assert(vstring_length(fragment_shader_source) > 0);
 	
-	return (graphics_shader_source) { 
+	return (graphics_shader_source) 
+	{ 
 		(const char*) vertex_shader_source, 
-		(const char*) fragment_shader_source };
+		(const char*) fragment_shader_source 
+	};
 }
 
-uint32 graphics_shader_compile(graphics_shader_source source)
+uint32 
+graphics_shader_compile(graphics_shader_source source)
 {
 	uint32 vertex_shader_id;
 	vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
@@ -83,17 +94,14 @@ uint32 graphics_shader_compile(graphics_shader_source source)
 
 	int32 result = GL_FALSE;
 	int32 info_log_length;
-	glGetShaderiv(vertex_shader_id,
-		GL_COMPILE_STATUS, &result);
-	glGetShaderiv(vertex_shader_id,
-		GL_INFO_LOG_LENGTH, &info_log_length);
+	glGetShaderiv(vertex_shader_id, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(vertex_shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
 	if (info_log_length > 0)
 	{
-		char* shader_error_message =
-			(char*)malloc(info_log_length + 1);
-		glGetShaderInfoLog(vertex_shader_id,
-			info_log_length, 0, shader_error_message);
+		char* shader_error_message = malloc(info_log_length + 1);
+		glGetShaderInfoLog(vertex_shader_id, info_log_length, 0, shader_error_message);
 		printf(BRIGHTRED("compiling error %s\n"), shader_error_message);
+		free(shader_error_message);
 	}
 
 	printf("Compiling fragment shader\n");
@@ -102,21 +110,14 @@ uint32 graphics_shader_compile(graphics_shader_source source)
 	glShaderSource(fragment_shader_id, 1, &source.fragment_shader, 0);
 	glCompileShader(fragment_shader_id);
 
-	glGetShaderiv(fragment_shader_id,
-		GL_COMPILE_STATUS, &result);
-	glGetShaderiv(fragment_shader_id,
-		GL_INFO_LOG_LENGTH, &info_log_length);
+	glGetShaderiv(fragment_shader_id, GL_COMPILE_STATUS, &result);
+	glGetShaderiv(fragment_shader_id, GL_INFO_LOG_LENGTH, &info_log_length);
 	if (info_log_length > 0)
 	{
-		char* shader_error_message =
-			(char*)malloc(info_log_length + 1);
-		glGetShaderInfoLog(fragment_shader_id,
-			info_log_length, 0, shader_error_message);
+		char* shader_error_message = malloc(info_log_length + 1);
+		glGetShaderInfoLog(fragment_shader_id, info_log_length, 0, shader_error_message);
 		printf(BRIGHTRED("compiling error %s\n"), shader_error_message);
-		if (shader_error_message)
-		{
-			free(shader_error_message);
-		}
+		free(shader_error_message);
 	}
 
 	printf("Linking program\n");
@@ -129,15 +130,10 @@ uint32 graphics_shader_compile(graphics_shader_source source)
 	glGetProgramiv(shader_program_id, GL_INFO_LOG_LENGTH, &info_log_length);
 	if (info_log_length > 0)
 	{
-		char* shader_error_message =
-			(char*)malloc(info_log_length + 1);
-		glGetProgramInfoLog(shader_program_id,
-			info_log_length, 0, shader_error_message);
+		char* shader_error_message = malloc(info_log_length + 1);
+		glGetProgramInfoLog(shader_program_id, info_log_length, 0, shader_error_message);
 		printf(BRIGHTRED("linking error %s\n"), shader_error_message);
-		if (shader_error_message)
-		{
-			free(shader_error_message);
-		}
+		free(shader_error_message);
 	}
 
 	glDetachShader(shader_program_id, vertex_shader_id);
@@ -149,17 +145,20 @@ uint32 graphics_shader_compile(graphics_shader_source source)
 	return shader_program_id;
 }
 
-void graphics_shader_delete(uint32_t renderId)
+void 
+graphics_shader_delete(uint32 renderId)
 {
 	glDeleteProgram(renderId);
 }
 
-void graphics_shader_bind(uint32_t renderId)
+void 
+graphics_shader_bind(uint32 renderId)
 {
 	glUseProgram(renderId);
 }
 
-void graphics_shader_unbind()
+void 
+graphics_shader_unbind()
 {
 	glUseProgram(0);
 }

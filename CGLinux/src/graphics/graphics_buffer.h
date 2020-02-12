@@ -1,7 +1,5 @@
 #pragma once
 
-#pragma once
-
 #include "../vlib/core/vtypes.h"
 #include "../vlib/core/varray.h"
 
@@ -27,6 +25,7 @@ static uint32 data_type_get_size(data_type type)
 	}
 	//for debug purpose
 	asserts(0, "Unknown data type!");
+	return 0;
 }
 
 static uint32 data_type_get_count(data_type type)
@@ -48,25 +47,15 @@ static uint32 data_type_get_count(data_type type)
 
 typedef struct graphics_buffer_element
 {
-	int8 is_normilized;
-	data_type type;
-	int32 size;
-	int32 offset;
+	int8 IsNormilized;
+	data_type Type;
+	int32 Size;
 } graphics_buffer_element;
-
-typedef struct graphics_buffer_layout
-{
-	int32 stride;
-	graphics_buffer_element* elements;
-} graphics_buffer_layout;
-
-void graphics_buffer_layout_create(graphics_buffer_layout* layout, graphics_buffer_element* elements);
 
 typedef struct graphics_vertex_buffer
 {
-	float* vertices;
-	uint32_t rendererID;
-	graphics_buffer_layout* layout;
+	float* Vertices;
+	uint32 RendererID;
 } graphics_vertex_buffer;
 
 void graphics_vertex_buffer_create(graphics_vertex_buffer* buffer, float* vertices, uint32_t size);
@@ -75,11 +64,24 @@ void graphics_vertex_buffer_unbind(graphics_vertex_buffer* vertex_buffer);
 
 typedef struct graphics_index_buffer
 {
-	uint32* indices;
-	uint32 rendererID;
-	uint32 count;
+	uint32* Indices;
+	uint32 RendererID;
+	uint32 Count;
 } graphics_index_buffer;
 
 void graphics_index_buffer_create(graphics_index_buffer* buffer, uint32_t* indices, uint32_t size);
 void graphics_index_buffer_bind(graphics_index_buffer* index_buffer);
 void graphics_index_buffer_unbind(graphics_index_buffer* index_buffer);
+
+typedef struct graphics_vertex_array {
+	uint32 RendererID;
+	uint32 VertexAttribArrayID;
+	graphics_buffer_element Element;
+	graphics_vertex_buffer VertexBuffer;
+} graphics_vertex_array;
+
+static int32 vertex_array_count = 0;
+
+void graphics_vertex_array_create(graphics_vertex_array* va, uint32 size, float* vertices, data_type type);
+void graphics_vertex_array_bind(graphics_vertex_array* va);
+void graphics_vertex_array_unbind();

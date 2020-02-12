@@ -838,6 +838,7 @@ char* vstring_substring_range(const char* input, int32 start_index, int32 end_in
 		{
 			result[i - start_index] = input[i];
 		}
+		result[new_length] = '\0';
 		return result;
 	}
 	return "vstring_substring: ERROR";

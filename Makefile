@@ -11,26 +11,29 @@ endif
 ifeq ($(config),debug)
   GLFW_config = debug
   glad_config = debug
+  CGLM_config = debug
   CGLinux_config = debug
 endif
 ifeq ($(config),release)
   GLFW_config = release
   glad_config = release
+  CGLM_config = release
   CGLinux_config = release
 endif
 ifeq ($(config),dist)
   GLFW_config = dist
   glad_config = dist
+  CGLM_config = dist
   CGLinux_config = dist
 endif
 
-PROJECTS := GLFW glad CGLinux
+PROJECTS := GLFW glad CGLM CGLinux
 
 .PHONY: all clean help $(PROJECTS) Dependencies
 
 all: $(PROJECTS)
 
-Dependencies: CGLinux GLFW glad
+Dependencies: CGLM CGLinux GLFW glad
 
 GLFW:
 ifneq (,$(GLFW_config))
@@ -44,6 +47,12 @@ ifneq (,$(glad_config))
 	@${MAKE} --no-print-directory -C Dependencies/glad -f Makefile config=$(glad_config)
 endif
 
+CGLM:
+ifneq (,$(CGLM_config))
+	@echo "==== Building CGLM ($(CGLM_config)) ===="
+	@${MAKE} --no-print-directory -C Dependencies/CGLM -f Makefile config=$(CGLM_config)
+endif
+
 CGLinux: glad GLFW
 ifneq (,$(CGLinux_config))
 	@echo "==== Building CGLinux ($(CGLinux_config)) ===="
@@ -53,6 +62,7 @@ endif
 clean:
 	@${MAKE} --no-print-directory -C Dependencies/GLFW -f Makefile clean
 	@${MAKE} --no-print-directory -C Dependencies/glad -f Makefile clean
+	@${MAKE} --no-print-directory -C Dependencies/CGLM -f Makefile clean
 	@${MAKE} --no-print-directory -C CGLinux -f Makefile clean
 
 help:
@@ -68,6 +78,7 @@ help:
 	@echo "   clean"
 	@echo "   GLFW"
 	@echo "   glad"
+	@echo "   CGLM"
 	@echo "   CGLinux"
 	@echo ""
 	@echo "For more information, see https://github.com/premake/premake-core/wiki"

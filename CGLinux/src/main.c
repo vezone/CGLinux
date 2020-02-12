@@ -3,11 +3,13 @@
 
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
+#include <cglm/cglm.h>
 
 #include "vlib/core/vtypes.h"
 
 #include "graphics/graphics_buffer.h"
 #include "graphics/graphics_shader.h"
+
 
 // WINDOW GLOBAL
 static int8 g_is_cursor_position_visible = 0;
@@ -236,6 +238,106 @@ void window_drop_callback(GLFWwindow* window, int32 count, const char** paths)
 	}
 }
 
+typedef struct Triangle2D
+{
+	float a[2];
+	float b[2];
+	float c[2];
+} Triangle2D;
+
+void
+render_triangle(Triangle2D triangle2D)
+{
+	float vertices[3 * 3] =
+	{
+		triangle2D.a[0], triangle2D.a[1], 0.0f,
+		triangle2D.b[0], triangle2D.b[1], 0.0f,
+		triangle2D.c[0], triangle2D.c[1], 0.0f
+	};
+	graphics_vertex_buffer vb = {};
+	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
+	graphics_vertex_buffer_bind(&vb);
+	
+	glEnableVertexAttribArray(0);
+	glVertexAttribPointer(0, 3, GL_FLOAT, 0, 3 * sizeof(float), 0);
+	
+	uint32_t indices[] = { 0, 1, 2 };
+	graphics_index_buffer ib = {};
+	graphics_index_buffer_create(&ib, indices, 3);
+	graphics_index_buffer_bind(&ib);
+	graphics_shader_source shader_source;
+	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
+	uint32 shader = graphics_shader_compile(shader_source);
+}
+
+typedef struct RenderData {
+	graphics_index_buffer ib;
+	graphics_vertex_array va;
+	uint32 shader; 
+} RenderData;
+
+RenderData
+other_va1()
+{
+	graphics_shader_source shader_source;
+	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
+	uint32 shader = graphics_shader_compile(shader_source);
+	graphics_shader_bind(shader);
+
+	float vertices[3 * 3] =
+	{
+		-0.1f, -0.1f, 0.0f,
+		 0.5f, -0.1f, 0.0f,
+		 0.0f,  0.5f, 0.0f
+	};
+
+	graphics_vertex_buffer vb = {};
+	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
+	
+	graphics_vertex_array va = {}; 
+	graphics_vertex_array_create(&va, sizeof(vertices), vertices, data_type_float3);
+	graphics_vertex_array_bind(&va);
+	va.VertexBuffer = vb;
+
+	uint32 indices[] = { 0, 1, 2 };
+	graphics_index_buffer ib = {};
+	graphics_index_buffer_create(&ib, indices, 3);
+	graphics_index_buffer_bind(&ib);
+
+	return (RenderData) { ib, va, shader };
+}
+
+RenderData
+other_va2()
+{
+	graphics_shader_source shader_source;
+	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
+	uint32 shader = graphics_shader_compile(shader_source);
+	graphics_shader_bind(shader);
+
+	float vertices[3 * 3] =
+	{
+		-0.9f, -0.9f, 0.0f,
+		 0.5f, -0.9f, 0.0f,
+		 0.0f,  0.5f, 0.0f
+	};
+
+	graphics_vertex_buffer vb = {};
+	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
+	
+	graphics_vertex_array va = {}; 
+	graphics_vertex_array_create(&va, sizeof(vertices), vertices, data_type_float3);
+	graphics_vertex_array_bind(&va);
+	va.VertexBuffer = vb;
+
+	uint32 indices[] = { 0, 1, 2 };
+	graphics_index_buffer ib = {};
+	graphics_index_buffer_create(&ib, indices, 3);
+	graphics_index_buffer_bind(&ib);
+
+	return (RenderData) { ib, va, shader };
+}
+
 int main()
 {
 	GLFWwindow* window;
@@ -261,7 +363,6 @@ int main()
 	glfwSetDropCallback(window, window_drop_callback);
 	
 	//OpenGL
-    #if 1
 	int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	if (status == 0)
 	{
@@ -269,54 +370,25 @@ int main()
 	}
 	printf("OpenGL version %s\n", glGetString(GL_VERSION));
 
-	#if 0
-	//FIXME: this part of code ruins everything
-	graphics_buffer_layout layout = {};
-	{
-		graphics_buffer_element* elements = 0;
-		{
-			graphics_buffer_element gbe = (graphics_buffer_element)
-			{
-				0, data_type_float3, data_type_get_size(data_type_float3), 0 
-			};
-			varray_push(elements, gbe);
-			gbe = (graphics_buffer_element)
-			{
-				0, data_type_float3, data_type_get_size(data_type_float3), 0 
-			};
-			varray_push(elements, gbe);
-		}
-		graphics_buffer_layout_create(&layout, elements);
-	}
-	#endif
-
-	uint32 vertex_array;
-	glCreateVertexArrays(1, &vertex_array);
-	glBindVertexArray(vertex_array);
-#if 1
-	//asserts(0, "LALAL");
-	//glGenBuffers(1, &vertex_array);
 	float vertices[3 * 3] =
 	{
 		-0.5f, -0.5f, 0.0f,
 		 0.5f, -0.5f, 0.0f,
 		 0.0f,  0.5f, 0.0f
 	};
-	graphics_vertex_buffer vb = {};
-	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
-	graphics_vertex_buffer_bind(&vb);
 	
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, 0, 3 * sizeof(float), 0);
-	
-	uint32_t indices[] = { 0, 1, 2 };
-	graphics_index_buffer ib = {};
-	graphics_index_buffer_create(&ib, indices, 3);
-	graphics_index_buffer_bind(&ib);
-	graphics_shader_source shader_source;
-	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
-	uint32 shader = graphics_shader_compile(shader_source);
-    #endif
+	RenderData renderData1 = other_va1();
+	RenderData renderData2 = other_va2();
+
+	printf("shader1: %d \n", renderData1.shader);
+	printf("va1.id: %d \n", renderData1.va.RendererID);
+	printf("va1.vap: %d \n", renderData1.va.VertexAttribArrayID);
+	printf("ib1.id: %d \n", renderData1.ib.RendererID);
+
+	printf("shader2: %d \n", renderData2.shader);
+	printf("va2.id: %d \n", renderData2.va.RendererID);
+	printf("va2.vap: %d \n", renderData2.va.VertexAttribArrayID);
+	printf("ib2.id: %d \n", renderData2.ib.RendererID);
 
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -335,18 +407,21 @@ int main()
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 
-        #if 1
-		graphics_shader_bind(shader);
-		//glBindVertexArray(vertex_array);
-		glDrawElements(GL_TRIANGLES, ib.count, GL_UNSIGNED_INT, NULL);
-        #endif
+		graphics_shader_bind(renderData1.shader);
+		graphics_vertex_array_bind(&renderData1.va);
+		graphics_index_buffer_bind(&renderData1.ib);
+		glDrawElements(GL_TRIANGLES, renderData1.ib.Count, GL_UNSIGNED_INT, NULL);
 
+		graphics_shader_bind(renderData2.shader);
+		graphics_vertex_array_bind(&renderData2.va);
+		graphics_index_buffer_bind(&renderData2.ib);
+		glDrawElements(GL_TRIANGLES, renderData2.ib.Count, GL_UNSIGNED_INT, NULL);
+	
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}
 	
 	glfwTerminate();
-#endif
 
 	return 0;
 }

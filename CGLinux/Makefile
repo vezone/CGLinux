@@ -16,7 +16,7 @@ ifeq ($(config),debug)
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/CGLinux
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG
-  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include
+  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99
@@ -43,7 +43,7 @@ ifeq ($(config),release)
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/CGLinux
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_RELEASE
-  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include
+  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99
@@ -70,7 +70,7 @@ ifeq ($(config),dist)
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Dist-linux-x86_64/CGLinux
   DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DIST
-  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include
+  INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99

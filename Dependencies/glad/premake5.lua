@@ -19,7 +19,7 @@ project "glad"
 
 	filter "system:linux"
 		pic "On"
-
+		buildoptions { "-std=c99" }
 		systemversion "latest"
 		staticruntime "On"
 
