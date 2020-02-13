@@ -811,13 +811,14 @@ char* vstring_substring(const char* input, int32 start_index)
 	int32 input_length = vstring_length(input);
 	if ((start_index < input_length) && (start_index >= 0))
 	{
+		int32 i;
 		int32 new_length = input_length - start_index + 1;
 		char* result = malloc(new_length * sizeof(char));
-		int32 i;
-		for (i = start_index; i < input_length; i++)
+		for (i = start_index; i <= input_length; i++)
 		{
 			result[i - start_index] = input[i];
 		}
+		result[new_length] = '\0';
 		return result;
 	}
 	return "vstring_substring: ERROR";
@@ -832,13 +833,13 @@ char* vstring_substring_range(const char* input, int32 start_index, int32 end_in
 		(end_index > start_index))
 	{
 		int32 i;
-		int32 new_length = end_index - start_index + 1;
+		int32 new_length = end_index - start_index;
 		char* result = malloc(new_length * sizeof(char));
 		for (i = start_index; i <= end_index; i++)
 		{
 			result[i - start_index] = input[i];
 		}
-		result[new_length] = '\0';
+		result[new_length-1] = '\0';
 		return result;
 	}
 	return "vstring_substring: ERROR";

@@ -76,15 +76,10 @@ void graphics_vertex_array_add_ibo(graphics_vertex_array* va, graphics_index_buf
 
 void graphics_vertex_array_bind(graphics_vertex_array* va) 
 {
-	//glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer.RendererID);
-	//glEnableVertexAttribArray(va->VertexAttribArrayID);
-	//glVertexAttribPointer(va->VertexAttribArrayID, 3, GL_FLOAT, 0, data_type_get_size(va->Element.Type), (void*)0);
 	glBindVertexArray(va->RendererID);
-	//glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, va->IndexBuffer.RendererID);
 }
 
 void graphics_vertex_array_unbind() 
 {
-	//glBindBuffer(GL_ARRAY_BUFFER, 0);
 	glBindVertexArray(0);
 }

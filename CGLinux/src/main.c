@@ -1,9 +1,9 @@
-#include <stdio.h>
-#include <stdlib.h>
-
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <cglm/cglm.h>
+
+#include <stdio.h>
+#include <stdlib.h>
 
 #include "vlib/core/vtypes.h"
 
@@ -285,11 +285,19 @@ render_data_print(RenderData renderData)
 	printf("ib1.id: %d \n", renderData.ib.RendererID);
 }
 
+static void
+render_data_render(RenderData renderData) 
+{
+	graphics_shader_bind(renderData.shader);
+	graphics_vertex_array_bind(&renderData.va);
+	glDrawElements(GL_TRIANGLES, renderData.ib.Count, GL_UNSIGNED_INT, NULL);
+}
+
 RenderData
-other_va1(float vertices[9])
+other_va1(const char* shader_path, float vertices[9])
 {
 	graphics_shader_source shader_source;
-	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
+	shader_source = graphics_shader_load(shader_path); 
 	uint32 shader = graphics_shader_compile(shader_source);
 	graphics_shader_bind(shader);
 
@@ -355,12 +363,36 @@ int main()
 		-0.5f, 0.7f, 0.0f
 	};
 
-	RenderData renderData1 = other_va1(vertices1);
-	RenderData renderData2 = other_va1(vertices2);
+	float vertices3[3 * 3] =
+	{
+		-0.5f, -0.5f, 0.0f,
+		 0.0f,  0.5f, 0.0f,
+		 0.5f, -0.5f, 0.0f
+	};
+
+	RenderData renderData1 = other_va1("CGLinux/resouce/simple_rotation_color_shader.glsl", vertices1);
+	RenderData renderData2 = other_va1("CGLinux/resouce/simple_shader.glsl", vertices2);
+	RenderData renderData3 = other_va1("CGLinux/resouce/simple_rotation_shader.glsl", vertices3);
 
 	render_data_print(renderData1);
 	render_data_print(renderData2);
+	render_data_print(renderData3);
 
+	mat4 rotationMatrix1 = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+	mat4 rotationMatrix3 = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1
+	};
+	vec3 v1 = { 0.1f, 0.1f, 0.1f };
+	vec3 v3 = { 0.7f, 0.1f, 0.4f };
+	
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
 	{
@@ -377,15 +409,26 @@ int main()
 
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
+		uint32 location = 
+			glGetUniformLocation(renderData1.shader, "u_RotationMatrix");
+		if (location >= 0)
+		{
+			glm_rotate(rotationMatrix1, 0.1f, v1);
+			glUniformMatrix4fv(location, 
+				1, 0, rotationMatrix1[0]);
+			glm_rotate(rotationMatrix3, 0.1f, v3);
+			glUniformMatrix4fv(glGetUniformLocation(renderData3.shader, "u_RotationMatrix"), 
+				1, 0, rotationMatrix3[0]);
+		}
+		else {
+			printf("location == %d\n", location);
+		}
 
-		graphics_shader_bind(renderData1.shader);
-		graphics_vertex_array_bind(&renderData1.va);
-		glDrawElements(GL_TRIANGLES, renderData1.ib.Count, GL_UNSIGNED_INT, NULL);
+	 	
+		render_data_render(renderData3);
+		render_data_render(renderData1);
+		render_data_render(renderData2);
 
-		graphics_shader_bind(renderData2.shader);
-		graphics_vertex_array_bind(&renderData2.va);
-		glDrawElements(GL_TRIANGLES, renderData2.ib.Count, GL_UNSIGNED_INT, NULL);
-	
 		glfwSwapBuffers(window);
 		glfwPollEvents();
 	}

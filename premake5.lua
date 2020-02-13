@@ -19,7 +19,6 @@ IncludeDirs["CGLM"] = "Dependencies/CGLM/include"
 group "Dependencies"
 	include "Dependencies/GLFW"
 	include "Dependencies/glad"
-	include "Dependencies/CGLM"
 
 project "CGLinux"
 	location "CGLinux"
