@@ -56,9 +56,10 @@ typedef struct graphics_vertex_buffer
 {
 	float* Vertices;
 	uint32 RendererID;
+	graphics_buffer_element Element;
 } graphics_vertex_buffer;
 
-void graphics_vertex_buffer_create(graphics_vertex_buffer* buffer, float* vertices, uint32_t size);
+void graphics_vertex_buffer_create(graphics_vertex_buffer* buffer, float* vertices, uint32_t size, data_type type);
 void graphics_vertex_buffer_bind(graphics_vertex_buffer* vertex_buffer);
 void graphics_vertex_buffer_unbind(graphics_vertex_buffer* vertex_buffer);
 
@@ -75,13 +76,12 @@ void graphics_index_buffer_unbind(graphics_index_buffer* index_buffer);
 
 typedef struct graphics_vertex_array {
 	uint32 RendererID;
-	uint32 VertexAttribArrayID;
-	graphics_buffer_element Element;
 	graphics_vertex_buffer VertexBuffer;
+	graphics_index_buffer IndexBuffer;
 } graphics_vertex_array;
 
-static int32 vertex_array_count = 0;
-
-void graphics_vertex_array_create(graphics_vertex_array* va, uint32 size, float* vertices, data_type type);
+void graphics_vertex_array_create(graphics_vertex_array* va);
+void graphics_vertex_array_add_vbo(graphics_vertex_array* va, graphics_vertex_buffer vbo);
+void graphics_vertex_array_add_ibo(graphics_vertex_array* va, graphics_index_buffer ibo);
 void graphics_vertex_array_bind(graphics_vertex_array* va);
 void graphics_vertex_array_unbind();

@@ -244,7 +244,7 @@ typedef struct Triangle2D
 	float b[2];
 	float c[2];
 } Triangle2D;
-
+#if 0
 void
 render_triangle(Triangle2D triangle2D)
 {
@@ -269,6 +269,7 @@ render_triangle(Triangle2D triangle2D)
 	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
 	uint32 shader = graphics_shader_compile(shader_source);
 }
+#endif
 
 typedef struct RenderData {
 	graphics_index_buffer ib;
@@ -276,66 +277,36 @@ typedef struct RenderData {
 	uint32 shader; 
 } RenderData;
 
-RenderData
-other_va1()
+static void
+render_data_print(RenderData renderData)
 {
-	graphics_shader_source shader_source;
-	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
-	uint32 shader = graphics_shader_compile(shader_source);
-	graphics_shader_bind(shader);
-
-	float vertices[3 * 3] =
-	{
-		-0.1f, -0.1f, 0.0f,
-		 0.5f, -0.1f, 0.0f,
-		 0.0f,  0.5f, 0.0f
-	};
-
-	graphics_vertex_buffer vb = {};
-	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
-	
-	graphics_vertex_array va = {}; 
-	graphics_vertex_array_create(&va, sizeof(vertices), vertices, data_type_float3);
-	graphics_vertex_array_bind(&va);
-	va.VertexBuffer = vb;
-
-	uint32 indices[] = { 0, 1, 2 };
-	graphics_index_buffer ib = {};
-	graphics_index_buffer_create(&ib, indices, 3);
-	graphics_index_buffer_bind(&ib);
-
-	return (RenderData) { ib, va, shader };
+	printf("shader1: %d \n", renderData.shader);
+	printf("va1.id: %d \n", renderData.va.RendererID);
+	printf("ib1.id: %d \n", renderData.ib.RendererID);
 }
 
 RenderData
-other_va2()
+other_va1(float vertices[9])
 {
 	graphics_shader_source shader_source;
 	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
 	uint32 shader = graphics_shader_compile(shader_source);
 	graphics_shader_bind(shader);
 
-	float vertices[3 * 3] =
-	{
-		-0.9f, -0.9f, 0.0f,
-		 0.5f, -0.9f, 0.0f,
-		 0.0f,  0.5f, 0.0f
-	};
-
-	graphics_vertex_buffer vb = {};
-	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
+	graphics_vertex_buffer vbo = {};
+	graphics_vertex_buffer_create(&vbo, vertices, 36, data_type_float3);
 	
-	graphics_vertex_array va = {}; 
-	graphics_vertex_array_create(&va, sizeof(vertices), vertices, data_type_float3);
-	graphics_vertex_array_bind(&va);
-	va.VertexBuffer = vb;
-
 	uint32 indices[] = { 0, 1, 2 };
-	graphics_index_buffer ib = {};
-	graphics_index_buffer_create(&ib, indices, 3);
-	graphics_index_buffer_bind(&ib);
+	graphics_index_buffer ibo = {};
+	graphics_index_buffer_create(&ibo, indices, 3);
 
-	return (RenderData) { ib, va, shader };
+	graphics_vertex_array va = {}; 
+	graphics_vertex_array_create(&va);
+	graphics_vertex_array_add_vbo(&va, vbo);
+	graphics_vertex_array_add_ibo(&va, ibo);
+	graphics_vertex_array_bind(&va);
+
+	return ((RenderData) { ibo, va, shader });
 }
 
 int main()
@@ -370,25 +341,25 @@ int main()
 	}
 	printf("OpenGL version %s\n", glGetString(GL_VERSION));
 
-	float vertices[3 * 3] =
+	float vertices1[3 * 3] =
 	{
-		-0.5f, -0.5f, 0.0f,
-		 0.5f, -0.5f, 0.0f,
-		 0.0f,  0.5f, 0.0f
+		-0.9f, -0.9f, 0.0f,
+		 -0.1f, -0.9f, 0.0f,
+		 0.0f,  0.3f, 0.0f
 	};
 	
-	RenderData renderData1 = other_va1();
-	RenderData renderData2 = other_va2();
+	float vertices2[3 * 3] =
+	{
+		 0.9f, 0.9f, 0.0f,
+		 0.9f, 0.7f, 0.0f,
+		-0.5f, 0.7f, 0.0f
+	};
 
-	printf("shader1: %d \n", renderData1.shader);
-	printf("va1.id: %d \n", renderData1.va.RendererID);
-	printf("va1.vap: %d \n", renderData1.va.VertexAttribArrayID);
-	printf("ib1.id: %d \n", renderData1.ib.RendererID);
+	RenderData renderData1 = other_va1(vertices1);
+	RenderData renderData2 = other_va1(vertices2);
 
-	printf("shader2: %d \n", renderData2.shader);
-	printf("va2.id: %d \n", renderData2.va.RendererID);
-	printf("va2.vap: %d \n", renderData2.va.VertexAttribArrayID);
-	printf("ib2.id: %d \n", renderData2.ib.RendererID);
+	render_data_print(renderData1);
+	render_data_print(renderData2);
 
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -409,12 +380,10 @@ int main()
 
 		graphics_shader_bind(renderData1.shader);
 		graphics_vertex_array_bind(&renderData1.va);
-		graphics_index_buffer_bind(&renderData1.ib);
 		glDrawElements(GL_TRIANGLES, renderData1.ib.Count, GL_UNSIGNED_INT, NULL);
 
 		graphics_shader_bind(renderData2.shader);
 		graphics_vertex_array_bind(&renderData2.va);
-		graphics_index_buffer_bind(&renderData2.ib);
 		glDrawElements(GL_TRIANGLES, renderData2.ib.Count, GL_UNSIGNED_INT, NULL);
 	
 		glfwSwapBuffers(window);
