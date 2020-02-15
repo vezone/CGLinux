@@ -61,7 +61,7 @@ typedef struct graphics_vertex_buffer
 
 void graphics_vertex_buffer_create(graphics_vertex_buffer* buffer, float* vertices, uint32_t size, data_type type);
 void graphics_vertex_buffer_bind(graphics_vertex_buffer* vertex_buffer);
-void graphics_vertex_buffer_unbind(graphics_vertex_buffer* vertex_buffer);
+void graphics_vertex_buffer_unbind();
 
 typedef struct graphics_index_buffer
 {
@@ -72,7 +72,7 @@ typedef struct graphics_index_buffer
 
 void graphics_index_buffer_create(graphics_index_buffer* buffer, uint32_t* indices, uint32_t size);
 void graphics_index_buffer_bind(graphics_index_buffer* index_buffer);
-void graphics_index_buffer_unbind(graphics_index_buffer* index_buffer);
+void graphics_index_buffer_unbind();
 
 typedef struct graphics_vertex_array {
 	uint32 RendererID;

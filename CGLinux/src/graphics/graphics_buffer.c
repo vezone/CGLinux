@@ -24,7 +24,7 @@ graphics_vertex_buffer_bind(graphics_vertex_buffer* vertex_buffer)
 }
 
 void 
-graphics_vertex_buffer_unbind(graphics_vertex_buffer* vertex_buffer)
+graphics_vertex_buffer_unbind()
 {
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
@@ -46,7 +46,7 @@ graphics_index_buffer_bind(graphics_index_buffer* index_buffer)
 }
 
 void 
-graphics_index_buffer_unbind(graphics_index_buffer* index_buffer)
+graphics_index_buffer_unbind()
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
