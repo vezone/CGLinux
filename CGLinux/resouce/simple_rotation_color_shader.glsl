@@ -3,11 +3,11 @@
 layout(location = 0) in vec4 position;
 
 out vec4 o_Position;
-uniform mat4 u_RotationMatrix;
+uniform mat4 u_srcs_RotationMatrix;
 
 void main()
 {
-    gl_Position = u_RotationMatrix * position;
+    gl_Position = u_srcs_RotationMatrix * position;
     o_Position = gl_Position;
 }
 

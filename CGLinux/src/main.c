@@ -324,7 +324,10 @@ render_data_create(const char* shader_path, float vertices[9])
 static void
 render_data_render(RenderData* renderData) 
 {
-	uint32 u_RotationMatrixLocation = glGetUniformLocation(renderData->Shader, "u_RotationMatrix");
+	graphics_shader_bind(renderData->Shader);
+	graphics_vertex_array_bind(&renderData->VertexArray);
+	
+	uint32 u_RotationMatrixLocation = glGetUniformLocation(renderData->Shader, "u_srcs_RotationMatrix");
 	if (u_RotationMatrixLocation >= 0)
 	{
 		glm_rotate(renderData->Rotation.Matrix, 
@@ -337,8 +340,18 @@ render_data_render(RenderData* renderData)
 		GLOG(RED("u_RotationMatrixLocation: %d\n"), u_RotationMatrixLocation);
 	}
 
-	graphics_shader_bind(renderData->Shader);
-	graphics_vertex_array_bind(&renderData->VertexArray);
+	u_RotationMatrixLocation = glGetUniformLocation(renderData->Shader, "u_RotationMatrix");
+	if (u_RotationMatrixLocation >= 0)
+	{
+		glm_rotate(renderData->Rotation.Matrix, 
+			renderData->Rotation.Angle, 
+			renderData->Rotation.Axis);
+		glUniformMatrix4fv(u_RotationMatrixLocation, 1, 0, renderData->Rotation.Matrix[0]);
+	}
+	else
+	{
+		GLOG(RED("u_RotationMatrixLocation: %d\n"), u_RotationMatrixLocation);
+	}
 
 	uint32 u_ColorLocation = glGetUniformLocation(renderData->Shader, "u_Color");
 	static float r = 0.5f;
@@ -438,7 +451,7 @@ int main()
 	//RENDER_DATA_PRINT(staticRenderData2);
 	//RENDER_DATA_PRINT(blueRenderData);
 
-	blueRenderData.Rotation.Angle = 0.5;
+	blueRenderData.Rotation.Angle = 0.001;
 
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -459,8 +472,8 @@ int main()
 		
 		render_data_render(&staticRenderData);
 		render_data_render(&staticRenderData2);
-	    render_data_render(&rgbRenderData);
 		render_data_render(&blueRenderData);
+	    render_data_render(&rgbRenderData);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();
