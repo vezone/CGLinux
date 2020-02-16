@@ -11,6 +11,29 @@
 #include "graphics/graphics_shader.h"
 
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
+#define TO_STRING(x) #x
+
+#define ISGLOBALLOG 1
+#define ISGLOBALDEBUG 1
+
+#if ISGLOBALLOG == 1
+	#define GLOG(...) printf(__VA_ARGS__)
+#else
+	#define GLOG(...)
+#endif
+
+#if ISGLOBALDEBUG == 1
+	#define GDEBUG(...) printf(__VA_ARGS__)
+#else
+	#define GDEBUG(...)
+#endif
+
+/*
+
+Bug: 
+	glUniform4f() works
+
+*/
 
 // WINDOW GLOBAL
 static int8 g_is_cursor_position_visible = 0;
@@ -279,16 +302,20 @@ typedef struct RotationData {
 } RotationData;
 
 typedef struct RenderData {
-	graphics_vertex_array VertexArray;
+	VertexArray VertexArray;
 	uint32 Shader;
 	RotationData Rotation;
 } RenderData;
 
+#define RENDER_DATA_PRINT(renderData) render_data_print(renderData, #renderData)
+
 static void
-render_data_print(RenderData renderData)
+render_data_print(RenderData renderData, const char* caller)
 {
-	printf("shader1: %d \n", renderData.Shader);
-	printf("va1.id: %d \n", renderData.VertexArray.RendererID);
+	printf(caller);
+	printf("_shader: %d \n", renderData.Shader);
+	printf(caller);
+	printf("_va.id: %d \n", renderData.VertexArray.RendererID);
 }
 
 RenderData
@@ -299,30 +326,30 @@ render_data_create(const char* shader_path, float vertices[9])
 	uint32 shader = graphics_shader_compile(shader_source);
 	graphics_shader_bind(shader);
 
-	graphics_vertex_buffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, 36, data_type_float3);
+	VertexBuffer vbo = {};
+	graphics_vertex_buffer_create(&vbo, vertices, 36, Float3);
 	
 	uint32 indices[] = { 0, 1, 2 };
-	graphics_index_buffer ibo = {};
+	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, ARRAY_LENGTH(indices));
 
-	graphics_vertex_array va = {}; 
+	VertexArray va = {}; 
 	graphics_vertex_array_create(&va);
 	graphics_vertex_array_add_vbo(&va, vbo);
 	graphics_vertex_array_add_ibo(&va, ibo);
 	graphics_vertex_array_bind(&va);
 
 	mat4 rotationMatrix = {
-		1, 0, 0, 0,
-		0, 1, 0, 0,
-		0, 0, 1, 0,
-		0, 0, 0, 1
+		1.0f, 0.0f, 0.0f, 0.0f,
+		0.0f, 1.0f, 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		0.0f, 0.0f, 0.0f, 1.0f
 	};
-	vec3 rotationAxis = { 0.0f, 0.0f, 1.0f };
+	vec3 rotationAxis = { 0.1f, 0.1f, 0.1f };
 	RotationData rotationData = {};
 	glm_mat4_copy(rotationMatrix, rotationData.Matrix);
 	glm_vec3_copy(rotationAxis, rotationData.Axis);
-	rotationData.Angle = 0.1f;
+	rotationData.Angle = 0.2f;
 	
 	return ((RenderData) { va, shader, rotationData });
 }
@@ -330,20 +357,39 @@ render_data_create(const char* shader_path, float vertices[9])
 static void
 render_data_render(RenderData renderData) 
 {
-	graphics_shader_bind(renderData.Shader);
-	graphics_vertex_array_bind(&renderData.VertexArray);
-
 	uint32 u_RotationMatrixLocation = glGetUniformLocation(renderData.Shader, "u_RotationMatrix");
 	if (u_RotationMatrixLocation >= 0)
 	{
-		//glm_mat4_print(renderData.RotationData.RotationMatrix, stdout);
 		glm_rotate(renderData.Rotation.Matrix, renderData.Rotation.Angle, renderData.Rotation.Axis);
 		glUniformMatrix4fv(u_RotationMatrixLocation, 1, 0, renderData.Rotation.Matrix[0]);
-		renderData.Rotation.Angle+= 0.01;
 	}
 	else 
 	{
-		printf(RED5("u_RotationMatrixLocation: %d\n"), u_RotationMatrixLocation);
+		GLOG(RED("u_RotationMatrixLocation: %d\n"), u_RotationMatrixLocation);
+	}
+
+	graphics_shader_bind(renderData.Shader);
+	graphics_vertex_array_bind(&renderData.VertexArray);
+
+	uint32 u_ColorLocation = glGetUniformLocation(renderData.Shader, "u_Color");
+	static float r = 0.5f;
+	static float incriment = 0.001f;
+	if (u_ColorLocation >= 0)
+	{
+		glUniform4f(u_ColorLocation, r, 0.3f, 0.8f, 1.0f);
+
+		if (r >= 1.0f) {
+			incriment = -0.001f;
+		}
+		else if (r <= 0.0f) {
+			incriment = 0.001f;
+		}
+ 
+		r += incriment;
+	}
+	else 
+	{
+		GLOG(RED5("u_ColorLocation: %d\n"), u_ColorLocation);
 	}
 
 	glDrawElements(GL_TRIANGLES, renderData.VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
@@ -356,12 +402,12 @@ int main()
 	{
 		if (!glfwInit())
 		{
-			printf("GLFW is not initialized!\n");
+			GLOG(RED("GLFW is not initialized!\n"));
 			return(-1);
 		}
 		int32 major, minor, revision;
 		glfwGetVersion(&major, &minor, &revision);
-		printf("GLFW version: %d.%d.%d\n", major, minor, revision);
+		GLOG(MAGNETA("GLFW version: %d.%d.%d\n"), major, minor, revision);
 		window = glfwCreateWindow(1280, 720, "Demo", 0, 0);
 		if (!window)
 		{
@@ -379,9 +425,9 @@ int main()
 		int status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 		if (status == 0)
 		{
-			printf("Failed to init GLAD\n");
+			GLOG(RED("Failed to init GLAD\n"));
 		}
-		printf("OpenGL version %s\n", glGetString(GL_VERSION));
+		GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
 	}
 
 	float vertices1[3 * 3] =
@@ -416,11 +462,12 @@ int main()
 	RenderData blueRenderData = render_data_create("CGLinux/resouce/simple_rotation_shader.glsl", vertices3);
 
 	RenderData staticRenderData = render_data_create("CGLinux/resouce/simple_shader.glsl", vertices2);
-	RenderData staticRenderData2 = render_data_create("CGLinux/resouce/simple_shader.glsl", vertices22);
+	RenderData staticRenderData2 = render_data_create("CGLinux/resouce/simple_color_shader.glsl", vertices22);
 
-	render_data_print(rgbRenderData);
-	render_data_print(staticRenderData);
-	render_data_print(blueRenderData);
+	RENDER_DATA_PRINT(rgbRenderData);
+	RENDER_DATA_PRINT(staticRenderData);
+	RENDER_DATA_PRINT(staticRenderData2);
+	RENDER_DATA_PRINT(blueRenderData);
 
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -428,20 +475,20 @@ int main()
 		g_freqency = glfwGetTimerFrequency();
 		if (g_is_freqency_visible)
 		{
-			printf("%ld hz\n", g_freqency);
+			GLOG("%ld hz\n", g_freqency);
 		}
 		if (g_is_cursor_position_visible)
 		{
 			glfwGetCursorPos(window, &mouse_x_pos, &mouse_y_pos);
-			printf("Mouse position: {%f,%f}\n", mouse_x_pos, mouse_y_pos);
+			GLOG("Mouse position: {%f,%f}\n", mouse_x_pos, mouse_y_pos);
 		}
 
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
-
+		
 		render_data_render(staticRenderData);
-		render_data_render(staticRenderData2);
-		render_data_render(blueRenderData);
+		//render_data_render(staticRenderData2);
+		//render_data_render(blueRenderData);
 		render_data_render(rgbRenderData);
 
 		glfwSwapBuffers(window);
@@ -449,6 +496,11 @@ int main()
 	}
 	
 	glfwTerminate();
+
+	graphics_shader_delete(rgbRenderData.Shader);
+	graphics_shader_delete(staticRenderData.Shader);
+	graphics_shader_delete(staticRenderData2.Shader);
+	graphics_shader_delete(blueRenderData.Shader);
 
 	return 0;
 }

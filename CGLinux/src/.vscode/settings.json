@@ -1,0 +1,7 @@
+{
+    "files.associations": {
+        "vstring.h": "c",
+        "hash_map": "cpp",
+        "vtypes.h": "c"
+    }
+}

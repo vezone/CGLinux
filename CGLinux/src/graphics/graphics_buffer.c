@@ -4,7 +4,7 @@
 #include "graphics_buffer.h"
 
 void 
-graphics_vertex_buffer_create(graphics_vertex_buffer* buffer, float* vertices, uint32_t size, data_type type)
+graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type)
 {
 	buffer->Vertices = vertices;
 	glGenBuffers(1, &(buffer->RendererID));
@@ -18,7 +18,7 @@ graphics_vertex_buffer_create(graphics_vertex_buffer* buffer, float* vertices, u
 }
 
 void 
-graphics_vertex_buffer_bind(graphics_vertex_buffer* vertex_buffer)
+graphics_vertex_buffer_bind(VertexBuffer* vbo)
 {
 	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->RendererID);
 }
@@ -30,17 +30,17 @@ graphics_vertex_buffer_unbind()
 }
 
 void 
-graphics_index_buffer_create(graphics_index_buffer* buffer, uint32* indices, uint32 count)
+graphics_index_buffer_create(IndexBuffer* buffer, uint32* indices, uint32 count)
 {
 	buffer->Count = count;
 	buffer->Indices = indices;
 	glGenBuffers(1, &(buffer->RendererID));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->RendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(indices), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(indices[0]), indices, GL_STATIC_DRAW);
 }
 
 void 
-graphics_index_buffer_bind(graphics_index_buffer* index_buffer)
+graphics_index_buffer_bind(IndexBuffer* ibo)
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->RendererID);
 }
@@ -51,12 +51,12 @@ graphics_index_buffer_unbind()
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 
-void graphics_vertex_array_create(graphics_vertex_array* va) 
+void graphics_vertex_array_create(VertexArray* va) 
 {
 	glCreateVertexArrays(1, &(va->RendererID));
 }
 
-void graphics_vertex_array_add_vbo(graphics_vertex_array* va, graphics_vertex_buffer vbo)
+void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 {
 	va->VertexBuffer = vbo;
 	glBindVertexArray(va->RendererID);
@@ -67,14 +67,14 @@ void graphics_vertex_array_add_vbo(graphics_vertex_array* va, graphics_vertex_bu
 	glVertexAttribPointer(0, data_type_get_count(va->VertexBuffer.Element.Type), GL_FLOAT, va->VertexBuffer.Element.IsNormilized, data_type_get_size(va->VertexBuffer.Element.Type), (void*)0);
 }
 
-void graphics_vertex_array_add_ibo(graphics_vertex_array* va, graphics_index_buffer ibo)
+void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo)
 {
 	va->IndexBuffer = ibo;
 	glBindVertexArray(va->RendererID);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo.RendererID);
 }
 
-void graphics_vertex_array_bind(graphics_vertex_array* va) 
+void graphics_vertex_array_bind(VertexArray* va) 
 {
 	glBindVertexArray(va->RendererID);
 }

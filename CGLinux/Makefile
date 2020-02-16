@@ -93,6 +93,7 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/graphics_buffer.o \
+	$(OBJDIR)/graphics_shader.o \
 	$(OBJDIR)/main.o \
 	$(OBJDIR)/varray.o \
 	$(OBJDIR)/vbinary_tree.o \
@@ -162,6 +163,9 @@ $(OBJECTS): | $(OBJDIR)
 endif
 
 $(OBJDIR)/graphics_buffer.o: src/graphics/graphics_buffer.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/graphics_shader.o: src/graphics/graphics_shader.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c
