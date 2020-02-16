@@ -262,39 +262,6 @@ void window_drop_callback(GLFWwindow* window, int32 count, const char** paths)
 	}
 }
 
-typedef struct Triangle2D
-{
-	float a[2];
-	float b[2];
-	float c[2];
-} Triangle2D;
-#if 0
-void
-render_triangle(Triangle2D triangle2D)
-{
-	float vertices[3 * 3] =
-	{
-		triangle2D.a[0], triangle2D.a[1], 0.0f,
-		triangle2D.b[0], triangle2D.b[1], 0.0f,
-		triangle2D.c[0], triangle2D.c[1], 0.0f
-	};
-	graphics_vertex_buffer vb = {};
-	graphics_vertex_buffer_create(&vb, vertices, sizeof(vertices));
-	graphics_vertex_buffer_bind(&vb);
-	
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, 0, 3 * sizeof(float), 0);
-	
-	uint32_t indices[] = { 0, 1, 2 };
-	graphics_index_buffer ib = {};
-	graphics_index_buffer_create(&ib, indices, 3);
-	graphics_index_buffer_bind(&ib);
-	graphics_shader_source shader_source;
-	shader_source = graphics_shader_load("CGLinux/resouce/simple_shader.txt"); 
-	uint32 shader = graphics_shader_compile(shader_source);
-}
-#endif
-
 typedef struct RotationData {
 	mat4 Matrix;
 	vec3 Axis;
@@ -345,33 +312,35 @@ render_data_create(const char* shader_path, float vertices[9])
 		0.0f, 0.0f, 1.0f, 0.0f,
 		0.0f, 0.0f, 0.0f, 1.0f
 	};
-	vec3 rotationAxis = { 0.1f, 0.1f, 0.1f };
+	vec3 rotationAxis = { 0.0f, 0.0f, 0.1f };
 	RotationData rotationData = {};
 	glm_mat4_copy(rotationMatrix, rotationData.Matrix);
 	glm_vec3_copy(rotationAxis, rotationData.Axis);
-	rotationData.Angle = 0.2f;
+	rotationData.Angle = 0.01f;
 	
 	return ((RenderData) { va, shader, rotationData });
 }
 
 static void
-render_data_render(RenderData renderData) 
+render_data_render(RenderData* renderData) 
 {
-	uint32 u_RotationMatrixLocation = glGetUniformLocation(renderData.Shader, "u_RotationMatrix");
+	uint32 u_RotationMatrixLocation = glGetUniformLocation(renderData->Shader, "u_RotationMatrix");
 	if (u_RotationMatrixLocation >= 0)
 	{
-		glm_rotate(renderData.Rotation.Matrix, renderData.Rotation.Angle, renderData.Rotation.Axis);
-		glUniformMatrix4fv(u_RotationMatrixLocation, 1, 0, renderData.Rotation.Matrix[0]);
+		glm_rotate(renderData->Rotation.Matrix, 
+			renderData->Rotation.Angle, 
+			renderData->Rotation.Axis);
+		glUniformMatrix4fv(u_RotationMatrixLocation, 1, 0, renderData->Rotation.Matrix[0]);
 	}
-	else 
+	else
 	{
 		GLOG(RED("u_RotationMatrixLocation: %d\n"), u_RotationMatrixLocation);
 	}
 
-	graphics_shader_bind(renderData.Shader);
-	graphics_vertex_array_bind(&renderData.VertexArray);
+	graphics_shader_bind(renderData->Shader);
+	graphics_vertex_array_bind(&renderData->VertexArray);
 
-	uint32 u_ColorLocation = glGetUniformLocation(renderData.Shader, "u_Color");
+	uint32 u_ColorLocation = glGetUniformLocation(renderData->Shader, "u_Color");
 	static float r = 0.5f;
 	static float incriment = 0.001f;
 	if (u_ColorLocation >= 0)
@@ -392,7 +361,7 @@ render_data_render(RenderData renderData)
 		GLOG(RED5("u_ColorLocation: %d\n"), u_ColorLocation);
 	}
 
-	glDrawElements(GL_TRIANGLES, renderData.VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, renderData->VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
 }
 
 int main()
@@ -448,7 +417,7 @@ int main()
 	{
 		 0.1f, 0.1f, 0.0f,
 		 0.1f, 0.4f, 0.0f,
-		-0.5f, 0.1f, 0.0f
+		-0.5f, 0.1f, 0.0f 
 	};
 
 	float vertices3[3 * 3] =
@@ -464,10 +433,12 @@ int main()
 	RenderData staticRenderData = render_data_create("CGLinux/resouce/simple_shader.glsl", vertices2);
 	RenderData staticRenderData2 = render_data_create("CGLinux/resouce/simple_color_shader.glsl", vertices22);
 
-	RENDER_DATA_PRINT(rgbRenderData);
-	RENDER_DATA_PRINT(staticRenderData);
-	RENDER_DATA_PRINT(staticRenderData2);
-	RENDER_DATA_PRINT(blueRenderData);
+	//RENDER_DATA_PRINT(rgbRenderData);
+	//RENDER_DATA_PRINT(staticRenderData);
+	//RENDER_DATA_PRINT(staticRenderData2);
+	//RENDER_DATA_PRINT(blueRenderData);
+
+	blueRenderData.Rotation.Angle = 0.5;
 
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -486,10 +457,10 @@ int main()
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		render_data_render(staticRenderData);
-		//render_data_render(staticRenderData2);
-		//render_data_render(blueRenderData);
-		render_data_render(rgbRenderData);
+		render_data_render(&staticRenderData);
+		render_data_render(&staticRenderData2);
+	    render_data_render(&rgbRenderData);
+		render_data_render(&blueRenderData);
 
 		glfwSwapBuffers(window);
 		glfwPollEvents();

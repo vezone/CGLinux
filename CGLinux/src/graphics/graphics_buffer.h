@@ -5,8 +5,7 @@
 
 typedef enum DataType
 {
-	None = 0,
-	Float1, Float2, Float3, Float4,
+	Float1 = 0, Float2, Float3, Float4,
 	Int1, Int2, Int3, Int4
 } DataType;
 

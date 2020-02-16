@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Workspace Name="CGLinux" Database="" Version="10.0.0">
+  <VirtualDirectory Name="Dependencies">
+    <Project Name="CGLinux" Path="CGLinux/CGLinux.project" Active="Yes"/>
+    <Project Name="GLFW" Path="Dependencies/GLFW/GLFW.project" Active="No"/>
+    <Project Name="glad" Path="Dependencies/glad/glad.project" Active="No"/>
+  </VirtualDirectory>
+  <BuildMatrix>
+    <WorkspaceConfiguration Name="Debug" Selected="yes">
+      <Project Name="CGLinux" ConfigName="Debug"/>
+      <Project Name="GLFW" ConfigName="Debug"/>
+      <Project Name="glad" ConfigName="Debug"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Release" Selected="yes">
+      <Project Name="CGLinux" ConfigName="Release"/>
+      <Project Name="GLFW" ConfigName="Release"/>
+      <Project Name="glad" ConfigName="Release"/>
+    </WorkspaceConfiguration>
+    <WorkspaceConfiguration Name="Dist" Selected="yes">
+      <Project Name="CGLinux" ConfigName="Dist"/>
+      <Project Name="GLFW" ConfigName="Dist"/>
+      <Project Name="glad" ConfigName="Dist"/>
+    </WorkspaceConfiguration>
+  </BuildMatrix>
+</CodeLite_Workspace>

@@ -20,7 +20,7 @@ graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t si
 void 
 graphics_vertex_buffer_bind(VertexBuffer* vbo)
 {
-	glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer->RendererID);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo->RendererID);
 }
 
 void 
@@ -42,7 +42,7 @@ graphics_index_buffer_create(IndexBuffer* buffer, uint32* indices, uint32 count)
 void 
 graphics_index_buffer_bind(IndexBuffer* ibo)
 {
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, index_buffer->RendererID);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->RendererID);
 }
 
 void 
