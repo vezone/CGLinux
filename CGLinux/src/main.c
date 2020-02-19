@@ -28,13 +28,6 @@
 	#define GDEBUG(...)
 #endif
 
-/*
-
-Bug: 
-	glUniform4f() works
-
-*/
-
 // WINDOW GLOBAL
 static int8 g_is_cursor_position_visible = 0;
 static int8 g_is_cursor_enabled = 1;
@@ -262,6 +255,14 @@ void window_drop_callback(GLFWwindow* window, int32 count, const char** paths)
 	}
 }
 
+typedef struct OrthographicCamera {
+	mat4 ProjectionMatrix;
+	mat4 ViewMatrix;
+	mat4 ViewProjectionMatrix;
+	vec3 Position;
+	float Rotation; 
+} OrthographicCamera;
+
 typedef struct RotationData {
 	mat4 Matrix;
 	vec3 Axis;
@@ -272,6 +273,7 @@ typedef struct RenderData {
 	VertexArray VertexArray;
 	uint32 Shader;
 	RotationData Rotation;
+	OrthographicCamera Camera;
 } RenderData;
 
 #define RENDER_DATA_PRINT(renderData) render_data_print(renderData, #renderData)
@@ -285,8 +287,40 @@ render_data_print(RenderData renderData, const char* caller)
 	printf("_va.id: %d \n", renderData.VertexArray.RendererID);
 }
 
+OrthographicCamera 
+orthographic_camera_create(float left, float right, float bot, float top)
+{
+	OrthographicCamera camera = {};
+	glm_ortho(left, right, bot, top, -1.0f, 1.0f, camera.ProjectionMatrix);
+	glm_mat4_identity(camera.ViewMatrix);
+	glm_mat4_mul(camera.ProjectionMatrix, camera.ViewMatrix, camera.ViewProjectionMatrix);
+	glm_vec3_zero(camera.Position);
+	camera.Rotation = 0.0f;
+}
+
+void
+orthographic_camera_set_projection(OrthographicCamera* camera, float left, float right, float bot, float top)
+{
+	glm_ortho(left, right, bot, top, -1.0f, 1.0f, camera->ProjectionMatrix);
+	glm_mat4_mul(camera->ProjectionMatrix, camera->ViewMatrix, camera->ViewProjectionMatrix);
+}
+
+void
+orthographic_camera_recalculate_view_matrix(OrthographicCamera* camera)
+{
+	mat4 identityTranslate = GLM_MAT4_IDENTITY_INIT;
+	mat4 identityRotate = GLM_MAT4_IDENTITY_INIT;
+	mat4 transform = {};
+	vec3 rotate_vec = { 0.0f, 0.0f, 1.0f };
+	glm_translate(identityTranslate, camera->Position);
+	glm_rotate(identityRotate, glm_rad(camera->Rotation), rotate_vec);
+	glm_mat4_mul(identityTranslate, identityRotate, transform);
+	glm_mat4_inv(transform, camera->ViewMatrix);
+	glm_mat4_mul(camera->ProjectionMatrix, camera->ViewMatrix, camera->ViewProjectionMatrix);
+}
+
 RenderData
-render_data_create(const char* shader_path, float vertices[9])
+render_data_create(const char* shader_path, float vertices[9], OrthographicCamera camera)
 {
 	graphics_shader_source shader_source;
 	shader_source = graphics_shader_load(shader_path); 
@@ -334,6 +368,16 @@ render_data_render(RenderData* renderData)
 			renderData->Rotation.Angle, 
 			renderData->Rotation.Axis);
 		glUniformMatrix4fv(u_RotationMatrixLocation, 1, 0, renderData->Rotation.Matrix[0]);
+	}
+	else
+	{
+		GLOG(RED("u_RotationMatrixLocation: %d\n"), u_RotationMatrixLocation);
+	}
+
+	u_RotationMatrixLocation = glGetUniformLocation(renderData->Shader, "u_ViewProjection");
+	if (u_RotationMatrixLocation >= 0)
+	{
+		glUniformMatrix4fv(u_RotationMatrixLocation, 1, 0, renderData->Camera.ViewProjectionMatrix[0]);
 	}
 	else
 	{
@@ -426,13 +470,6 @@ int main()
 		-0.5f, 0.7f, 0.0f
 	};
 
-	float vertices22[3 * 3] =
-	{
-		 0.1f, 0.1f, 0.0f,
-		 0.1f, 0.4f, 0.0f,
-		-0.5f, 0.1f, 0.0f 
-	};
-
 	float vertices3[3 * 3] =
 	{
 		-0.5f, -0.5f, 0.0f,
@@ -440,18 +477,14 @@ int main()
 		 0.5f, -0.5f, 0.0f
 	};
 
-	RenderData rgbRenderData = render_data_create("CGLinux/resouce/simple_rotation_color_shader.glsl", vertices1);
-	RenderData blueRenderData = render_data_create("CGLinux/resouce/simple_rotation_shader.glsl", vertices3);
-
-	RenderData staticRenderData = render_data_create("CGLinux/resouce/simple_shader.glsl", vertices2);
-	RenderData staticRenderData2 = render_data_create("CGLinux/resouce/simple_color_shader.glsl", vertices22);
+	OrthographicCamera camera;
+	camera = orthographic_camera_create(-1.0f, 1.0f, -1.0f, 1.0f);
+	
+	RenderData rgbRenderData = render_data_create("CGLinux/resouce/simple_rotation_color_shader.glsl", vertices1, camera);
+	RenderData staticRenderData = render_data_create("CGLinux/resouce/simple_shader.glsl", vertices2, camera);
 
 	//RENDER_DATA_PRINT(rgbRenderData);
 	//RENDER_DATA_PRINT(staticRenderData);
-	//RENDER_DATA_PRINT(staticRenderData2);
-	//RENDER_DATA_PRINT(blueRenderData);
-
-	blueRenderData.Rotation.Angle = 0.001;
 
 	double mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -471,8 +504,6 @@ int main()
 		glClear(GL_COLOR_BUFFER_BIT);
 		
 		render_data_render(&staticRenderData);
-		render_data_render(&staticRenderData2);
-		render_data_render(&blueRenderData);
 	    render_data_render(&rgbRenderData);
 
 		glfwSwapBuffers(window);
@@ -483,8 +514,6 @@ int main()
 
 	graphics_shader_delete(rgbRenderData.Shader);
 	graphics_shader_delete(staticRenderData.Shader);
-	graphics_shader_delete(staticRenderData2.Shader);
-	graphics_shader_delete(blueRenderData.Shader);
 
 	return 0;
 }
