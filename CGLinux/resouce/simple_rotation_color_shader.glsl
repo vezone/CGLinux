@@ -8,7 +8,7 @@ uniform mat4 u_ViewProjection;
 
 void main()
 {
-    gl_Position = u_srcs_RotationMatrix*position;
+    gl_Position = u_ViewProjection*u_srcs_RotationMatrix*position;
     o_Position = gl_Position;
 }
 

@@ -35,8 +35,11 @@ project "CGLinux"
 		"%{prj.name}/src/**.c",
 		"%{prj.name}/src/vlib/core/**.h",
 		"%{prj.name}/src/vlib/core/**.c",
-		"%{prj.name}/src/graphics/**.h",
-		"%{prj.name}/src/graphics/**.c"
+		"%{prj.name}/src/Graphics/**.h",
+		"%{prj.name}/src/Graphics/**.c",
+		"%{prj.name}/src/Graphics/Renderer2D/**.h",
+		"%{prj.name}/src/Graphics/Renderer2D/**.c",
+		"%{prj.name}/src/Utils/**.h"
 	}
 
 	defines

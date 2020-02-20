@@ -8,7 +8,7 @@
 #include <string.h>
 
 static void 
-file_write_string(char* file_path, char* data, int32 len)
+file_write_string(char* file_path, char* data, i32 len)
 {
 	FILE* file;
 	file = fopen(file_path, "w");
@@ -24,7 +24,7 @@ file_read_string(const char* file_path)
 	if (file)
 	{
 		char* result;
-		long file_length;
+		i32 file_length;
 
 		fseek(file, 0, SEEK_END);
 		file_length = (ftell(file));

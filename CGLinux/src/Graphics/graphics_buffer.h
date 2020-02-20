@@ -3,6 +3,8 @@
 #include "../vlib/core/vtypes.h"
 #include "../vlib/core/varray.h"
 
+#include "Utils/Types.h"
+
 typedef enum DataType
 {
 	Float1 = 0, Float2, Float3, Float4,

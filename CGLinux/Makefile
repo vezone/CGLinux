@@ -92,6 +92,8 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/OrthographicCamera.o \
+	$(OBJDIR)/Renderer2D.o \
 	$(OBJDIR)/graphics_buffer.o \
 	$(OBJDIR)/graphics_shader.o \
 	$(OBJDIR)/main.o \
@@ -162,10 +164,16 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
-$(OBJDIR)/graphics_buffer.o: src/graphics/graphics_buffer.c
+$(OBJDIR)/OrthographicCamera.o: src/Graphics/Renderer2D/OrthographicCamera.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/graphics_shader.o: src/graphics/graphics_shader.c
+$(OBJDIR)/Renderer2D.o: src/Graphics/Renderer2D/Renderer2D.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/graphics_buffer.o: src/Graphics/graphics_buffer.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/graphics_shader.o: src/Graphics/graphics_shader.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c
