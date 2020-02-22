@@ -1,8 +1,5 @@
 #pragma once
 
-#include "../vlib/core/vtypes.h"
-#include "../vlib/core/varray.h"
-
 #include "Utils/Types.h"
 
 typedef enum DataType
@@ -24,8 +21,6 @@ static uint32 data_type_get_size(DataType type)
 		case Int3: return 4 * 3;
 		case Int4: return 4 * 4; 
 	}
-	//for debug purpose
-	asserts(0, "Unknown data type!");
 	return 0;
 }
 
@@ -42,8 +37,6 @@ static uint32 data_type_get_count(DataType type)
 		case Int3: return 3;
 		case Int4: return 4; 
 	}
-	//for debug purpose
-	asserts(0, "Unknown data type!");
 }
 
 typedef struct BufferElement

@@ -1,7 +1,7 @@
-#include <stdlib.h>
+#include "Buffer.h"
 
+#include <stdlib.h>
 #include <glad/glad.h>
-#include "graphics_buffer.h"
 
 void 
 graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type)
@@ -12,7 +12,7 @@ graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t si
 	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 
 	buffer->Element.IsNormilized = 0;
-	buffer->Element.Size = sizeof(vertices);
+	buffer->Element.Size = size;
 	buffer->Element.Type = type;
 	buffer->Vertices = vertices;
 }
@@ -62,7 +62,6 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 	glBindVertexArray(va->RendererID);
 	
 	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer.RendererID);
-
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0, data_type_get_count(va->VertexBuffer.Element.Type), GL_FLOAT, va->VertexBuffer.Element.IsNormilized, data_type_get_size(va->VertexBuffer.Element.Type), (void*)0);
 }

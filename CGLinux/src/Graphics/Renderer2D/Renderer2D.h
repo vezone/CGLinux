@@ -2,8 +2,8 @@
 
 #include <cglm/cglm.h>
 #include "Graphics/Renderer2D/OrthographicCamera.h"
-#include "Graphics/graphics_buffer.h"
-#include "Graphics/graphics_shader.h"
+#include "Graphics/Buffer.h"
+#include "Graphics/Shader.h"
 #include "Utils/Types.h"
 
 typedef struct RotationData {

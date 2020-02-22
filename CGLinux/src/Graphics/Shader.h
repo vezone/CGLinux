@@ -1,7 +1,5 @@
 #pragma once 
 
-#include "../vlib/core/vtypes.h"
-
 #include "Utils/Types.h"
 
 #define ISSHADERDEBUG 0
@@ -21,6 +19,7 @@
 
 typedef struct graphics_shader_source
 {
+	char* name;
 	const char* vertex_shader;
 	const char* fragment_shader;
 } graphics_shader_source;

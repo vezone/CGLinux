@@ -92,20 +92,13 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/Buffer.o \
+	$(OBJDIR)/Tilemap.o \
 	$(OBJDIR)/OrthographicCamera.o \
 	$(OBJDIR)/Renderer2D.o \
-	$(OBJDIR)/graphics_buffer.o \
-	$(OBJDIR)/graphics_shader.o \
+	$(OBJDIR)/Shader.o \
+	$(OBJDIR)/String.o \
 	$(OBJDIR)/main.o \
-	$(OBJDIR)/varray.o \
-	$(OBJDIR)/vbinary_tree.o \
-	$(OBJDIR)/vdynamic_array_i32.o \
-	$(OBJDIR)/vdynamic_table.o \
-	$(OBJDIR)/vmath.o \
-	$(OBJDIR)/vmemory_debug.o \
-	$(OBJDIR)/vstring.o \
-	$(OBJDIR)/vstring_builder.o \
-	$(OBJDIR)/vtree.o \
 
 RESOURCES := \
 
@@ -164,46 +157,25 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
+$(OBJDIR)/Buffer.o: src/Graphics/Buffer.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Tilemap.o: src/Graphics/Feature2D/Tilemap.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/OrthographicCamera.o: src/Graphics/Renderer2D/OrthographicCamera.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Renderer2D.o: src/Graphics/Renderer2D/Renderer2D.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/graphics_buffer.o: src/Graphics/graphics_buffer.c
+$(OBJDIR)/Shader.o: src/Graphics/Shader.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/graphics_shader.o: src/Graphics/graphics_shader.c
+$(OBJDIR)/String.o: src/Utils/String.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/varray.o: src/vlib/core/varray.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vbinary_tree.o: src/vlib/core/vbinary_tree.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vdynamic_array_i32.o: src/vlib/core/vdynamic_array_i32.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vdynamic_table.o: src/vlib/core/vdynamic_table.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vmath.o: src/vlib/core/vmath.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vmemory_debug.o: src/vlib/core/vmemory_debug.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vstring.o: src/vlib/core/vstring.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vstring_builder.o: src/vlib/core/vstring_builder.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/vtree.o: src/vlib/core/vtree.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

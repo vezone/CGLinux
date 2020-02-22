@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stddef.h>
-#include <assert.h>
-
 #define MAX(x, y) ((x) >= (y) ? (x) : (y))
 
 typedef struct buffer_header
@@ -34,7 +31,6 @@ void* array_grow(const void* array, size_t new_len, size_t elem_size);
 void* array_grow(const void* array, size_t new_len, size_t elem_size)
 {
 	size_t new_cap = MAX(1 + 2 * array_cap(array), new_len);
-	assert(new_len <= new_cap);
 	size_t new_size = offsetof(buffer_header, array) + new_cap*elem_size;
 	buffer_header* new_hdr;
 	if (array)
@@ -49,31 +45,4 @@ void* array_grow(const void* array, size_t new_len, size_t elem_size)
 	
 	new_hdr->capacity = new_cap;
 	return new_hdr->array;
-}
-
-typedef struct
-{
-	int32 age;
-	char* name;
-} person;
-
-//stretchy buffer test
-void array_test()
-{
-    person* arr = NULL;
-	person temp;
-	temp.age = 25;
-	temp.name = "Jack";
-	for (int32 i = 0; i < 10; i++)
-	{
-		array_push(arr, temp);
-		++temp.age;
-	}
-
-	for (int32 i = 0; i < 10; i++)
-	{
-		printf("Jack%d [age = %d, name = %s]\n", i, arr[i].age, arr[i].name);
-	}
-
-    array_free(arr);
 }

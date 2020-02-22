@@ -2,13 +2,6 @@
 
 #include <stdint.h>
 
-#define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
-#define TO_STRING(x) #x
-#define KB(x) 1024 * x
-#define MB(x) 1024 * KB(x)
-#define GB(x) 1024 * MB(x)
-#define nullptr ((void*) 0)
-
 /*
     ==================
     ==================
@@ -81,6 +74,7 @@
 
 #define RED5(x) "\033[5;1;31m"x"\033[0m"
 #define REDBG5(x) "\033[5;101;30m"x"\033[0m"
+#define	GREEN5(x) "\033[5;1;32m"x"\033[0m"  
 
 typedef int8_t int8;
 typedef int16_t int16;
@@ -102,3 +96,14 @@ typedef uint64_t u64;
 
 typedef float f32;
 typedef double f64;
+
+#define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
+#define TO_STRING(x) #x
+#define KB(x) 1024 * x
+#define MB(x) 1024 * KB(x)
+#define GB(x) 1024 * MB(x)
+#define nullptr ((void*) 0)
+
+#define TOKB(x) ((f64) x) / 1024
+#define TOMB(x) ((f64) TOKB(x)) / 1024
+#define TOGB(x) ((f64) TOMB(x)) / 1024

@@ -1,3 +1,5 @@
+#include <sys/resource.h>
+
 #include <GLFW/glfw3.h>
 #include <glad/glad.h>
 #include <cglm/cglm.h>
@@ -5,13 +7,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "Graphics/graphics_buffer.h"
-#include "Graphics/graphics_shader.h"
+#include "Utils/Types.h"
+#include "Utils/String.h"
+#include "Utils/Logger.h"
+#include "Utils/Array.h"
+
+#include "Graphics/Buffer.h"
+#include "Graphics/Shader.h"
 #include "Graphics/Renderer2D/Renderer2D.h"
 #include "Graphics/Renderer2D/OrthographicCamera.h"
 
-#include "Utils/Logger.h"
-#include "Utils/Types.h"
+#include "Graphics/Feature2D/Tilemap.h"
 
 // WINDOW GLOBAL
 static i8 g_is_cursor_position_visible = 0;
@@ -19,6 +25,10 @@ static i8 g_is_cursor_enabled = 1;
 static i8 g_is_freqency_visible = 0;
 static u64 g_freqency;
 
+const char* shader_srcs = "CGLinux/resouce/simple_rotation_color_shader.glsl";
+const char* shader_scs = "CGLinux/resouce/simple_color_shader.glsl";
+
+OrthographicCamera g_Camera;
 RenderData g_RgbRenderData;
 RenderData g_StaticRenderData;
 
@@ -249,7 +259,27 @@ void window_drop_callback(GLFWwindow* window, i32 count, const char** paths)
 
 int main()
 {
+	struct rlimit resource_limit;
+	int result = getrlimit(RLIMIT_STACK, &resource_limit);
+	if (result < 0)
+	{
+		GLOG(RED("get r limit error!\n"));
+	}
+	else 
+	{
+		GLOG("Resource limit: %lld\n", (i64)resource_limit.rlim_cur, (i64)resource_limit.rlim_max);
+		resource_limit.rlim_cur = (i64) MB(100);
+		resource_limit.rlim_max = (i64) MB(128);
+		result = setrlimit(RLIMIT_STACK, &resource_limit);
+		if (result == 0) 
+		{
+			GLOG(YELLOW("NEW") "Resource limit: %lld mb\n", 
+			(i64)TOMB(resource_limit.rlim_cur), (i64)resource_limit.rlim_max);
+		}
+	}
+
 	GLFWwindow* window;
+
 	//GLFWWindow & OpenGL initialization stuff
 	{
 		if (!glfwInit())
@@ -296,14 +326,34 @@ int main()
 		-0.5f, 0.7f, 0.0f
 	};
 
-	OrthographicCamera camera;
-	camera = orthographic_camera_create(-1.6f, 1.6f, -0.9f, 0.9f);
-	camera.Position[0] = 0.5f;
-	camera.Position[1] = 0.5f;
-	camera.Position[2] = 0.0f;
+	g_Camera = orthographic_camera_create(-1.6f, 1.6f, -0.9f, 0.9f);
 	
-	g_RgbRenderData = render_data_create("CGLinux/resouce/simple_rotation_color_shader.glsl", vertices1, &camera);
-	g_StaticRenderData = render_data_create("CGLinux/resouce/simple_shader.glsl", vertices2, &camera);
+	g_RgbRenderData = render_data_create(shader_srcs, vertices1, &g_Camera);
+	g_StaticRenderData = render_data_create(shader_scs, vertices2, &g_Camera);
+
+	GPosition position = (GPosition) { -0.5f, -0.5f, 0.1f, 0.1f };
+	GPosition position2 = (GPosition) { -0.5 + 0.11f, -0.5f, 0.1f, 0.1f };
+	GColor color = { 0.2f, 0.5f, 0.3f, 0.0f };
+	graphics_shader_source shader_source = {};
+	shader_source = graphics_shader_load(shader_scs);
+	u32 shader = graphics_shader_compile(shader_source);
+	
+	Quad* quads = NULL;
+	Quad quad;
+
+	i32 x, y, qlen = 25;
+	f32 topx = position.TopX, topy = position.TopY;
+	for (x = 0; x < qlen; x++)
+	{
+		position.TopX = topx + x * 0.11f;
+		for (y = 0; y < qlen; y++)
+		{
+			position.TopY = topy + y * 0.11f;
+			quad = renderer_quad_create(position, color, shader, &g_Camera);
+			array_push(quads, quad);
+		}
+		position.TopY = topy;
+	}
 
 	f64 mouse_x_pos, mouse_y_pos;
 	while (!glfwWindowShouldClose(window))
@@ -322,6 +372,12 @@ int main()
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
+		renderer_quad_set_shader_default(quads[0]);
+		for (x = 0; x < qlen*qlen; x++)
+		{
+			renderer_quad_draw(quads[x]);
+		}
+
 		render_data_render(&g_StaticRenderData);
 	    render_data_render(&g_RgbRenderData);
 
