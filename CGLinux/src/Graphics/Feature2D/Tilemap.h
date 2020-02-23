@@ -26,6 +26,15 @@ typedef struct Quad {
     OrthographicCamera* camera;
 } Quad;
 
+typedef struct QuadArray {
+	u32 Shader;
+	VertexArray VertexArray;
+    OrthographicCamera* Camera;
+} QuadArray;
+
 Quad renderer_quad_create(GPosition position, GColor color, u32 shared_shader, OrthographicCamera* camera);
 void renderer_quad_set_shader_default(Quad quad);
 void renderer_quad_draw(Quad quad);
+
+QuadArray renderer_quad_array(u32 shader, OrthographicCamera* camera);
+void renderer_quad_array_draw(QuadArray array);

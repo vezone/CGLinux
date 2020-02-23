@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include "Utils/Logger.h"
+#include "Utils/Array.h"
 
 void
 render_data_print(RenderData renderData, const char* caller)

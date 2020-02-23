@@ -2,6 +2,7 @@
 
 #include <stdlib.h>
 #include <glad/glad.h>
+#include "Utils/Array.h"
 
 void 
 graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type)
@@ -36,7 +37,7 @@ graphics_index_buffer_create(IndexBuffer* buffer, uint32* indices, uint32 count)
 	buffer->Indices = indices;
 	glGenBuffers(1, &(buffer->RendererID));
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->RendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(indices[0]), indices, GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(u32), indices, GL_STATIC_DRAW);
 }
 
 void 
@@ -63,7 +64,12 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 	
 	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer.RendererID);
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, data_type_get_count(va->VertexBuffer.Element.Type), GL_FLOAT, va->VertexBuffer.Element.IsNormilized, data_type_get_size(va->VertexBuffer.Element.Type), (void*)0);
+	glVertexAttribPointer(0,
+		data_type_get_count(va->VertexBuffer.Element.Type), 
+		GL_FLOAT, 
+		va->VertexBuffer.Element.IsNormilized, 
+		data_type_get_size(va->VertexBuffer.Element.Type), 
+		(void*)0);
 }
 
 void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo)
