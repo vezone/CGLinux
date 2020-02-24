@@ -21,11 +21,26 @@
 
 #include "Graphics/Feature2D/Tilemap.h"
 
+
 // WINDOW GLOBAL
+#define HD 1
+#define FULLHD 0
+
 static i8 g_is_cursor_position_visible = 0;
 static i8 g_is_cursor_enabled = 1;
 static i8 g_is_freqency_visible = 0;
 static u64 g_freqency;
+
+#if HD == 1
+f32 Width = 1280.0f; 
+f32 Height = 720.0f;
+#elif FULLHD == 1
+f32 Width = 1920.0f; 
+f32 Height = 1080.0f;
+#else
+f32 Width = 960; 
+f32 Height = 640;
+#endif
 
 const char* shader_srcs = "CGLinux/resouce/simple_rotation_color_shader.glsl";
 const char* shader_scs = "CGLinux/resouce/simple_color_shader.glsl";
@@ -35,129 +50,15 @@ OrthographicCamera g_Camera;
 RenderData g_RgbRenderData;
 RenderData g_StaticRenderData;
 
-#define HD 1
-#define FULLHD 0
-
-void window_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32 mods)
-{
-	if (action == GLFW_PRESS || action == GLFW_REPEAT)
-	{
-		switch (key)
-		{
-		case GLFW_KEY_Q:
-			printf("Q is pressed\n");
-			glfwSetWindowShouldClose(window, 1);
-			break;
-		case GLFW_KEY_W:
-			printf("W is pressed\n");
-			g_Camera.Position[1] += 0.1;
-			break;
-		case GLFW_KEY_E:
-			printf("E is pressed\n");
-			break;
-		case GLFW_KEY_R:
-			printf("R is pressed\n");
-			break;
-		case GLFW_KEY_T:
-			printf("T is pressed\n");
-			break;
-		case GLFW_KEY_Y:
-			printf("Y is pressed\n");
-			break;
-		case GLFW_KEY_U:
-			printf("U is pressed\n");
-			break;
-		case GLFW_KEY_I:
-			printf("I is pressed\n");
-			break;
-		case GLFW_KEY_O:
-			printf("O is pressed\n");
-			break;
-		case GLFW_KEY_P:
-			printf("P is pressed\n");
-			break;
-		case GLFW_KEY_A:
-			printf("A is pressed\n");
-			g_Camera.Position[0] -= 0.1;
-			break;
-		case GLFW_KEY_S:
-			g_Camera.Position[1] -= 0.1;
-			// if (!g_is_cursor_position_visible)
-			// {
-			// 	g_is_cursor_position_visible = 1;
-			// }
-			// else
-			// {
-			// 	g_is_cursor_position_visible = 0;
-			// }
-			printf("S is pressed\n");
-			break;
-		case GLFW_KEY_D:
-			g_Camera.Position[0] += 0.1;
-			// if (!g_is_cursor_enabled)
-			// {
-			// 	g_is_cursor_enabled = 1;
-			// 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-			// }
-			// else
-			// {
-			// 	g_is_cursor_enabled = 0;
-			// 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
-			// }
-			printf("D is pressed\n");
-			break;
-		case GLFW_KEY_F:
-			if (g_is_freqency_visible)
-			{
-				g_is_freqency_visible = 0;
-			}
-			else
-			{
-				g_is_freqency_visible = 1;
-			}
-			printf("F is pressed\n");
-			break;
-		}
-	}
-}
-
-void window_mouse_button_callback(GLFWwindow* window, i32 button, i32 action, i32 mods)
-{
-	if (action == GLFW_PRESS)
-	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			printf("Left mouse button is pressed\n");
-		}
-		else if (button == GLFW_MOUSE_BUTTON_RIGHT)
-		{
-			printf("Right mouse button is pressed\n");
-		}
-		else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
-		{
-			printf("Middle mouse button is pressed\n");
-		}
-	}
-	else if (action == GLFW_RELEASE)
-	{
-		if (button == GLFW_MOUSE_BUTTON_LEFT)
-		{
-			printf("Left mouse button is released\n");
-		}
-		else if (button == GLFW_MOUSE_BUTTON_RIGHT)
-		{
-			printf("Right mouse button is released\n");
-		}
-		else if (button == GLFW_MOUSE_BUTTON_MIDDLE)
-		{
-			printf("Middle mouse button is released\n");
-		}
-	}
-}
+f32 g_ZoomLevel = 1.0f;
+f32 g_AspectRatio; //1.6f;
 
 void window_mouse_scroll_callback(GLFWwindow* window, f64 xoffset, f64 yoffset)
 {
-	printf("Scroll mouse {%f, %f}\n", xoffset, yoffset);
+	if (yoffset < 0.0f || g_ZoomLevel > 0.2f)
+	{
+		g_ZoomLevel -= yoffset / 10;
+	}
 }
 
 void window_cursor_callback(GLFWwindow* window, f64 xpos, f64 ypos)
@@ -177,6 +78,11 @@ void window_drop_callback(GLFWwindow* window, i32 count, const char** paths)
 	{
 		handle_dropped_file(paths[i]);
 	}
+}
+
+void window_resize_callback(GLFWwindow* window, int width, int height)
+{
+	glViewport(0, 0, width, height);
 }
 
 int main()
@@ -205,20 +111,15 @@ int main()
 	}
 
 	Window window = {};
-	i32 isWindowCreated = window_create(&window, 
-	#if HD == 1
-		1280, 720,
-	#elif FULLHD == 1
-		1920, 1080,
-	#else
-		960, 640,
-	#endif
-		"Demo");
+	i32 isWindowCreated = window_create(&window, Width, Height, "Demo");
 	if (isWindowCreated == -1) 
 	{
 		GLOG(RED("Can't create window!\n"));
 	}
 	
+	window_set_scroll_callback(&window, window_mouse_scroll_callback);
+	window_set_resize_callback(&window, window_resize_callback);
+
 	//OpenGL
 	i32 status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
 	if (status == 0)
@@ -226,6 +127,9 @@ int main()
 		GLOG(RED("Failed to init GLAD\n"));
 	}
 	GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
+
+	f32 asp = 1280.0f / 720.0f;
+	GLOG("aspect ratio: %f\n", asp);
 
 	f32 vertices1[3 * 3] =
 	{
@@ -243,18 +147,21 @@ int main()
 
 	g_RgbRenderData = render_data_create(shader_srcs, vertices1, &g_Camera);
 	g_StaticRenderData = render_data_create(shader_scs, vertices2, &g_Camera);
-
-	g_Camera = orthographic_camera_create(-1.6f, 1.6f, -0.9f, 0.9f);
+	
+	g_Camera = orthographic_camera_create(
+		-g_AspectRatio*g_ZoomLevel, g_AspectRatio*g_ZoomLevel, -g_ZoomLevel, g_ZoomLevel);
 
 	GPosition position = (GPosition) { -0.5f, -0.5f, 0.01f, 0.01f };
 	graphics_shader_source shader_source = {};
 	shader_source = graphics_shader_load(shader_ss);
 	u32 shader = graphics_shader_compile(shader_source);
 	QuadArray quadArray = renderer_quad_array(shader, &g_Camera);
+	char windowTitle[33];
+	g_AspectRatio = Width / Height;
 
 	while (!window_should_close(&window))
 	{
-		if (window_is_key_pressed(&window, KEY_Q))
+		if (window_is_key_pressed(&window, KEY_ESCAPE))
 		{
 			window_set_should_close(&window, 1);
 		}
@@ -263,8 +170,7 @@ int main()
 		{
 			g_Camera.Position[0] -= 0.1;
 		}
-
-		if (window_is_key_pressed(&window, KEY_D))
+		else if (window_is_key_pressed(&window, KEY_D))
 		{
 			g_Camera.Position[0] += 0.1;
 		}
@@ -273,12 +179,28 @@ int main()
 		{
 			g_Camera.Position[1] += 0.1;
 		}
-
-		if (window_is_key_pressed(&window, KEY_S))
+		else if (window_is_key_pressed(&window, KEY_S))
 		{
 			g_Camera.Position[1] -= 0.1;
 		}
 
+		if (window_is_key_pressed(&window, KEY_Q))
+		{
+			g_Camera.Rotation += 0.1f;
+		}
+		else if (window_is_key_pressed(&window, KEY_E))
+		{
+			g_Camera.Rotation -= 0.1f;
+		}
+
+		sprintf (windowTitle, "Demo %f", g_ZoomLevel);
+		window_set_title(window.GlfwWindow, windowTitle);
+		orthographic_camera_set_projection(&g_Camera, 
+			-g_AspectRatio*g_ZoomLevel, 
+			g_AspectRatio*g_ZoomLevel, 
+			-g_ZoomLevel, g_ZoomLevel);
+		orthographic_camera_recalculate_view_matrix(&g_Camera);
+	
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		

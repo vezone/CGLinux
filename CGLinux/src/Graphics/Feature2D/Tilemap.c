@@ -67,10 +67,10 @@ renderer_quad_array(u32 shader, OrthographicCamera* camera)
 
 	for (x = 0; x < qlen; x++)
 	{
-		position.TopX = topx + x * position.Width * 1.1f;
+		position.TopX = topx + x * position.Width * 1.5f;
 		for (y = 0; y < qlen; y++)
 		{
-			position.TopY = topy + y * position.Height * 1.1f;
+			position.TopY = topy + y * position.Height * 1.5f;
 			
 			array_push(vertices, position.TopX);
 			array_push(vertices, position.TopY);
