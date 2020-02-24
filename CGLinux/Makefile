@@ -97,6 +97,7 @@ OBJECTS := \
 	$(OBJDIR)/OrthographicCamera.o \
 	$(OBJDIR)/Renderer2D.o \
 	$(OBJDIR)/Shader.o \
+	$(OBJDIR)/Window.o \
 	$(OBJDIR)/Array.o \
 	$(OBJDIR)/String.o \
 	$(OBJDIR)/main.o \
@@ -171,6 +172,9 @@ $(OBJDIR)/Renderer2D.o: src/Graphics/Renderer2D/Renderer2D.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Shader.o: src/Graphics/Shader.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Window.o: src/Graphics/Window.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Array.o: src/Utils/Array.c

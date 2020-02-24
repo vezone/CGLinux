@@ -12,6 +12,8 @@
 #include "Utils/Logger.h"
 #include "Utils/Array.h"
 
+#include "Graphics/Window.h"
+#include "Graphics/KeyCodes.h"
 #include "Graphics/Buffer.h"
 #include "Graphics/Shader.h"
 #include "Graphics/Renderer2D/Renderer2D.h"
@@ -115,90 +117,6 @@ void window_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, 
 			}
 			printf("F is pressed\n");
 			break;
-		case GLFW_KEY_G:
-			printf("G is pressed\n");
-			break;
-		case GLFW_KEY_H:
-			printf("H is pressed\n");
-			break;
-		case GLFW_KEY_J:
-			printf("J is pressed\n");
-			break;
-		case GLFW_KEY_K:
-			printf("K is pressed\n");
-			break;
-		case GLFW_KEY_L:
-			printf("L is pressed\n");
-			break;
-		case GLFW_KEY_Z:
-			printf("Z is pressed\n");
-			break;
-		case GLFW_KEY_X:
-			printf("X is pressed\n");
-			break;
-		case GLFW_KEY_C:
-			printf("C is pressed\n");
-			break;
-		case GLFW_KEY_V:
-			printf("V is pressed\n");
-			break;
-		case GLFW_KEY_B:
-			printf("B is pressed\n");
-			break;
-		case GLFW_KEY_N:
-			printf("N is pressed\n");
-			break;
-		case GLFW_KEY_M:
-			printf("M is pressed\n");
-			break;
-		case GLFW_KEY_0:
-			printf("0 is pressed\n");
-			break;
-		case GLFW_KEY_1:
-			printf("1 is pressed\n");
-			break;
-		case GLFW_KEY_2:
-			printf("2 is pressed\n");
-			break;
-		case GLFW_KEY_3:
-			printf("3 is pressed\n");
-			break;
-		case GLFW_KEY_4:
-			printf("4 is pressed\n");
-			break;
-		case GLFW_KEY_5:
-			printf("5 is pressed\n");
-			break;
-		case GLFW_KEY_6:
-			printf("6 is pressed\n");
-			break;
-		case GLFW_KEY_7:
-			printf("7 is pressed\n");
-			break;
-		case GLFW_KEY_8:
-			printf("8 is pressed\n");
-			break;
-		case GLFW_KEY_9:
-			printf("9 is pressed\n");
-			break;
-		case GLFW_KEY_LEFT_SHIFT:
-			printf("LShift is pressed\n");
-			break;
-		case GLFW_KEY_RIGHT_SHIFT:
-			printf("RShift is pressed\n");
-			break;
-		case GLFW_KEY_UP:
-			printf("Up is pressed\n");
-			break;
-		case GLFW_KEY_DOWN:
-			printf("Down is pressed\n");
-			break;
-		case GLFW_KEY_LEFT:
-			printf("Left is pressed\n");
-			break;
-		case GLFW_KEY_RIGHT:
-			printf("Right is pressed\n");
-			break;
 		}
 	}
 }
@@ -263,6 +181,7 @@ void window_drop_callback(GLFWwindow* window, i32 count, const char** paths)
 
 int main()
 {
+	//app
 	//seting stack size
 	{
 		struct rlimit resource_limit;
@@ -285,44 +204,28 @@ int main()
 		}
 	}
 
-	GLFWwindow* window;
-	//GLFWWindow & OpenGL initialization stuff
+	Window window = {};
+	i32 isWindowCreated = window_create(&window, 
+	#if HD == 1
+		1280, 720,
+	#elif FULLHD == 1
+		1920, 1080,
+	#else
+		960, 640,
+	#endif
+		"Demo");
+	if (isWindowCreated == -1) 
 	{
-		if (!glfwInit())
-		{
-			GLOG(RED("GLFW is not initialized!\n"));
-			return(-1);
-		}
-		i32 major, minor, revision;
-		glfwGetVersion(&major, &minor, &revision);
-		GLOG(MAGNETA("GLFW version: %d.%d.%d\n"), major, minor, revision);
-#if HD == 1
-		window = glfwCreateWindow(1280, 720, "Demo", 0, 0);
-#elif FULLHD == 1
-		window = glfwCreateWindow(1920, 1080, "Demo", 0, 0);
-#else
-		window = glfwCreateWindow(960, 640, "Demo", 0, 0);
-#endif
-		if (!window)
-		{
-			glfwTerminate();
-			return(-1);
-		}
-		glfwMakeContextCurrent(window);
-		glfwSwapInterval(1);
-		glfwSetKeyCallback(window, window_key_callback);
-		glfwSetMouseButtonCallback(window, window_mouse_button_callback);
-		glfwSetScrollCallback(window, window_mouse_scroll_callback);
-		glfwSetDropCallback(window, window_drop_callback);
-		
-		//OpenGL
-		i32 status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-		if (status == 0)
-		{
-			GLOG(RED("Failed to init GLAD\n"));
-		}
-		GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
+		GLOG(RED("Can't create window!\n"));
 	}
+	
+	//OpenGL
+	i32 status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
+	if (status == 0)
+	{
+		GLOG(RED("Failed to init GLAD\n"));
+	}
+	GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
 
 	f32 vertices1[3 * 3] =
 	{
@@ -340,28 +243,40 @@ int main()
 
 	g_RgbRenderData = render_data_create(shader_srcs, vertices1, &g_Camera);
 	g_StaticRenderData = render_data_create(shader_scs, vertices2, &g_Camera);
-	
+
 	g_Camera = orthographic_camera_create(-1.6f, 1.6f, -0.9f, 0.9f);
 
 	GPosition position = (GPosition) { -0.5f, -0.5f, 0.01f, 0.01f };
 	graphics_shader_source shader_source = {};
 	shader_source = graphics_shader_load(shader_ss);
 	u32 shader = graphics_shader_compile(shader_source);
-	
 	QuadArray quadArray = renderer_quad_array(shader, &g_Camera);
-	
-	f64 mouse_x_pos, mouse_y_pos;
-	while (!glfwWindowShouldClose(window))
+
+	while (!window_should_close(&window))
 	{
-		g_freqency = glfwGetTimerFrequency();
-		if (g_is_freqency_visible)
+		if (window_is_key_pressed(&window, KEY_Q))
 		{
-			GLOG("%ld hz\n", g_freqency);
+			window_set_should_close(&window, 1);
 		}
-		if (g_is_cursor_position_visible)
+		
+		if (window_is_key_pressed(&window, KEY_A))
 		{
-			glfwGetCursorPos(window, &mouse_x_pos, &mouse_y_pos);
-			GLOG("Mouse position: {%f,%f}\n", mouse_x_pos, mouse_y_pos);
+			g_Camera.Position[0] -= 0.1;
+		}
+
+		if (window_is_key_pressed(&window, KEY_D))
+		{
+			g_Camera.Position[0] += 0.1;
+		}
+
+		if (window_is_key_pressed(&window, KEY_W))
+		{
+			g_Camera.Position[1] += 0.1;
+		}
+
+		if (window_is_key_pressed(&window, KEY_S))
+		{
+			g_Camera.Position[1] -= 0.1;
 		}
 
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
@@ -371,15 +286,12 @@ int main()
 
 		render_data_render(&g_StaticRenderData);
 	    render_data_render(&g_RgbRenderData);
-#if 0
-#endif
 
-		glfwSwapBuffers(window);
-		glfwPollEvents();
+		window_on_update(&window);
 	}
-	
-	glfwTerminate();
 
+	window_terminate();
+	
 	graphics_shader_delete(g_RgbRenderData.Shader);
 	graphics_shader_delete(g_StaticRenderData.Shader);
 
