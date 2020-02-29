@@ -1,31 +1,71 @@
 #pragma once
 
-#include <cglm/cglm.h>
-#include "Graphics/Renderer2D/OrthographicCamera.h"
-#include "Graphics/Buffer.h"
-#include "Graphics/Shader.h"
 #include "Utils/Types.h"
+#include "Graphics/Buffer.h"
+#include "Graphics/Renderer2D/OrthographicCamera.h"
+#include "Graphics/Texture2D.h"
 
-typedef struct RotationData {
-	f32 Angle;
-	mat4 Matrix;
-	vec3 Axis;
-} RotationData;
+typedef struct GColor {
+	f32 R;
+	f32 G;
+	f32 B;
+	f32 A;
+} GColor;
 
-typedef struct RenderData {
+typedef struct TriangleGeometry {
+	f32 A[2];
+	f32 B[2];
+	f32 C[2];
+} TriangleGeometry;
+
+typedef struct Triangle {
+	u32 Shader;
+	VertexArray VAO;
+    TriangleGeometry Geometry;
+	GColor Color;
+    OrthographicCamera* Camera;
+} Triangle;
+
+typedef struct RectangleGeometry {
+	f32 TopX;
+	f32 TopY;
+	f32 Width;
+	f32 Height;
+} RectangleGeometry;
+
+typedef struct Rectangle {
+	u32 Shader;
+	VertexArray VAO;
+    RectangleGeometry Geometry;
+	GColor Color;
+    OrthographicCamera* Camera;
+} Rectangle;
+
+typedef struct TexturedRectangle {
+	u32 Shader;
+	VertexArray VAO;
+	Texture2D Texture;
+    RectangleGeometry Geometry;
+    OrthographicCamera* Camera;
+} TexturedRectangle;
+
+typedef struct RectangleArray {
 	u32 Shader;
 	VertexArray VertexArray;
-	RotationData Rotation;
-	OrthographicCamera* Camera;
-} RenderData;
+    OrthographicCamera* Camera;
+} RectangleArray;
 
-#define RENDER_DATA_PRINT(renderData) render_data_print(renderData, #renderData)
+Triangle renderer_triangle_create(TriangleGeometry geometry, GColor color, OrthographicCamera* camera);
+void renderer_triangle_draw(Triangle triangle);
 
+Rectangle renderer_rectangle_create(RectangleGeometry geometry, GColor color, OrthographicCamera* camera);
+void renderer_rectangle_set_shader_default(Rectangle rectangle);
+void renderer_rectangle_draw(Rectangle rectangle);
+
+TexturedRectangle
+renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamera* camera);
 void
-render_data_print(RenderData renderData, const char* caller);
+renderer_textured_rectangle_draw(TexturedRectangle rectangle);
 
-RenderData
-render_data_create(const char* shader_path, f32 vertices[9], OrthographicCamera* camera);
-
-void
-render_data_render(RenderData* renderData);
+RectangleArray renderer_rectangle_array_create(OrthographicCamera* camera);
+void renderer_rectangle_array_draw(RectangleArray array);

@@ -59,17 +59,35 @@ void graphics_vertex_array_create(VertexArray* va)
 
 void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 {
-	va->VertexBuffer = vbo;
+	va->VertexBuffer = &vbo;
 	glBindVertexArray(va->RendererID);
 	
-	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer.RendererID);
+	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
 	glEnableVertexAttribArray(0);
 	glVertexAttribPointer(0,
-		data_type_get_count(va->VertexBuffer.Element.Type), 
+		data_type_get_count(va->VertexBuffer->Element.Type), 
 		GL_FLOAT, 
-		va->VertexBuffer.Element.IsNormilized, 
-		data_type_get_size(va->VertexBuffer.Element.Type), 
+		va->VertexBuffer->Element.IsNormilized, 
+		data_type_get_size(va->VertexBuffer->Element.Type), 
 		(void*)0);
+}
+
+void graphics_vertex_array_add_vbos(VertexArray* va, VertexBuffer* vbos)
+{
+	va->VertexBuffer = vbos;
+	glBindVertexArray(va->RendererID);
+	
+	for (i32 i = 0; i < array_len(vbos); i++)
+	{
+		glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer[i].RendererID);
+		glEnableVertexAttribArray(0);
+		glVertexAttribPointer(va->VertexBuffer[i].RendererID,
+			data_type_get_count(va->VertexBuffer[i].Element.Type), 
+			GL_FLOAT, 
+			va->VertexBuffer[i].Element.IsNormilized, 
+			data_type_get_size(va->VertexBuffer[i].Element.Type), 
+			(void*)&va->VertexBuffer[i].Element.Size);
+	}
 }
 
 void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo)

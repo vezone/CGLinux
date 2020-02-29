@@ -3,6 +3,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "Utils/String.h"
+#include "Utils/Array.h"
+
+u32* ShadersCollection = NULL;
 
 static char*
 file_get_name_with_extension(const char* path)
@@ -152,6 +155,9 @@ graphics_shader_compile(graphics_shader_source source)
 
 	glDeleteShader(vertex_shader_id);
 	glDeleteShader(fragment_shader_id);
+
+	array_push(ShadersCollection, shader_program_id);
+
 	return shader_program_id;
 }
 
@@ -171,4 +177,15 @@ void
 graphics_shader_unbind()
 {
 	glUseProgram(0);
+}
+
+void
+graphics_shader_delete_collection()
+{
+	for (i32 i = 0; i < array_len(ShadersCollection); i++)
+	{
+		graphics_shader_delete(ShadersCollection[i]);
+	}
+
+	SHADERLOG(GREEN("Delete shader's collection\n"));
 }

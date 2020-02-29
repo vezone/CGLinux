@@ -93,13 +93,14 @@ endif
 
 OBJECTS := \
 	$(OBJDIR)/Buffer.o \
-	$(OBJDIR)/Tilemap.o \
 	$(OBJDIR)/OrthographicCamera.o \
 	$(OBJDIR)/Renderer2D.o \
 	$(OBJDIR)/Shader.o \
+	$(OBJDIR)/Texture2D.o \
 	$(OBJDIR)/Window.o \
 	$(OBJDIR)/Array.o \
 	$(OBJDIR)/String.o \
+	$(OBJDIR)/stb_image.o \
 	$(OBJDIR)/main.o \
 
 RESOURCES := \
@@ -162,9 +163,6 @@ endif
 $(OBJDIR)/Buffer.o: src/Graphics/Buffer.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/Tilemap.o: src/Graphics/Feature2D/Tilemap.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/OrthographicCamera.o: src/Graphics/Renderer2D/OrthographicCamera.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -174,6 +172,9 @@ $(OBJDIR)/Renderer2D.o: src/Graphics/Renderer2D/Renderer2D.c
 $(OBJDIR)/Shader.o: src/Graphics/Shader.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Texture2D.o: src/Graphics/Texture2D.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Window.o: src/Graphics/Window.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -181,6 +182,9 @@ $(OBJDIR)/Array.o: src/Utils/Array.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/String.o: src/Utils/String.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/stb_image.o: src/Utils/stb_image.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/main.o: src/main.c

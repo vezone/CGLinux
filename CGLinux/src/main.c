@@ -19,11 +19,12 @@
 #include "Graphics/Renderer2D/Renderer2D.h"
 #include "Graphics/Renderer2D/OrthographicCamera.h"
 
-#include "Graphics/Feature2D/Tilemap.h"
-
+/*
+TODO: need proper buffer layout to make textures in a good way
+*/
 
 // WINDOW GLOBAL
-#define HD 1
+#define HD 0
 #define FULLHD 0
 
 static i8 g_is_cursor_position_visible = 0;
@@ -42,14 +43,7 @@ f32 Width = 960;
 f32 Height = 640;
 #endif
 
-const char* shader_srcs = "CGLinux/resouce/simple_rotation_color_shader.glsl";
-const char* shader_scs = "CGLinux/resouce/simple_color_shader.glsl";
-const char* shader_ss = "CGLinux/resouce/simple_shader.glsl";
-
 OrthographicCamera g_Camera;
-RenderData g_RgbRenderData;
-RenderData g_StaticRenderData;
-
 f32 g_ZoomLevel = 1.0f;
 f32 g_AspectRatio; //1.6f;
 
@@ -82,6 +76,11 @@ void window_drop_callback(GLFWwindow* window, i32 count, const char** paths)
 
 void window_resize_callback(GLFWwindow* window, int width, int height)
 {
+	g_AspectRatio = width / Width;
+	orthographic_camera_set_projection(&g_Camera, 
+		-g_AspectRatio * g_ZoomLevel, 
+		 g_AspectRatio * g_ZoomLevel, 
+		-g_ZoomLevel, g_ZoomLevel);
 	glViewport(0, 0, width, height);
 }
 
@@ -116,7 +115,7 @@ int main()
 	{
 		GLOG(RED("Can't create window!\n"));
 	}
-	
+
 	window_set_scroll_callback(&window, window_mouse_scroll_callback);
 	window_set_resize_callback(&window, window_resize_callback);
 
@@ -128,36 +127,35 @@ int main()
 	}
 	GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
 
-	f32 asp = 1280.0f / 720.0f;
-	GLOG("aspect ratio: %f\n", asp);
-
-	f32 vertices1[3 * 3] =
-	{
-		-0.9f, -0.9f, 0.0f,
-		 -0.1f, -0.9f, 0.0f,
-		 0.0f,  0.3f, 0.0f
-	};
-	
-	f32 vertices2[3 * 3] =
-	{
-		 0.9f, 0.9f, 0.0f,
-		 0.9f, 0.7f, 0.0f,
-		-0.5f, 0.7f, 0.0f
-	};
-
-	g_RgbRenderData = render_data_create(shader_srcs, vertices1, &g_Camera);
-	g_StaticRenderData = render_data_create(shader_scs, vertices2, &g_Camera);
-	
 	g_Camera = orthographic_camera_create(
-		-g_AspectRatio*g_ZoomLevel, g_AspectRatio*g_ZoomLevel, -g_ZoomLevel, g_ZoomLevel);
-
-	GPosition position = (GPosition) { -0.5f, -0.5f, 0.01f, 0.01f };
-	graphics_shader_source shader_source = {};
-	shader_source = graphics_shader_load(shader_ss);
-	u32 shader = graphics_shader_compile(shader_source);
-	QuadArray quadArray = renderer_quad_array(shader, &g_Camera);
+		-g_AspectRatio*g_ZoomLevel, 
+		g_AspectRatio*g_ZoomLevel, 
+		-g_ZoomLevel, g_ZoomLevel);
 	char windowTitle[33];
 	g_AspectRatio = Width / Height;
+	GColor color = { 0.2f, 0.5f, 1.0f, 1.0f };
+
+	// TriangleGeometry triangleGeometry = {
+	// 	{ -0.9f, -0.9f }, 
+	// 	{ -0.1f, -0.9f },
+	// 	{ -0.5f,  0.7f }
+	// };
+	// Triangle triangle = 
+	// 	renderer_triangle_create(triangleGeometry, 
+	//    	color, &g_Camera);
+
+	// Rectangle rectangle = renderer_rectangle_create(
+	//   	(RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, &g_Camera);
+	// Rectangle rectangle2 = renderer_rectangle_create(
+	//   	(RectangleGeometry) { -1.5f, 0.5f, 1.5f, 0.5f }, color, &g_Camera);
+
+	TexturedRectangle texturedRectangle = 
+		renderer_create_textured_rectangle(
+			(RectangleGeometry) { 0.1f, 0.1f, 0.5f, 0.5f }, 
+			&g_Camera);
+
+	// RectangleArray quadArray = 
+	// 	renderer_rectangle_array_create(&g_Camera);
 
 	while (!window_should_close(&window))
 	{
@@ -192,9 +190,10 @@ int main()
 		{
 			g_Camera.Rotation -= 0.1f;
 		}
-
-		sprintf (windowTitle, "Demo %f", g_ZoomLevel);
+		
+		sprintf(windowTitle, "Demo %f", g_ZoomLevel);
 		window_set_title(window.GlfwWindow, windowTitle);
+
 		orthographic_camera_set_projection(&g_Camera, 
 			-g_AspectRatio*g_ZoomLevel, 
 			g_AspectRatio*g_ZoomLevel, 
@@ -204,18 +203,19 @@ int main()
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		renderer_quad_array_draw(quadArray);
+		// renderer_triangle_draw(triangle);
+		// renderer_rectangle_draw(rectangle);
+		// renderer_rectangle_draw(rectangle2);
+		// renderer_rectangle_array_draw(quadArray);
+		renderer_textured_rectangle_draw(texturedRectangle);
 
-		render_data_render(&g_StaticRenderData);
-	    render_data_render(&g_RgbRenderData);
 
 		window_on_update(&window);
 	}
 
 	window_terminate();
 	
-	graphics_shader_delete(g_RgbRenderData.Shader);
-	graphics_shader_delete(g_StaticRenderData.Shader);
+	graphics_shader_delete_collection();
 
 	return 0;
 }

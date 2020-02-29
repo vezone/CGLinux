@@ -70,12 +70,13 @@ void graphics_index_buffer_unbind();
 
 typedef struct VertexArray {
 	uint32 RendererID;
-	VertexBuffer VertexBuffer;
+	VertexBuffer* VertexBuffer;
 	IndexBuffer IndexBuffer;
 } VertexArray;
 
 void graphics_vertex_array_create(VertexArray* va);
 void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo);
+void graphics_vertex_array_add_vbos(VertexArray* va, VertexBuffer* vbos);
 void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo);
 void graphics_vertex_array_bind(VertexArray* va);
 void graphics_vertex_array_unbind();

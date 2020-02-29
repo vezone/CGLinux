@@ -37,8 +37,6 @@ project "CGLinux"
 		"%{prj.name}/src/Graphics/**.c",
 		"%{prj.name}/src/Graphics/Renderer2D/**.h",
 		"%{prj.name}/src/Graphics/Renderer2D/**.c",
-		"%{prj.name}/src/Graphics/Feature2D/**.h",
-		"%{prj.name}/src/Graphics/Feature2D/**.c",
 		"%{prj.name}/src/Utils/**.h",
 		"%{prj.name}/src/Utils/**.c"
 	}

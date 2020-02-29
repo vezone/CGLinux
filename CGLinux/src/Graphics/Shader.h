@@ -44,3 +44,6 @@ graphics_shader_bind(u32 renderId);
 
 void 
 graphics_shader_unbind();
+
+void
+graphics_shader_delete_collection();
