@@ -1,20 +1,27 @@
 #vertex shader
 #version 330 core
-layout(location = 0) in vec3 a_Position;
+layout(location = 0) in vec3 i_Position;
+layout(location = 1) in vec2 i_TextureCoordinates;
+
 uniform mat4 u_ViewProjection;
-out vec4 o_Position;
+
+out vec2 o_TextureCoordinates;
 
 void main()
 {
-	gl_Position = u_ViewProjection * vec4(a_Position, 1.0);
-	o_Position = gl_Position;
+	o_TextureCoordinates = i_TextureCoordinates;
+	gl_Position = u_ViewProjection * vec4(i_Position, 1.0);
 }
 
 #fragment shader
 #version 330 core
 layout(location = 0) out vec4 o_Color;
-in vec4 o_Position;
+
+in vec2 o_TextureCoordinates;
+uniform sampler2D u_Texture;
+
 void main()
 {
-	o_Color = o_Position * 0.5 + 0.5;
+	o_Color = texture(u_Texture, o_TextureCoordinates);
+	o_Color = vec4(o_TextureCoordinates, 0.0, 1.0);
 }

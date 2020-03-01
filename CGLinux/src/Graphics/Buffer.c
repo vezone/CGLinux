@@ -3,19 +3,47 @@
 #include <stdlib.h>
 #include <glad/glad.h>
 #include "Utils/Array.h"
+#include "Utils/Logger.h"
 
 void 
 graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type)
 {
-	buffer->Vertices = vertices;
 	glGenBuffers(1, &(buffer->RendererID));
 	glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID);
 	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 
-	buffer->Element.IsNormilized = 0;
-	buffer->Element.Size = size;
-	buffer->Element.Type = type;
 	buffer->Vertices = vertices;
+	buffer->Elements = NULL;
+	buffer->Stride = 0;
+}
+
+static void
+stride_update(VertexBuffer* buffer)
+{
+	//0 12 24
+	i32 offset = 0;
+	buffer->Stride = 0;
+
+	for (i32 i = 0; i < array_len(buffer->Elements); i++)
+	{
+		buffer->Elements[i].Offset = offset;
+		offset += buffer->Elements[i].Size;
+		buffer->Stride += buffer->Elements[i].Size;
+	}
+}
+
+void graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type)
+{
+	BufferElement element = {
+		.IsNormilized = isNormalized,
+		.Type = type,
+		.Size = data_type_get_size(type),
+		.Count = data_type_get_count(type),
+		.Offset = 0
+	};
+
+	array_push(buffer->Elements, element);
+	stride_update(buffer);
 }
 
 void 
@@ -61,32 +89,22 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 {
 	va->VertexBuffer = &vbo;
 	glBindVertexArray(va->RendererID);
-	
-	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
-	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0,
-		data_type_get_count(va->VertexBuffer->Element.Type), 
-		GL_FLOAT, 
-		va->VertexBuffer->Element.IsNormilized, 
-		data_type_get_size(va->VertexBuffer->Element.Type), 
-		(void*)0);
-}
+	GLOG("Stride: %d\n", vbo.Stride);
 
-void graphics_vertex_array_add_vbos(VertexArray* va, VertexBuffer* vbos)
-{
-	va->VertexBuffer = vbos;
-	glBindVertexArray(va->RendererID);
-	
-	for (i32 i = 0; i < array_len(vbos); i++)
+	BufferElement* layout = vbo.Elements;
+	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
+	for (i32 i = 0; i < array_len(layout); i++)
 	{
-		glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer[i].RendererID);
-		glEnableVertexAttribArray(0);
-		glVertexAttribPointer(va->VertexBuffer[i].RendererID,
-			data_type_get_count(va->VertexBuffer[i].Element.Type), 
+		BufferElement element = layout[i];
+
+		GLOG("Offset: %d\n", element.Offset);
+		glEnableVertexAttribArray(i);
+		glVertexAttribPointer(i,
+			element.Count, 
 			GL_FLOAT, 
-			va->VertexBuffer[i].Element.IsNormilized, 
-			data_type_get_size(va->VertexBuffer[i].Element.Type), 
-			(void*)&va->VertexBuffer[i].Element.Size);
+			element.IsNormilized, 
+			vbo.Stride,
+			(const void*)element.Offset);
 	}
 }
 

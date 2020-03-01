@@ -43,17 +43,27 @@ typedef struct BufferElement
 {
 	int8 IsNormilized;
 	DataType Type;
-	int32 Size;
+	i32 Size;
+	i32 Count;
+	i32 Offset;
 } BufferElement;
+
+
+typedef struct BufferLayout {
+	BufferElement* elements;
+	i32 Stride;
+} BufferLayout;
 
 typedef struct VertexBuffer
 {
 	float* Vertices;
 	uint32 RendererID;
-	BufferElement Element;
+	BufferElement* Elements;
+	i32 Stride;
 } VertexBuffer;
 
 void graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type);
+void graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type);
 void graphics_vertex_buffer_bind(VertexBuffer* vbo);
 void graphics_vertex_buffer_unbind();
 
@@ -76,7 +86,6 @@ typedef struct VertexArray {
 
 void graphics_vertex_array_create(VertexArray* va);
 void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo);
-void graphics_vertex_array_add_vbos(VertexArray* va, VertexBuffer* vbos);
 void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo);
 void graphics_vertex_array_bind(VertexArray* va);
 void graphics_vertex_array_unbind();

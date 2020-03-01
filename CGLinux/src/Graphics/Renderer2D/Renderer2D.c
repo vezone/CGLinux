@@ -26,6 +26,7 @@ renderer_triangle_create(TriangleGeometry geometry, GColor color, OrthographicCa
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices), Float3);
 	graphics_vertex_buffer_bind(&vbo);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, ARRAY_LENGTH(indices));
@@ -85,6 +86,7 @@ renderer_rectangle_create(RectangleGeometry geometry, GColor color, Orthographic
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices), Float3);
 	graphics_vertex_buffer_bind(&vbo);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, ARRAY_LENGTH(indices));
@@ -132,20 +134,22 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 	Texture2D texture = graphics_texture2d_create(texture_arf3d1);
 	graphics_texture2d_bind(&texture, 0);
 
+	f32 x1 = geometry.TopX;
+	f32 x2 = geometry.TopX + geometry.Width;
+	f32 y1 = geometry.TopY;
+	f32 y2 = geometry.TopY - geometry.Height;
+
+	f32 tx1 = (x1 >= 0.0f) ? 1.0f : 0.0f;
+	f32 tx2 = (x2 >= 0.0f) ? 1.0f : 0.0f;
+	f32 ty1 = (y1 >= 0.0f) ? 1.0f : 0.0f;
+	f32 ty2 = (y2 >= 0.0f) ? 1.0f : 0.0f;
+
 	f32 vertices[] =
 	{
-		geometry.TopX, geometry.TopY, 0.0f, 
-		geometry.TopX + geometry.Width, geometry.TopY, 0.0f,
-		geometry.TopX + geometry.Width, geometry.TopY - geometry.Height, 0.0f,
-		geometry.TopX, geometry.TopY - geometry.Height, 0.0f
-	};
-
-	f32 texturePos[] =
-	{
-		0.0f, 0.0f, 0.0f, 
-		1.0f, 0.0f, 0.0f,
-		1.0f, 1.0f, 0.0f,
-		0.0f, 1.0f, 0.0f
+		x1, y1, 0.0f, tx1, ty1,
+		x2, y1, 0.0f, tx2, ty1,
+		x2, y2, 0.0f, tx2, ty2,
+		x1, y2, 0.0f, tx1, ty2
 	};
 
 	u32 indices[] = {
@@ -156,13 +160,8 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices), Float3);
 	graphics_vertex_buffer_bind(&vbo);
 
-	VertexBuffer vboText = {};
-	graphics_vertex_buffer_create(&vbo, texturePos, sizeof(texturePos), Float3);
-	graphics_vertex_buffer_bind(&vboText);
-
-	VertexBuffer* vbos = NULL;
-	array_push(vbos, vbo);
-	array_push(vbos, vboText);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, ARRAY_LENGTH(indices));
@@ -170,7 +169,7 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 
 	VertexArray vao = {};
 	graphics_vertex_array_create(&vao);
-	graphics_vertex_array_add_vbos(&vao, vbos);
+	graphics_vertex_array_add_vbo(&vao, vbo);
 	graphics_vertex_array_add_ibo(&vao, ibo);
 	graphics_vertex_array_bind(&vao);
 
@@ -183,10 +182,12 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 
 	return rectangle;
 }
+
 void 
 renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 {
 	graphics_shader_bind(rectangle.Shader);
+	graphics_texture2d_bind(&rectangle.Texture, 0);
 
 	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
 	
@@ -203,9 +204,8 @@ renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 	}
 	graphics_vertex_array_bind(&(rectangle.VAO));
 	
-	GLOG(RED("HERE\n"));
 	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
-
+	// GLOG(RED("HERE\n"));
 }
 
 RectangleArray 
@@ -257,6 +257,7 @@ renderer_rectangle_array_create(OrthographicCamera* camera)
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_create(&vbo, vertices, array_len(vertices)*sizeof(f32), Float3);
 	graphics_vertex_buffer_bind(&vbo);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, array_len(indices));

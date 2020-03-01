@@ -20,7 +20,9 @@
 #include "Graphics/Renderer2D/OrthographicCamera.h"
 
 /*
-TODO: need proper buffer layout to make textures in a good way
+TODO: 
+	1) check if stride and offset is correct
+	2) check if Texture2D setup is correct
 */
 
 // WINDOW GLOBAL
@@ -135,27 +137,26 @@ int main()
 	g_AspectRatio = Width / Height;
 	GColor color = { 0.2f, 0.5f, 1.0f, 1.0f };
 
-	// TriangleGeometry triangleGeometry = {
-	// 	{ -0.9f, -0.9f }, 
-	// 	{ -0.1f, -0.9f },
-	// 	{ -0.5f,  0.7f }
-	// };
-	// Triangle triangle = 
-	// 	renderer_triangle_create(triangleGeometry, 
-	//    	color, &g_Camera);
+	Triangle triangle = 
+		renderer_triangle_create((TriangleGeometry)
+		{
+			{ -0.9f, -0.9f }, 
+			{ -0.1f, -0.9f },
+			{ -0.5f,  0.7f }
+		}, color, &g_Camera);
 
-	// Rectangle rectangle = renderer_rectangle_create(
-	//   	(RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, &g_Camera);
-	// Rectangle rectangle2 = renderer_rectangle_create(
-	//   	(RectangleGeometry) { -1.5f, 0.5f, 1.5f, 0.5f }, color, &g_Camera);
+	Rectangle rectangle = renderer_rectangle_create(
+	  	(RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, &g_Camera);
+	Rectangle rectangle2 = renderer_rectangle_create(
+	  	(RectangleGeometry) { -1.5f, 0.5f, 1.5f, 0.5f }, color, &g_Camera);
 
 	TexturedRectangle texturedRectangle = 
 		renderer_create_textured_rectangle(
-			(RectangleGeometry) { 0.1f, 0.1f, 0.5f, 0.5f }, 
+			(RectangleGeometry) { -0.5f, -0.5f, 1.0f, 1.0f }, 
 			&g_Camera);
 
-	// RectangleArray quadArray = 
-	// 	renderer_rectangle_array_create(&g_Camera);
+	RectangleArray quadArray = 
+		renderer_rectangle_array_create(&g_Camera);
 
 	while (!window_should_close(&window))
 	{
@@ -203,10 +204,12 @@ int main()
 		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		// renderer_triangle_draw(triangle);
-		// renderer_rectangle_draw(rectangle);
-		// renderer_rectangle_draw(rectangle2);
-		// renderer_rectangle_array_draw(quadArray);
+		#if 0
+		renderer_triangle_draw(triangle);
+		renderer_rectangle_draw(rectangle);
+		renderer_rectangle_draw(rectangle2);
+		renderer_rectangle_array_draw(quadArray);
+		#endif
 		renderer_textured_rectangle_draw(texturedRectangle);
 
 
