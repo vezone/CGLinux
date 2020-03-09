@@ -5,16 +5,27 @@
 #include "Utils/Array.h"
 #include "Utils/Logger.h"
 
+void
+buffer_element_print(BufferElement element)
+{
+	int8 IsNormilized;
+	DataType Type;
+	i32 Size;
+	i32 Count;
+	i32 Offset;
+	GLOG("Size: %d, Count: %d, Offset: %d\n", 
+		element.Size, element.Count, element.Offset);
+}
+
 void 
-graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type)
+graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size)
 {
 	glGenBuffers(1, &(buffer->RendererID));
 	glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID);
 	glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
 
-	buffer->Vertices = vertices;
 	buffer->Elements = NULL;
-	buffer->Stride = 0;
+	buffer->Vertices = vertices;
 }
 
 static void
@@ -24,6 +35,8 @@ stride_update(VertexBuffer* buffer)
 	i32 offset = 0;
 	buffer->Stride = 0;
 
+	// o: 0, stride: 12
+	// o: 12, stride: 24
 	for (i32 i = 0; i < array_len(buffer->Elements); i++)
 	{
 		buffer->Elements[i].Offset = offset;
@@ -38,8 +51,7 @@ void graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, Da
 		.IsNormilized = isNormalized,
 		.Type = type,
 		.Size = data_type_get_size(type),
-		.Count = data_type_get_count(type),
-		.Offset = 0
+		.Count = data_type_get_count(type)
 	};
 
 	array_push(buffer->Elements, element);
@@ -88,19 +100,21 @@ void graphics_vertex_array_create(VertexArray* va)
 void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 {
 	va->VertexBuffer = &vbo;
+
 	glBindVertexArray(va->RendererID);
+	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
 	GLOG("Stride: %d\n", vbo.Stride);
 
 	BufferElement* layout = vbo.Elements;
-	glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
 	for (i32 i = 0; i < array_len(layout); i++)
 	{
 		BufferElement element = layout[i];
-
-		GLOG("Offset: %d\n", element.Offset);
+		
+		buffer_element_print(element);
+		
 		glEnableVertexAttribArray(i);
 		glVertexAttribPointer(i,
-			element.Count, 
+			element.Count,
 			GL_FLOAT, 
 			element.IsNormilized, 
 			vbo.Stride,

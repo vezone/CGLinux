@@ -24,7 +24,7 @@ renderer_triangle_create(TriangleGeometry geometry, GColor color, OrthographicCa
 	};
 
 	VertexBuffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices), Float3);
+	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices));
 	graphics_vertex_buffer_bind(&vbo);
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 
@@ -84,7 +84,7 @@ renderer_rectangle_create(RectangleGeometry geometry, GColor color, Orthographic
 	};
 
 	VertexBuffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices), Float3);
+	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices));
 	graphics_vertex_buffer_bind(&vbo);
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 
@@ -137,12 +137,15 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 	f32 x1 = geometry.TopX;
 	f32 x2 = geometry.TopX + geometry.Width;
 	f32 y1 = geometry.TopY;
-	f32 y2 = geometry.TopY - geometry.Height;
+	f32 y2 = geometry.TopY + geometry.Height;
 
 	f32 tx1 = (x1 >= 0.0f) ? 1.0f : 0.0f;
 	f32 tx2 = (x2 >= 0.0f) ? 1.0f : 0.0f;
 	f32 ty1 = (y1 >= 0.0f) ? 1.0f : 0.0f;
 	f32 ty2 = (y2 >= 0.0f) ? 1.0f : 0.0f;
+
+	GDEBUG("x1: %f, y1: %f, x2: %f, y2: %f\n", x1, y1, x2, y2);
+	GDEBUG("tx1: %f, ty1: %f, tx2: %f, ty2: %f\n", tx1, ty1, tx2, ty2);
 
 	f32 vertices[] =
 	{
@@ -157,7 +160,7 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 	};
 
 	VertexBuffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices), Float3);
+	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices));
 	graphics_vertex_buffer_bind(&vbo);
 
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
@@ -186,12 +189,14 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamer
 void 
 renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 {
+	i32 location;
+
 	graphics_shader_bind(rectangle.Shader);
 	graphics_texture2d_bind(&rectangle.Texture, 0);
 
 	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
 	
-	i32 location = glGetUniformLocation(rectangle.Shader, "u_Texture");
+	location = glGetUniformLocation(rectangle.Shader, "u_Texture");
 	if (location >= 0)
 	{
 		glUniform1i(location, 0);
@@ -205,7 +210,6 @@ renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 	graphics_vertex_array_bind(&(rectangle.VAO));
 	
 	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
-	// GLOG(RED("HERE\n"));
 }
 
 RectangleArray 
@@ -255,7 +259,7 @@ renderer_rectangle_array_create(OrthographicCamera* camera)
 	}
 
 	VertexBuffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, array_len(vertices)*sizeof(f32), Float3);
+	graphics_vertex_buffer_create(&vbo, vertices, array_len(vertices)*sizeof(f32));
 	graphics_vertex_buffer_bind(&vbo);
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 

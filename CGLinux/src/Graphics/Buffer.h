@@ -48,6 +48,8 @@ typedef struct BufferElement
 	i32 Offset;
 } BufferElement;
 
+void
+buffer_element_print(BufferElement element);
 
 typedef struct BufferLayout {
 	BufferElement* elements;
@@ -62,7 +64,7 @@ typedef struct VertexBuffer
 	i32 Stride;
 } VertexBuffer;
 
-void graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size, DataType type);
+void graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size);
 void graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type);
 void graphics_vertex_buffer_bind(VertexBuffer* vbo);
 void graphics_vertex_buffer_unbind();

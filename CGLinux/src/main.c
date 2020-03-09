@@ -47,7 +47,7 @@ f32 Height = 640;
 
 OrthographicCamera g_Camera;
 f32 g_ZoomLevel = 1.0f;
-f32 g_AspectRatio; //1.6f;
+f32 g_AspectRatio;
 
 void window_mouse_scroll_callback(GLFWwindow* window, f64 xoffset, f64 yoffset)
 {
@@ -137,6 +137,7 @@ int main()
 	g_AspectRatio = Width / Height;
 	GColor color = { 0.2f, 0.5f, 1.0f, 1.0f };
 
+	#if 0
 	Triangle triangle = 
 		renderer_triangle_create((TriangleGeometry)
 		{
@@ -149,14 +150,17 @@ int main()
 	  	(RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, &g_Camera);
 	Rectangle rectangle2 = renderer_rectangle_create(
 	  	(RectangleGeometry) { -1.5f, 0.5f, 1.5f, 0.5f }, color, &g_Camera);
+	RectangleArray quadArray = 
+		renderer_rectangle_array_create(&g_Camera);
+	#endif
 
+	#if 1
 	TexturedRectangle texturedRectangle = 
 		renderer_create_textured_rectangle(
 			(RectangleGeometry) { -0.5f, -0.5f, 1.0f, 1.0f }, 
 			&g_Camera);
+	#endif
 
-	RectangleArray quadArray = 
-		renderer_rectangle_array_create(&g_Camera);
 
 	while (!window_should_close(&window))
 	{
@@ -209,9 +213,9 @@ int main()
 		renderer_rectangle_draw(rectangle);
 		renderer_rectangle_draw(rectangle2);
 		renderer_rectangle_array_draw(quadArray);
-		#endif
+		#else
 		renderer_textured_rectangle_draw(texturedRectangle);
-
+		#endif
 
 		window_on_update(&window);
 	}

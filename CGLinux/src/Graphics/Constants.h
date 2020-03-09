@@ -7,4 +7,4 @@ const char* shader_ss = "CGLinux/resource/simple_shader.glsl";
 const char* shader_sts = "CGLinux/resource/simple_texture_shader.glsl";
 
 //Textures
-const char* texture_arf3d1 = "resource/anime_reference_for_3d_1.png";
+const char* texture_arf3d1 = "CGLinux/resource/Hazel.png";
