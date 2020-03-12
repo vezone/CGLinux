@@ -92,12 +92,14 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/Sandbox.o \
 	$(OBJDIR)/Buffer.o \
 	$(OBJDIR)/OrthographicCamera.o \
 	$(OBJDIR)/Renderer2D.o \
 	$(OBJDIR)/Shader.o \
 	$(OBJDIR)/Texture2D.o \
 	$(OBJDIR)/Window.o \
+	$(OBJDIR)/Linux.o \
 	$(OBJDIR)/Array.o \
 	$(OBJDIR)/String.o \
 	$(OBJDIR)/stb_image.o \
@@ -160,6 +162,9 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
+$(OBJDIR)/Sandbox.o: src/App/Sandbox.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Buffer.o: src/Graphics/Buffer.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -176,6 +181,9 @@ $(OBJDIR)/Texture2D.o: src/Graphics/Texture2D.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Window.o: src/Graphics/Window.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Linux.o: src/Platform/Linux/Linux.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Array.o: src/Utils/Array.c

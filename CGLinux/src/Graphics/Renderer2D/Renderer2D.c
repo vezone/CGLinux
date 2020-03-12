@@ -126,12 +126,12 @@ renderer_rectangle_draw(Rectangle rectangle)
 }
 
 TexturedRectangle 
-renderer_create_textured_rectangle(RectangleGeometry geometry, OrthographicCamera* camera)
+renderer_create_textured_rectangle(RectangleGeometry geometry, const char* texturePath, OrthographicCamera* camera)
 {
 	u32 shader = 
 		graphics_shader_compile(graphics_shader_load(shader_sts));
 
-	Texture2D texture = graphics_texture2d_create(texture_arf3d1);
+	Texture2D texture = graphics_texture2d_create(texturePath);
 	graphics_texture2d_bind(&texture, 0);
 
 	f32 x1 = geometry.TopX;
@@ -219,8 +219,10 @@ renderer_rectangle_array_create(OrthographicCamera* camera)
 		graphics_shader_compile(graphics_shader_load(shader_ss));
 
 	//2550 * 2550 = 6 502 500
-	i32 x, y, qlen = 2550;
-	RectangleGeometry position = (RectangleGeometry) { -0.5f, -0.5f, 0.01f, 0.01f };
+	i32 x, y, qlen = 500;
+	RectangleGeometry position = (RectangleGeometry) { 
+		-3.5f, -3.5f, 0.01f, 0.01f 
+	};
 	f32* vertices = NULL;
 	u32* indices = NULL;
 	f32 topx = position.TopX, topy = position.TopY;

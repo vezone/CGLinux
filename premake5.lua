@@ -33,6 +33,10 @@ project "CGLinux"
 	{
 		"%{prj.name}/src/**.h",
 		"%{prj.name}/src/**.c",
+		"%{prj.name}/src/App/**.h",
+		"%{prj.name}/src/App/**.c",
+		"%{prj.name}/src/Platform/Linux/**.h",
+		"%{prj.name}/src/Platform/Linux/**.c",
 		"%{prj.name}/src/Graphics/**.h",
 		"%{prj.name}/src/Graphics/**.c",
 		"%{prj.name}/src/Graphics/Renderer2D/**.h",

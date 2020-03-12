@@ -21,9 +21,26 @@ typedef struct Window {
 #define window_set_drop_callback(window, callback) glfwSetDropCallback((window)->GlfwWindow, callback)
 #define window_set_resize_callback(window, callback) glfwSetWindowSizeCallback((window)->GlfwWindow, callback)
 
-i32 window_create(Window* window, u32 width, u32 height, const char* tittle);
+i32
+window_create(Window* window, u32 width, u32 height, const char* tittle);
 
-i32 window_is_key_pressed(Window* window, i32 key);
-i32 window_is_mouse_pressed(Window* window, i32 key);
+static i32
+window_is_key_pressed(Window* window, i32 key)
+{
+    i32 state = glfwGetKey(window->GlfwWindow, key);
+    return(state == GLFW_PRESS || state == GLFW_REPEAT);        
+}
 
-void window_on_update(Window* window);
+static i32 
+window_is_mouse_pressed(Window* window, i32 key)
+{
+    i32 state = glfwGetMouseButton(window->GlfwWindow, key);
+    return(state == GLFW_PRESS);
+}
+
+static void 
+window_on_update(Window* window)
+{
+    glfwSwapBuffers(window->GlfwWindow);
+	glfwPollEvents();
+}
