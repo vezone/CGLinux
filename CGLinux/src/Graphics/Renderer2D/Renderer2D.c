@@ -54,12 +54,9 @@ renderer_triangle_draw(Triangle triangle)
 	graphics_shader_bind(triangle.Shader);
 
 	orthographic_camera_recalculate_view_matrix(triangle.Camera);
+
+	graphics_shader_uniform_mat4(triangle.Shader, "u_ViewProjection", 1, 0, triangle.Camera->ViewProjectionMatrix[0]); 
 	
-	i32 location = glGetUniformLocation(triangle.Shader, "u_ViewProjection");
-	if (location >= 0)
-	{
-		glUniformMatrix4fv(location, 1, 0, triangle.Camera->ViewProjectionMatrix[0]);
-	}
 	graphics_vertex_array_bind(&(triangle.VAO));
 	
 	glDrawElements(GL_TRIANGLES, triangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
@@ -114,12 +111,8 @@ renderer_rectangle_draw(Rectangle rectangle)
 	graphics_shader_bind(rectangle.Shader);
 
 	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
+	graphics_shader_uniform_mat4(rectangle.Shader, "u_ViewProjection", 1, 0, rectangle.Camera->ViewProjectionMatrix[0]); 
 	
-	i32 location = glGetUniformLocation(rectangle.Shader, "u_ViewProjection");
-	if (location >= 0)
-	{
-		glUniformMatrix4fv(location, 1, 0, rectangle.Camera->ViewProjectionMatrix[0]);
-	}
 	graphics_vertex_array_bind(&(rectangle.VAO));
 	
 	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
@@ -189,24 +182,15 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, const char* textu
 void 
 renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 {
-	i32 location;
-
 	graphics_shader_bind(rectangle.Shader);
 	graphics_texture2d_bind(&rectangle.Texture, 0);
 
 	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
-	
-	location = glGetUniformLocation(rectangle.Shader, "u_Texture");
-	if (location >= 0)
-	{
-		glUniform1i(location, 0);
-	}
 
-	location = glGetUniformLocation(rectangle.Shader, "u_ViewProjection");
-	if (location >= 0)
-	{
-		glUniformMatrix4fv(location, 1, 0, rectangle.Camera->ViewProjectionMatrix[0]);
-	}
+	graphics_shader_uniform1i(rectangle.Shader, "u_Texture", 0); 
+	
+	graphics_shader_uniform_mat4(rectangle.Shader, "u_ViewProjection", 1, 0, rectangle.Camera->ViewProjectionMatrix[0]); 
+	
 	graphics_vertex_array_bind(&(rectangle.VAO));
 	
 	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
@@ -221,18 +205,18 @@ renderer_rectangle_array_create(OrthographicCamera* camera)
 	//2550 * 2550 = 6 502 500
 	i32 x, y, qlen = 500;
 	RectangleGeometry position = (RectangleGeometry) { 
-		-3.5f, -3.5f, 0.01f, 0.01f 
+		-3.5f, -3.5f, 0.05f, 0.05f 
 	};
 	f32* vertices = NULL;
 	u32* indices = NULL;
-	f32 topx = position.TopX, topy = position.TopY;
-
+	f32  topx = position.TopX, topy = position.TopY;
+	f32  multiplier = 1.1f;
 	for (x = 0; x < qlen; x++)
 	{
-		position.TopX = topx + x * position.Width * 1.5f;
+		position.TopX = topx + x * position.Width * multiplier;
 		for (y = 0; y < qlen; y++)
 		{
-			position.TopY = topy + y * position.Height * 1.5f;
+			position.TopY = topy + y * position.Height * multiplier;
 			
 			array_push(vertices, position.TopX);
 			array_push(vertices, position.TopY);
@@ -289,11 +273,8 @@ renderer_rectangle_array_draw(RectangleArray array)
 	orthographic_camera_recalculate_view_matrix(array.Camera);
 	
 	graphics_shader_bind(array.Shader);
-	i32 location = glGetUniformLocation(array.Shader, "u_ViewProjection");
-	if (location >= 0)
-	{
-		glUniformMatrix4fv(location, 1, 0, array.Camera->ViewProjectionMatrix[0]);
-	}
+
+	graphics_shader_uniform_mat4(array.Shader, "u_ViewProjection", 1, 0, array.Camera->ViewProjectionMatrix[0]); 
 	
 	graphics_vertex_array_bind(&array.VertexArray);
 

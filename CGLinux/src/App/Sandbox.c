@@ -78,7 +78,7 @@ window_drop_callback(GLFWwindow* window, i32 count, const char** paths)
 }
 
 void 
-window_resize_callback(GLFWwindow* window, int width, int height)
+window_resize_callback(GLFWwindow* window, i32 width, i32 height)
 {
     //Camera stuff
 	g_AspectRatio = width / Width;
@@ -118,8 +118,8 @@ sandbox_start()
 	GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
 
 	g_Camera = orthographic_camera_create(
-		-g_AspectRatio*g_ZoomLevel, 
-		g_AspectRatio*g_ZoomLevel, 
+		-g_AspectRatio *g_ZoomLevel, 
+		g_AspectRatio *g_ZoomLevel, 
 		-g_ZoomLevel, g_ZoomLevel);
 	char windowTitle[33];
 	g_AspectRatio = Width / Height;

@@ -4,64 +4,63 @@
 
 typedef enum DataType
 {
-	Float1 = 0, Float2, Float3, Float4,
-	Int1, Int2, Int3, Int4
+   Float1 = 0, Float2, Float3, Float4,
+   Int1, Int2, Int3, Int4
 } DataType;
 
-static uint32 data_type_get_size(DataType type)
+static uint32
+data_type_get_size(DataType type)
 {
-	switch (type)
-	{
-		case Float1: return 4;
-		case Float2: return 4 * 2;
-		case Float3: return 4 * 3;
-		case Float4: return 4 * 4;
-		case Int1: return 4;
-		case Int2: return 4 * 2;
-		case Int3: return 4 * 3;
-		case Int4: return 4 * 4; 
-	}
-	return 0;
+  switch (type)
+  {
+	case Float1: return 4;
+	case Float2: return 4 * 2;
+	case Float3: return 4 * 3;
+	case Float4: return 4 * 4;
+	case Int1: return 4;
+	case Int2: return 4 * 2;
+	case Int3: return 4 * 3;
+	case Int4: return 4 * 4; 
+  }
+  return 0;
 }
 
-static uint32 data_type_get_count(DataType type)
+static uint32
+data_type_get_count(DataType type)
 {
-	switch (type)
-	{
-		case Float1: return 1;
-		case Float2: return 2;
-		case Float3: return 3;
-		case Float4: return 4;
-		case Int1: return 1;
-		case Int2: return 2;
-		case Int3: return 3;
-		case Int4: return 4; 
-	}
+  switch (type)
+  {
+	case Float1: return 1;
+	case Float2: return 2;
+	case Float3: return 3;
+	case Float4: return 4;
+	case Int1: return 1;
+	case Int2: return 2;
+	case Int3: return 3;
+	case Int4: return 4; 
+  }
 }
 
 typedef struct BufferElement
 {
-	int8 IsNormilized;
-	DataType Type;
-	i32 Size;
-	i32 Count;
-	i32 Offset;
+  int8 IsNormilized;
+  DataType Type;
+  i32 Size;
+  i32 Count;
+  i32 Offset;
 } BufferElement;
 
-void
-buffer_element_print(BufferElement element);
-
 typedef struct BufferLayout {
-	BufferElement* elements;
-	i32 Stride;
+  BufferElement* elements;
+  i32 Stride;
 } BufferLayout;
 
 typedef struct VertexBuffer
 {
-	float* Vertices;
-	uint32 RendererID;
-	BufferElement* Elements;
-	i32 Stride;
+  float* Vertices;
+  uint32 RendererID;
+  BufferElement* Elements;
+  i32 Stride;
 } VertexBuffer;
 
 void graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size);
@@ -71,9 +70,9 @@ void graphics_vertex_buffer_unbind();
 
 typedef struct IndexBuffer
 {
-	uint32* Indices;
-	uint32 RendererID;
-	uint32 Count;
+  uint32* Indices;
+  uint32 RendererID;
+  uint32 Count;
 } IndexBuffer;
 
 void graphics_index_buffer_create(IndexBuffer* buffer, uint32_t* indices, uint32_t size);
@@ -81,9 +80,9 @@ void graphics_index_buffer_bind(IndexBuffer* ibo);
 void graphics_index_buffer_unbind();
 
 typedef struct VertexArray {
-	uint32 RendererID;
-	VertexBuffer* VertexBuffer;
-	IndexBuffer IndexBuffer;
+  uint32 RendererID;
+  VertexBuffer* VertexBuffer;
+  IndexBuffer IndexBuffer;
 } VertexArray;
 
 void graphics_vertex_array_create(VertexArray* va);
