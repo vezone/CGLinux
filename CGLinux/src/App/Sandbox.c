@@ -125,13 +125,16 @@ sandbox_start()
 	g_AspectRatio = Width / Height;
 	GColor color = { 0.2f, 0.5f, 1.0f, 1.0f };
 
+	mat4 transform_triangle;
+	glm_mat4_identity(transform_triangle);
 	Triangle triangle = 
 		renderer_triangle_create((TriangleGeometry)
 		{
 			{ -0.9f, -0.9f }, 
 			{ -0.1f, -0.9f },
 			{ -0.5f,  0.7f }
-		}, color, &g_Camera);
+		}, color, transform_triangle, &g_Camera);
+	
 	Rectangle rectangle = renderer_rectangle_create(
 	  	(RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, &g_Camera);
 	Rectangle rectangle2 = renderer_rectangle_create(
@@ -149,9 +152,9 @@ sandbox_start()
 			&g_Camera);
 	RectangleArray quadArray = 
 		renderer_rectangle_array_create(&g_Camera);
-	#if 0
-	#endif
 
+    #if 0
+	#endif
 	while (!window_should_close(&window))
 	{
 		if (window_is_key_pressed(&window, KEY_ESCAPE))
@@ -214,4 +217,6 @@ sandbox_start()
 	window_terminate();
 	
 	graphics_shader_delete_collection();
+	renderer_triangle_destroy(triangle);
+	
 }

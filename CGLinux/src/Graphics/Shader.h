@@ -3,21 +3,6 @@
 #include <glad/glad.h>
 #include "Utils/Types.h"
 
-#define ISSHADERDEBUG 0
-#define ISSHADERLOG 1
-
-#if ISSHADERDEBUG == 1
-	#define SHADERDEBUG(...) printf(__VA_ARGS__)
-#else
-	#define SHADERDEBUG(...)
-#endif
-
-#if ISSHADERLOG == 1
-	#define SHADERLOG(...) printf(__VA_ARGS__)
-#else
-	#define SHADERLOG(...)
-#endif
-
 typedef struct graphics_shader_source
 {
 	char* name;

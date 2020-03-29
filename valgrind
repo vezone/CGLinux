@@ -1,0 +1,1 @@
+valgrind --leak-check=yes bin/Debug-linux-x86_64/CGLinux/CGLinux

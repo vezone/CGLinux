@@ -1,21 +1,24 @@
 #pragma once
 
 #include <stdio.h>
+#include "Types.h"
 
 #define ISGLOBALLOG 1
-#define ISGLOBALDEBUG 1
+#define ISGLOBALDEBUG 0
 #define ISFORMATTOSTRING 1
 
 #if ISGLOBALLOG == 1
-	#define GLOG(...) printf(__VA_ARGS__)
+#define GLOG(format, ...) printf("file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
 #else
-	#define GLOG(...)
+#define GLOG(format, ...)
 #endif
 
+#define GERROR(format, ...) GLOG(RED(format), ##__VA_ARGS__) 
+
 #if ISGLOBALDEBUG == 1
-	#define GDEBUG(...) printf(__VA_ARGS__)
+	#define GDEBUG(format, ...) printf("file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
 #else
-	#define GDEBUG(...)
+	#define GDEBUG(format, ...)
 #endif
 
 #if ISFORMATTOSTRING == 1
@@ -23,3 +26,4 @@
 #else
 	#define GFORMAT(string, format, ...)
 #endif
+

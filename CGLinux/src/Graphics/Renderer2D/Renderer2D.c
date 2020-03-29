@@ -7,11 +7,12 @@
 #include "Graphics/Constants.h"
 
 Triangle
-renderer_triangle_create(TriangleGeometry geometry, GColor color, OrthographicCamera* camera)
+renderer_triangle_create(TriangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera)
 {
+	graphics_shader_source shader_source =  graphics_shader_load(shader_ss);
 	u32 shader = 
-		graphics_shader_compile(graphics_shader_load(shader_ss));
-
+		graphics_shader_compile(shader_source);
+	
 	f32 vertices[] =
 	{
 		geometry.A[0], geometry.A[1], 0.0f,
@@ -43,6 +44,7 @@ renderer_triangle_create(TriangleGeometry geometry, GColor color, OrthographicCa
 	triangle.VAO = vao;
 	triangle.Geometry = geometry;
 	triangle.Color = color;
+	glm_mat4_copy(transform, triangle.Transform);
 	triangle.Camera = camera;
 	
 	return triangle;
@@ -56,6 +58,7 @@ renderer_triangle_draw(Triangle triangle)
 	orthographic_camera_recalculate_view_matrix(triangle.Camera);
 
 	graphics_shader_uniform_mat4(triangle.Shader, "u_ViewProjection", 1, 0, triangle.Camera->ViewProjectionMatrix[0]); 
+	graphics_shader_uniform_mat4(triangle.Shader, "u_Transform", 1, 0, triangle.Transform[0]); 
 	
 	graphics_vertex_array_bind(&(triangle.VAO));
 	
@@ -188,7 +191,6 @@ renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
 
 	graphics_shader_uniform1i(rectangle.Shader, "u_Texture", 0); 
-	
 	graphics_shader_uniform_mat4(rectangle.Shader, "u_ViewProjection", 1, 0, rectangle.Camera->ViewProjectionMatrix[0]); 
 	
 	graphics_vertex_array_bind(&(rectangle.VAO));
