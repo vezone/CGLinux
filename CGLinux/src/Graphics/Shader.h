@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include "Utils/Types.h"
+#include "Utils/Logger.h"
 
 typedef struct graphics_shader_source
 {

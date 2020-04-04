@@ -10,6 +10,9 @@
 	* create linux file with platform dependent code
 	* create _
 
+	IDEA:
+	* we can create static lib (.a) for game code and load it by toolkit dynamicly [we can use dlopen(LoadLibrary) dlclose(FreeLibrary) dlsym(GetProcAddress) function, here is link: https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/dlopen.3.html] 
+	
 */
 
 

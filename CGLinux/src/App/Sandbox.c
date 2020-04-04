@@ -135,10 +135,8 @@ sandbox_start()
 			{ -0.5f,  0.7f }
 		}, color, transform_triangle, &g_Camera);
 	
-	Rectangle rectangle = renderer_rectangle_create(
-	  	(RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, &g_Camera);
-	Rectangle rectangle2 = renderer_rectangle_create(
-	  	(RectangleGeometry) { -1.5f, 0.5f, 1.5f, 0.5f }, color, &g_Camera);
+	Rectangle rectangle = renderer_rectangle_create((RectangleGeometry) { 0.5f, 0.5f, 1.5f, 1.0f }, color, transform_triangle, &g_Camera);
+	Rectangle rectangle2 = renderer_rectangle_create((RectangleGeometry) { -1.5f, 0.5f, 1.5f, 0.5f }, color, transform_triangle, &g_Camera);
 
 	TexturedRectangle texturedRectangle = 
 		renderer_create_textured_rectangle(
@@ -150,8 +148,7 @@ sandbox_start()
 			(RectangleGeometry) { -0.5f, -0.5f, 1.0f, 1.0f }, 
 			texture_anime_chibi,
 			&g_Camera);
-	RectangleArray quadArray = 
-		renderer_rectangle_array_create(&g_Camera);
+	RectangleArray quadArray = renderer_rectangle_array_create(transform_triangle, &g_Camera);
 
     #if 0
 	#endif
@@ -217,6 +214,11 @@ sandbox_start()
 	window_terminate();
 	
 	graphics_shader_delete_collection();
+
 	renderer_triangle_destroy(triangle);
+	renderer_rectangle_destroy(rectangle);
+	renderer_rectangle_destroy(rectangle2);
+	renderer_textured_rectangle_destroy(texturedRectangle2);
+	renderer_rectangle_array_destroy(quadArray);
 	
 }

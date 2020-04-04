@@ -5,8 +5,8 @@
 void
 vstring_set(char* string, char c, i32 length)
 {
-    i32 i = 0;
-    for (; i < length; i++)
+    i32 i;
+    for (i = 0; i < length; i++)
     {
         string[i] = c;
     }
@@ -216,7 +216,7 @@ vstring_last_index_of(const char* input, char character)
 	
 	return -1;
 }
-
+#include "Logger.h"
 const char* 
 vstring_substring(const char* input, i32 start_index)
 {
@@ -231,25 +231,23 @@ vstring_substring(const char* input, i32 start_index)
 	}
 	
 	input_length = vstring_length(input);
-	
-    if (start_index >= input_length ||
+	if (start_index >= input_length ||
 		start_index < 0)
 	{
 		return NULL;
 	}
 	
-	new_length = input_length - start_index + 1;
+	new_length = input_length - start_index;
 	result = malloc((new_length + 1) * sizeof(char));
 	for (i = start_index; i < input_length; i++)
 	{
 		result[i - start_index] = input[i];
 	}
 	result[new_length] = '\0';
-
+	
 	return (const char*)result;
 }
 
-//HERE A BUG
 const char* 
 vstring_substring_range(const char* input, i32 start_index, i32 end_index)
 {

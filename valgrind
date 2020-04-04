@@ -1,1 +1,3 @@
-valgrind --leak-check=yes bin/Debug-linux-x86_64/CGLinux/CGLinux
+#!/bin/bash
+
+valgrind --leak-check=yes --show-leak-kinds=all bin/Debug-linux-x86_64/CGLinux/CGLinux

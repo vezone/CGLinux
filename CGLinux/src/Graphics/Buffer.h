@@ -91,7 +91,8 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo);
 void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo);
 void graphics_vertex_array_bind(VertexArray* va);
 void graphics_vertex_array_unbind();
-static void graphics_vertex_array_destroy(VertexArray* va)
+static void
+graphics_vertex_array_destroy(VertexArray* va)
 {
 	glDeleteVertexArrays(1, &va->RendererID);
 }

@@ -8,7 +8,7 @@
 static void
 buffer_element_print(BufferElement element)
 {
-  GLOG("Size: %d, Count: %d, Offset: %d\n", 
+	BUFFERDEBUG("Size: %d, Count: %d, Offset: %d\n", 
        element.Size, element.Count, element.Offset);
 }
 
@@ -29,7 +29,7 @@ stride_update(VertexBuffer* buffer)
   //0 12 24
   i32 offset = 0;
   buffer->Stride = 0;
-
+  
   // o: 0, stride: 12
   // o: 12, stride: 24
   for (i32 i = 0; i < array_len(buffer->Elements); i++)
@@ -98,7 +98,7 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
     
   glBindVertexArray(va->RendererID);
   glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
-  GLOG("Stride: %d\n", vbo.Stride);
+  BUFFERDEBUG("Stride: %d\n", vbo.Stride);
 
   BufferElement* layout = vbo.Elements;
   for (i32 i = 0; i < array_len(layout); i++)
@@ -108,12 +108,7 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
       buffer_element_print(element);
 		
       glEnableVertexAttribArray(i);
-      glVertexAttribPointer(i,
-                            element.Count,
-                            GL_FLOAT, 
-                            element.IsNormilized, 
-                            vbo.Stride,
-                            (const void*)element.Offset);
+      glVertexAttribPointer(i, element.Count, GL_FLOAT, element.IsNormilized, vbo.Stride, (const void*)element.Offset);
    }
 }
 

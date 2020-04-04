@@ -40,6 +40,7 @@ typedef struct Rectangle {
 	VertexArray VAO;
     RectangleGeometry Geometry;
 	GColor Color;
+	mat4 Transform;
     OrthographicCamera* Camera;
 } Rectangle;
 
@@ -53,7 +54,8 @@ typedef struct TexturedRectangle {
 
 typedef struct RectangleArray {
 	u32 Shader;
-	VertexArray VertexArray;
+	VertexArray VAO;
+	mat4 Transform;
     OrthographicCamera* Camera;
 } RectangleArray;
 
@@ -68,18 +70,33 @@ void
 renderer_triangle_draw(Triangle triangle);
 
 Rectangle 
-renderer_rectangle_create(RectangleGeometry geometry, GColor color, OrthographicCamera* camera);
+renderer_rectangle_create(RectangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera);
 void 
 renderer_rectangle_set_shader_default(Rectangle rectangle);
 void 
 renderer_rectangle_draw(Rectangle rectangle);
+static void
+renderer_rectangle_destroy(Rectangle rectangle)
+{
+	graphics_vertex_array_destroy(&rectangle.VAO);
+}
 
 TexturedRectangle
 renderer_create_textured_rectangle(RectangleGeometry geometry, const char* texturePath, OrthographicCamera* camera);
 void
 renderer_textured_rectangle_draw(TexturedRectangle rectangle);
+static void
+renderer_textured_rectangle_destroy(TexturedRectangle rectangle)
+{
+	graphics_vertex_array_destroy(&rectangle.VAO);
+}
 
 RectangleArray 
-renderer_rectangle_array_create(OrthographicCamera* camera);
+renderer_rectangle_array_create(mat4 transform, OrthographicCamera* camera);
 void 
 renderer_rectangle_array_draw(RectangleArray array);
+static void
+renderer_rectangle_array_destroy(RectangleArray array)
+{
+	graphics_vertex_array_destroy(&array.VAO);
+}

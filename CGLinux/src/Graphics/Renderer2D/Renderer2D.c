@@ -15,9 +15,9 @@ renderer_triangle_create(TriangleGeometry geometry, GColor color, mat4 transform
 	
 	f32 vertices[] =
 	{
-		geometry.A[0], geometry.A[1], 0.0f,
-		geometry.B[0], geometry.B[1], 0.0f,
-		geometry.C[0], geometry.C[1], 0.0f
+		geometry.A[0], geometry.A[1],
+		geometry.B[0], geometry.B[1],
+		geometry.C[0], geometry.C[1],
 	};
 
 	u32 indices[] = {
@@ -27,7 +27,7 @@ renderer_triangle_create(TriangleGeometry geometry, GColor color, mat4 transform
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices));
 	graphics_vertex_buffer_bind(&vbo);
-	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, ARRAY_LENGTH(indices));
@@ -66,17 +66,22 @@ renderer_triangle_draw(Triangle triangle)
 }
 
 Rectangle 
-renderer_rectangle_create(RectangleGeometry geometry, GColor color, OrthographicCamera* camera)
+renderer_rectangle_create(RectangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera)
 {
-	u32 shader = 
-		graphics_shader_compile(graphics_shader_load(shader_ss));
+	graphics_shader_source source = graphics_shader_load(shader_ss);
+	u32 shader = graphics_shader_compile(source);
+	
+	f32 x1 = geometry.TopX;
+	f32 x2 = geometry.TopX + geometry.Width;
+	f32 y1 = geometry.TopY;
+	f32 y2 = geometry.TopY + geometry.Height;
 
 	f32 vertices[] =
 	{
-		geometry.TopX, geometry.TopY, 0.0f,
-		geometry.TopX + geometry.Width, geometry.TopY, 0.0f,
-		geometry.TopX + geometry.Width, geometry.TopY - geometry.Height, 0.0f,
-		geometry.TopX, geometry.TopY - geometry.Height, 0.0f
+		x1, y1, 	
+		x2, y1, 	
+		x2, y2, 	
+		x1, y2	
 	};
 
 	u32 indices[] = {
@@ -86,7 +91,7 @@ renderer_rectangle_create(RectangleGeometry geometry, GColor color, Orthographic
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices));
 	graphics_vertex_buffer_bind(&vbo);
-	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, ARRAY_LENGTH(indices));
@@ -103,6 +108,7 @@ renderer_rectangle_create(RectangleGeometry geometry, GColor color, Orthographic
 	rectangle.VAO = vao;
 	rectangle.Geometry = geometry;
 	rectangle.Color = color;
+	glm_mat4_copy(transform, rectangle.Transform);
 	rectangle.Camera = camera;
 
 	return rectangle;
@@ -114,8 +120,10 @@ renderer_rectangle_draw(Rectangle rectangle)
 	graphics_shader_bind(rectangle.Shader);
 
 	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
+
 	graphics_shader_uniform_mat4(rectangle.Shader, "u_ViewProjection", 1, 0, rectangle.Camera->ViewProjectionMatrix[0]); 
-	
+	graphics_shader_uniform_mat4(rectangle.Shader, "u_Transform", 1, 0, rectangle.Transform[0]); 
+
 	graphics_vertex_array_bind(&(rectangle.VAO));
 	
 	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
@@ -145,10 +153,10 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, const char* textu
 
 	f32 vertices[] =
 	{
-		x1, y1, 0.0f, tx1, ty1,
-		x2, y1, 0.0f, tx2, ty1,
-		x2, y2, 0.0f, tx2, ty2,
-		x1, y2, 0.0f, tx1, ty2
+		x1, y1, tx1, ty1,
+		x2, y1, tx2, ty1,
+		x2, y2, tx2, ty2,
+		x1, y2, tx1, ty2
 	};
 
 	u32 indices[] = {
@@ -159,7 +167,7 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, const char* textu
 	graphics_vertex_buffer_create(&vbo, vertices, sizeof(vertices));
 	graphics_vertex_buffer_bind(&vbo);
 
-	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 
 	IndexBuffer ibo = {};
@@ -199,57 +207,59 @@ renderer_textured_rectangle_draw(TexturedRectangle rectangle)
 }
 
 RectangleArray 
-renderer_rectangle_array_create(OrthographicCamera* camera)
+renderer_rectangle_array_create(mat4 transform, OrthographicCamera* camera)
 {
-	u32 shader = 
-		graphics_shader_compile(graphics_shader_load(shader_ss));
+	i32 x, y, qlen, temp_index;
+	u32 *indices, shader;
+	f32 *vertices, topx, topy, multiplier, temp_position_x, temp_position_y;
+	RectangleGeometry position;
+	
+	shader = graphics_shader_compile(graphics_shader_load(shader_ss));
 
 	//2550 * 2550 = 6 502 500
-	i32 x, y, qlen = 500;
-	RectangleGeometry position = (RectangleGeometry) { 
-		-3.5f, -3.5f, 0.05f, 0.05f 
-	};
-	f32* vertices = NULL;
-	u32* indices = NULL;
-	f32  topx = position.TopX, topy = position.TopY;
-	f32  multiplier = 1.1f;
+	qlen = 2000;
+	indices = NULL;
+	vertices = NULL;
+	multiplier = 1.5f;
+	position = (RectangleGeometry) { -2.5f, -2.5f, 0.01f, 0.01f };
+	f32 heightMultiplier = position.Height * multiplier;
+	f32 widthMultiplier = position.Width * multiplier;
+	
 	for (x = 0; x < qlen; x++)
 	{
-		position.TopX = topx + x * position.Width * multiplier;
+		topx = position.TopX + x * widthMultiplier;
+		temp_position_x = topx - position.Width;
 		for (y = 0; y < qlen; y++)
 		{
-			position.TopY = topy + y * position.Height * multiplier;
+			topy = position.TopY + y * heightMultiplier;
+			temp_position_y = topy - position.Height;
+			temp_index = (y * 4) + (x * 4 * qlen);
 			
-			array_push(vertices, position.TopX);
-			array_push(vertices, position.TopY);
-			array_push(vertices, 0.0f);
+			array_push(vertices, topx);
+			array_push(vertices, topy);
 
-			array_push(vertices, position.TopX + position.Width);
-			array_push(vertices, position.TopY);
-			array_push(vertices, 0.0f);
+			array_push(vertices, temp_position_x);
+			array_push(vertices, topy);
 			
-			array_push(vertices, position.TopX + position.Width);
-			array_push(vertices, position.TopY - position.Height);
-			array_push(vertices, 0.0f);
+			array_push(vertices, temp_position_x);
+			array_push(vertices, temp_position_y);
 			
-			array_push(vertices, position.TopX);
-			array_push(vertices, position.TopY - position.Height);
-			array_push(vertices, 0.0f);
+			array_push(vertices, topx);
+			array_push(vertices, temp_position_y);
 
-			array_push(indices, 0 + (y * 4) + (x * 4 * qlen));
-			array_push(indices, 1 + (y * 4) + (x * 4 * qlen));
-			array_push(indices, 2 + (y * 4) + (x * 4 * qlen));
-			array_push(indices, 2 + (y * 4) + (x * 4 * qlen));
-			array_push(indices, 3 + (y * 4) + (x * 4 * qlen));
-			array_push(indices, 0 + (y * 4) + (x * 4 * qlen));
+			array_push(indices, 0 + temp_index);
+			array_push(indices, 1 + temp_index);
+			array_push(indices, 2 + temp_index);
+			array_push(indices, 2 + temp_index);
+			array_push(indices, 3 + temp_index);
+			array_push(indices, 0 + temp_index);
 		}
-		position.TopY = topy;
 	}
-
+	
 	VertexBuffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, array_len(vertices)*sizeof(f32));
+	graphics_vertex_buffer_create(&vbo, vertices, array_len(vertices) * sizeof(f64));
 	graphics_vertex_buffer_bind(&vbo);
-	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 
 	IndexBuffer ibo = {};
 	graphics_index_buffer_create(&ibo, indices, array_len(indices));
@@ -263,7 +273,8 @@ renderer_rectangle_array_create(OrthographicCamera* camera)
 
 	RectangleArray rectangleArray = {};
 	rectangleArray.Shader = shader;
-	rectangleArray.VertexArray = vao;
+	rectangleArray.VAO = vao;
+	glm_mat4_copy(transform, rectangleArray.Transform);
 	rectangleArray.Camera = camera;
 
 	return rectangleArray;
@@ -277,8 +288,9 @@ renderer_rectangle_array_draw(RectangleArray array)
 	graphics_shader_bind(array.Shader);
 
 	graphics_shader_uniform_mat4(array.Shader, "u_ViewProjection", 1, 0, array.Camera->ViewProjectionMatrix[0]); 
+	graphics_shader_uniform_mat4(array.Shader, "u_Transform", 1, 0, array.Transform[0]);
 	
-	graphics_vertex_array_bind(&array.VertexArray);
+	graphics_vertex_array_bind(&array.VAO);
 
-	glDrawElements(GL_TRIANGLES, array.VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
+	glDrawElements(GL_TRIANGLES, array.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
 }
