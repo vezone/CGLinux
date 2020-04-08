@@ -19,9 +19,9 @@ window_create(Window* window, u32 width, u32 height, const char* tittle)
     window->Height = height;
     window->Title = tittle;
     window->GlfwWindow = glfwCreateWindow(width, height, tittle, 0, 0);
-
+	//glfwSetInputMode(window->GlfwWindow, GLFW_STICKY_KEYS, 0);
+	
     glfwMakeContextCurrent(window->GlfwWindow);
-	glfwSwapInterval(1);
-
+	
     return(1);
 }

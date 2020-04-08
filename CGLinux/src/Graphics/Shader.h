@@ -3,25 +3,37 @@
 #include <glad/glad.h>
 #include "Utils/Types.h"
 #include "Utils/Logger.h"
+#include "Utils/stb_ds.h"
 
-typedef struct graphics_shader_source
+typedef struct ShaderSource
 {
 	char* name;
 	const char* vertex_shader;
 	const char* fragment_shader;
-} graphics_shader_source;
+} ShaderSource;
 
-graphics_shader_source 
+typedef struct UniformTableType { 
+	const char* key;
+	i32 value;
+} UniformTableType;
+	
+typedef struct Shader
+{
+	u32 ShaderID;
+	UniformTableType* UniformTable;
+} Shader;
+
+ShaderSource
 graphics_shader_load(const char* shader_path);
 
-u32 
-graphics_shader_compile(graphics_shader_source source);
+Shader 
+graphics_shader_compile(ShaderSource source);
 
 void 
-graphics_shader_delete(u32 renderId);
+graphics_shader_delete(Shader* shader);
 
 void 
-graphics_shader_bind(u32 renderId);
+graphics_shader_bind(Shader* shader);
 
 void 
 graphics_shader_unbind();
@@ -30,219 +42,491 @@ void
 graphics_shader_delete_collection();
 
 static void
-graphics_shader_uniform1f(u32 shader, const char* uniformName, f32 v0)
+graphics_shader_set_1float(Shader* shader, const char* uniformName, f32 v0)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
+	{
 		glUniform1f(location, v0);
+	}
 }
 
 static void
-graphics_shader_uniform2f(u32 shader, const char* uniformName, f32 v0, f32 v1)
+graphics_shader_set_2float(Shader* shader, const char* uniformName, f32 v0, f32 v1)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform2f(location, v0, v1);
 }
 
 static void
-graphics_shader_uniform3f(u32 shader, const char* uniformName, f32 v0, f32 v1, f32 v2)
+graphics_shader_set_3float(Shader* shader, const char* uniformName, f32 v0, f32 v1, f32 v2)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform3f(location, v0, v1, v2);
 }
 
 static void
-graphics_shader_uniform4f(u32 shader, const char* uniformName, f32 v0, f32 v1, f32 v2, f32 v3)
+graphics_shader_set_4float(Shader* shader, const char* uniformName, f32 v0, f32 v1, f32 v2, f32 v3)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4f(location, v0, v1, v2, v3);
 }
 
 
 static void
-graphics_shader_uniform1i(u32 shader, const char* uniformName, i32 v0)
+graphics_shader_set_1int(Shader* shader, const char* uniformName, i32 v0)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform1i(location, v0);
 }
 
 static void
-graphics_shader_uniform2i(u32 shader, const char* uniformName, i32 v0, i32 v1)
+graphics_shader_set_2int(Shader* shader, const char* uniformName, i32 v0, i32 v1)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform2i(location, v0, v1);
 }
 
 static void
-graphics_shader_uniform3i(u32 shader, const char* uniformName, i32 v0, i32 v1, i32 v2)
+graphics_shader_set_3int(Shader* shader, const char* uniformName, i32 v0, i32 v1, i32 v2)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform3i(location, v0, v1, v2);
 }
 
 static void
-graphics_shader_uniform4i(u32 shader, const char* uniformName, i32 v0, i32 v1, i32 v2, i32 v3)
+graphics_shader_set_4int(Shader* shader, const char* uniformName, i32 v0, i32 v1, i32 v2, i32 v3)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4i(location, v0, v1, v2, v3);
 }
 
 static void
-graphics_shader_uniform1ui(u32 shader, const char* uniformName, u32 v0)
+graphics_shader_set_1uint(Shader* shader, const char* uniformName, u32 v0)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform1ui(location, v0);
 }
 
 static void
-graphics_shader_uniform2ui(u32 shader, const char* uniformName, u32 v0, u32 v1)
+graphics_shader_set_2uint(Shader* shader, const char* uniformName, u32 v0, u32 v1)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform2ui(location, v0, v1);
 }
 
 static void
-graphics_shader_uniform3ui(u32 shader, const char* uniformName, u32 v0, u32 v1, u32 v2)
+graphics_shader_set_3uint(Shader* shader, const char* uniformName, u32 v0, u32 v1, u32 v2)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform3ui(location, v0, v1, v2);
 }
 
 static void
-graphics_shader_uniform4ui(u32 shader, const char* uniformName, u32 v0, u32 v1, u32 v2, u32 v3)
+graphics_shader_set_4uint(Shader* shader, const char* uniformName, u32 v0, u32 v1, u32 v2, u32 v3)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4ui(location, v0, v1, v2, v3);
 }
 
 
 static void
-graphics_shader_uniform1fv(u32 shader, const char* uniformName, i32 count, f32* values)
+graphics_shader_set_float1(Shader* shader, const char* uniformName, i32 count, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+	
 	if (location >= 0)
 		glUniform1fv(location, count, values);
 }
 
 static void
-graphics_shader_uniform2fv(u32 shader, const char* uniformName, i32 count, f32* values)
+graphics_shader_set_float2(Shader* shader, const char* uniformName, i32 count, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform2fv(location, count, values);
 }
 
 static void
-graphics_shader_uniform3fv(u32 shader, const char* uniformName, i32 count, f32* values)
+graphics_shader_set_float3(Shader* shader, const char* uniformName, i32 count, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform3fv(location, count,  values);
 }
 
 static void
-graphics_shader_uniform4fv(u32 shader, const char* uniformName, i32 count, f32* values)
+graphics_shader_set_float4(Shader* shader, const char* uniformName, i32 count, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4fv(location, count, values);
 }
 
 static void
-graphics_shader_uniform1iv(u32 shader, const char* uniformName, i32 count, i32* values)
+graphics_shader_set_int1(Shader* shader, const char* uniformName, i32 count, i32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4iv(location, count, values);
 }
 
 static void
-graphics_shader_uniform2iv(u32 shader, const char* uniformName, i32 count, i32* values)
+graphics_shader_set_int2(Shader* shader, const char* uniformName, i32 count, i32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform2iv(location, count, values);
 }
 
 static void
-graphics_shader_uniform3iv(u32 shader, const char* uniformName, i32 count, i32* values)
+graphics_shader_set_int3(Shader* shader, const char* uniformName, i32 count, i32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform3iv(location, count, values);
 }
 
 static void
-graphics_shader_uniform4iv(u32 shader, const char* uniformName, i32 count, i32* values)
+graphics_shader_set_int4(Shader* shader, const char* uniformName, i32 count, i32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4iv(location, count, values);
 }
 
 static void
-graphics_shader_uniform1uiv(u32 shader, const char* uniformName, i32 count, u32* values)
+graphics_shader_set_uint1(Shader* shader, const char* uniformName, i32 count, u32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4uiv(location, count, values);
 }
 
 static void
-graphics_shader_uniform2uiv(u32 shader, const char* uniformName, i32 count, u32* values)
+graphics_shader_set_uint2(Shader* shader, const char* uniformName, i32 count, u32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform2uiv(location, count, values);
 }
 
 static void
-graphics_shader_uniform3uiv(u32 shader, const char* uniformName, i32 count, u32* values)
+graphics_shader_set_uint3(Shader* shader, const char* uniformName, i32 count, u32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform3uiv(location, count, values);
 }
 
 static void
-graphics_shader_uniform4uiv(u32 shader, const char* uniformName, i32 count, u32* values)
+graphics_shader_set_uint4(Shader* shader, const char* uniformName, i32 count, u32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniform4uiv(location, count, values);
 }
 
 static void
-graphics_shader_uniform_mat2(u32 shader, const char* uniformName, i32 count, i8 transpose, f32* values)
+graphics_shader_set_mat2(Shader* shader, const char* uniformName, i32 count, i8 transpose, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniformMatrix2fv(location, count, transpose, values);
 }
 
 static void
-graphics_shader_uniform_mat3(u32 shader, const char* uniformName, i32 count, i8 transpose, f32* values)
+graphics_shader_set_mat3(Shader* shader, const char* uniformName, i32 count, i8 transpose, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniformMatrix3fv(location, count, transpose, values);
 }
 
 static void
-graphics_shader_uniform_mat4(u32 shader, const char* uniformName, i32 count, i8 transpose, f32* values)
+graphics_shader_set_mat4(Shader* shader, const char* uniformName, i32 count, i8 transpose, f32* values)
 {
-	i32 location = glGetUniformLocation(shader, uniformName);
+	i32 location = shgeti(shader->UniformTable, uniformName);
+	if (location == -1)
+	{
+		location = glGetUniformLocation(shader->ShaderID, uniformName);
+		shput(shader->UniformTable, uniformName, location);
+	}
+	else
+	{
+		location = shget(shader->UniformTable, uniformName);
+	}
+
 	if (location >= 0)
 		glUniformMatrix4fv(location, count, transpose, values);
 }

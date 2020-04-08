@@ -2,28 +2,39 @@
 
 #include "Utils/Types.h"
 #include "Graphics/Buffer.h"
+#include "Graphics/Shader.h"
 #include "Graphics/Renderer2D/OrthographicCamera.h"
 #include "Graphics/Texture2D.h"
 #include "cglm/cglm.h"
 
-typedef struct GColor {
-	f32 R;
-	f32 G;
-	f32 B;
-	f32 A;
-} GColor;
 
-typedef struct TriangleGeometry {
-	f32 A[2];
-	f32 B[2];
-	f32 C[2];
-} TriangleGeometry;
+typedef struct BaseGeometry
+{
+	/*
+	  if we want to move object at x coord:
+	      instance.Position[0] += 0.1;
+	  in update function we should do smth like that:
+	      glm_translate(rectangle.Transform, rectangle.Position);
+	 */
+	vec3 Position;
+	mat4 Transform;
+} BaseGeometry;
+
+typedef struct BaseObject
+{
+	BaseGeometry Geometry;
+	VertexArray VertexArray;
+} BaseObject;
+
+static void
+base_geometry_update_position(BaseObject* object)
+{
+	glm_translate(object->Geometry.Transform, object->Geometry.Position);
+}
 
 typedef struct Triangle {
 	u32 Shader;
 	VertexArray VAO;
-    TriangleGeometry Geometry;
-	GColor Color;
 	mat4 Transform;
     OrthographicCamera* Camera;
 } Triangle;
@@ -39,7 +50,6 @@ typedef struct Rectangle {
 	u32 Shader;
 	VertexArray VAO;
     RectangleGeometry Geometry;
-	GColor Color;
 	mat4 Transform;
     OrthographicCamera* Camera;
 } Rectangle;
@@ -49,54 +59,46 @@ typedef struct TexturedRectangle {
 	VertexArray VAO;
 	Texture2D Texture;
     RectangleGeometry Geometry;
+	vec3 Position;
+	vec2 Size;
+	mat4 Transform;
     OrthographicCamera* Camera;
 } TexturedRectangle;
 
 typedef struct RectangleArray {
-	u32 Shader;
+	Shader Shader;
 	VertexArray VAO;
 	mat4 Transform;
     OrthographicCamera* Camera;
 } RectangleArray;
 
-Triangle 
-renderer_triangle_create(TriangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera);
-static void
-renderer_triangle_destroy(Triangle triangle)
-{
-	graphics_vertex_array_destroy(&triangle.VAO);
-}
+BaseObject
+renderer_create_colored_triangle();
 void
-renderer_triangle_draw(Triangle triangle);
+renderer_draw_colored_triangle(BaseObject* objectToDraw, Shader* shader, vec4 color, OrthographicCamera* camera);
 
-Rectangle 
-renderer_rectangle_create(RectangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera);
+BaseObject 
+renderer_create_colored_rectangle();
 void 
-renderer_rectangle_set_shader_default(Rectangle rectangle);
-void 
-renderer_rectangle_draw(Rectangle rectangle);
-static void
-renderer_rectangle_destroy(Rectangle rectangle)
-{
-	graphics_vertex_array_destroy(&rectangle.VAO);
-}
+renderer_draw_colored_rectangle(BaseObject* objectToDraw, Shader* shader, vec4 color, OrthographicCamera* camera);
 
-TexturedRectangle
-renderer_create_textured_rectangle(RectangleGeometry geometry, const char* texturePath, OrthographicCamera* camera);
+BaseObject
+renderer_create_textured_rectangle();
 void
-renderer_textured_rectangle_draw(TexturedRectangle rectangle);
-static void
-renderer_textured_rectangle_destroy(TexturedRectangle rectangle)
-{
-	graphics_vertex_array_destroy(&rectangle.VAO);
-}
+renderer_draw_textured_rectangle(BaseObject* objectToDraw, Shader* shader, Texture2D* texture, OrthographicCamera* camera);
 
 RectangleArray 
-renderer_rectangle_array_create(mat4 transform, OrthographicCamera* camera);
+renderer_rectangle_array_create(OrthographicCamera* camera);
 void 
 renderer_rectangle_array_draw(RectangleArray array);
 static void
 renderer_rectangle_array_destroy(RectangleArray array)
 {
 	graphics_vertex_array_destroy(&array.VAO);
+}
+
+static void
+renderer_destroy_base_object(BaseObject* object)
+{	
+	graphics_vertex_array_destroy(&object->VertexArray);
 }

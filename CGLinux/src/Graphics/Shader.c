@@ -5,7 +5,7 @@
 #include "Utils/Array.h"
 #include "Utils/Logger.h"
 
-u32* ShadersCollection = NULL;
+Shader* ShadersCollection = NULL;
 
 static char*
 file_get_name_with_extension(const char* path)
@@ -75,7 +75,7 @@ file_read_string(const char* file_path)
 	return NULL;
 }
 
-graphics_shader_source 
+ShaderSource 
 graphics_shader_load(const char* shader_path)
 {
 	i32 vertex_index;
@@ -86,7 +86,7 @@ graphics_shader_load(const char* shader_path)
 	char* shader_name;
 	const char* vertex_shader_source;
 	const char* fragment_shader_source;
-	graphics_shader_source source = {};
+	ShaderSource source = {};
 
 	shader_source = file_read_string(shader_path);
 	shader_name = file_get_name_with_extension(shader_path);
@@ -137,22 +137,23 @@ shader_error_check(u32 shader_id)
 	}
 }
 
-u32 
-graphics_shader_compile(graphics_shader_source source)
+Shader 
+graphics_shader_compile(ShaderSource source)
 {
-	SHADERDEBUG(GREEN5("SHADER")" %s\n", source.name);
-	SHADERDEBUG(GREEN("Compiling")" vertex shader\n");
+	Shader shader = {};
 	u32 vertex_shader_id;
+	u32 fragment_shader_id;
+	u32 shader_program_id;
+	
+	SHADERDEBUG(GREEN5("SHADER")" %s\n", source.name);
 
+	SHADERDEBUG(GREEN("Compiling")" vertex shader\n");
 	vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
 	glShaderSource(vertex_shader_id, 1, &source.vertex_shader, 0);
-
 	glCompileShader(vertex_shader_id);
-
 	shader_error_check(vertex_shader_id);
 
 	SHADERDEBUG(GREEN("Compiling")" fragment shader\n");
-	u32 fragment_shader_id;
 	//HERE WE GET AN ERROR
 	fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
 	glShaderSource(fragment_shader_id, 1, &source.fragment_shader, 0);
@@ -160,7 +161,7 @@ graphics_shader_compile(graphics_shader_source source)
 	shader_error_check(fragment_shader_id);
 
 	SHADERDEBUG(GREEN("Linking")" program\n");
-	u32 shader_program_id = glCreateProgram();
+	shader_program_id = glCreateProgram();
 	SHADERDEBUG("SHADER ID: %d\n", shader_program_id);
 	glAttachShader(shader_program_id, vertex_shader_id);
 	glAttachShader(shader_program_id, fragment_shader_id);
@@ -173,21 +174,25 @@ graphics_shader_compile(graphics_shader_source source)
 	glDeleteShader(vertex_shader_id);
 	glDeleteShader(fragment_shader_id);
 
-	array_push(ShadersCollection, shader_program_id);
+	shader.ShaderID = shader_program_id;
+	shader.UniformTable = NULL;
 
-	return shader_program_id;
+	array_push(ShadersCollection, shader);
+	
+	return shader;
 }
 
 void 
-graphics_shader_delete(u32 renderId)
+graphics_shader_delete(Shader* shader)
 {
-	glDeleteProgram(renderId);
+	glDeleteProgram(shader->ShaderID);
+	shfree(shader->UniformTable);
 }
 
 void 
-graphics_shader_bind(u32 renderId)
+graphics_shader_bind(Shader* shader)
 {
-	glUseProgram(renderId);
+	glUseProgram(shader->ShaderID);
 }
 
 void 
@@ -199,9 +204,12 @@ graphics_shader_unbind()
 void
 graphics_shader_delete_collection()
 {
+	Shader shader;
 	for (i32 i = 0; i < array_len(ShadersCollection); i++)
 	{
-		graphics_shader_delete(ShadersCollection[i]);
+		shader = ShadersCollection[i];
+		graphics_shader_delete(&shader);
+		shfree(shader.UniformTable);
 	}
 
 	SHADERLOG(GREEN("Delete shader's collection\n"));

@@ -38,6 +38,12 @@ window_is_mouse_pressed(Window* window, i32 key)
     return(state == GLFW_PRESS);
 }
 
+static void
+window_set_vsync(i32 isVsync)
+{
+	glfwSwapInterval(isVsync);
+}
+
 static void 
 window_on_update(Window* window)
 {

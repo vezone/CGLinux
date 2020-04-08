@@ -13,7 +13,7 @@ buffer_element_print(BufferElement element)
 }
 
 void 
-graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, u32 size)
+graphics_vertex_buffer_create(VertexBuffer* buffer, f32* vertices, u32 size)
 {
   glGenBuffers(1, &(buffer->RendererID));
   glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID);
@@ -66,7 +66,7 @@ graphics_vertex_buffer_unbind()
 }
 
 void 
-graphics_index_buffer_create(IndexBuffer* buffer, uint32* indices, uint32 count)
+graphics_index_buffer_create(IndexBuffer* buffer, u32* indices, u32 count)
 {
   buffer->Count = count;
   buffer->Indices = indices;
@@ -124,7 +124,7 @@ void graphics_vertex_array_bind(VertexArray* va)
   glBindVertexArray(va->RendererID);
 }
 
-void graphics_vertex_array_unbind() 
+void graphics_vertex_array_unbind()
 {
   glBindVertexArray(0);
 }

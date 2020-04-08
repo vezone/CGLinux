@@ -6,18 +6,14 @@
 #include "Utils/Array.h"
 #include "Graphics/Constants.h"
 
-Triangle
-renderer_triangle_create(TriangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera)
+BaseObject
+renderer_create_colored_triangle()
 {
-	graphics_shader_source shader_source =  graphics_shader_load(shader_ss);
-	u32 shader = 
-		graphics_shader_compile(shader_source);
-	
 	f32 vertices[] =
 	{
-		geometry.A[0], geometry.A[1],
-		geometry.B[0], geometry.B[1],
-		geometry.C[0], geometry.C[1],
+		-0.5f, -0.5f,
+		0.0f, 0.5f,
+		0.5f, -0.5f,
 	};
 
 	u32 indices[] = {
@@ -39,42 +35,39 @@ renderer_triangle_create(TriangleGeometry geometry, GColor color, mat4 transform
 	graphics_vertex_array_add_ibo(&vao, ibo);
 	graphics_vertex_array_bind(&vao);
 
-	Triangle triangle = {};
-	triangle.Shader = shader;
-	triangle.VAO = vao;
-	triangle.Geometry = geometry;
-	triangle.Color = color;
-	glm_mat4_copy(transform, triangle.Transform);
-	triangle.Camera = camera;
-	
+	BaseObject triangle = {};
+	glm_mat4_identity(triangle.Geometry.Transform);
+	glm_vec3_zero(triangle.Geometry.Position);
+	triangle.VertexArray = vao;
+		
 	return triangle;
 }
 
 void 
-renderer_triangle_draw(Triangle triangle)
+renderer_draw_colored_triangle(BaseObject* objectToDraw, Shader* shader, vec4 color, OrthographicCamera* camera)
 {
-	graphics_shader_bind(triangle.Shader);
+	graphics_shader_bind(shader);
 
-	orthographic_camera_recalculate_view_matrix(triangle.Camera);
-
-	graphics_shader_uniform_mat4(triangle.Shader, "u_ViewProjection", 1, 0, triangle.Camera->ViewProjectionMatrix[0]); 
-	graphics_shader_uniform_mat4(triangle.Shader, "u_Transform", 1, 0, triangle.Transform[0]); 
+	mat4 transform = GLM_MAT4_IDENTITY_INIT;
+	glm_translate(transform, objectToDraw->Geometry.Position);
+	glm_mat4_copy(transform, objectToDraw->Geometry.Transform);
 	
-	graphics_vertex_array_bind(&(triangle.VAO));
+	graphics_shader_set_mat4(shader, "u_ViewProjection", 1, 0, camera->ViewProjectionMatrix[0]); 
+	graphics_shader_set_mat4(shader, "u_Transform", 1, 0, objectToDraw->Geometry.Transform[0]);
+	graphics_shader_set_float4(shader, "u_Color", 1, color);
 	
-	glDrawElements(GL_TRIANGLES, triangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
+	graphics_vertex_array_bind(&(objectToDraw->VertexArray));
+	
+	glDrawElements(GL_TRIANGLES, objectToDraw->VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
 }
 
-Rectangle 
-renderer_rectangle_create(RectangleGeometry geometry, GColor color, mat4 transform, OrthographicCamera* camera)
+BaseObject
+renderer_create_colored_rectangle()
 {
-	graphics_shader_source source = graphics_shader_load(shader_ss);
-	u32 shader = graphics_shader_compile(source);
-	
-	f32 x1 = geometry.TopX;
-	f32 x2 = geometry.TopX + geometry.Width;
-	f32 y1 = geometry.TopY;
-	f32 y2 = geometry.TopY + geometry.Height;
+	f32 x1 = -0.5f;
+	f32 x2 = 0.5f;
+	f32 y1 = -0.5f;
+	f32 y2 = 0.5f;
 
 	f32 vertices[] =
 	{
@@ -103,53 +96,44 @@ renderer_rectangle_create(RectangleGeometry geometry, GColor color, mat4 transfo
 	graphics_vertex_array_add_ibo(&vao, ibo);
 	graphics_vertex_array_bind(&vao);
 
-	Rectangle rectangle = {};
-	rectangle.Shader = shader;
-	rectangle.VAO = vao;
-	rectangle.Geometry = geometry;
-	rectangle.Color = color;
-	glm_mat4_copy(transform, rectangle.Transform);
-	rectangle.Camera = camera;
-
-	return rectangle;
-}
-
-void
-renderer_rectangle_draw(Rectangle rectangle)
-{
-	graphics_shader_bind(rectangle.Shader);
-
-	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
-
-	graphics_shader_uniform_mat4(rectangle.Shader, "u_ViewProjection", 1, 0, rectangle.Camera->ViewProjectionMatrix[0]); 
-	graphics_shader_uniform_mat4(rectangle.Shader, "u_Transform", 1, 0, rectangle.Transform[0]); 
-
-	graphics_vertex_array_bind(&(rectangle.VAO));
+	BaseObject coloredRectangle = {};
+	glm_mat4_identity(coloredRectangle.Geometry.Transform);
+	glm_vec3_zero(coloredRectangle.Geometry.Position);
+	coloredRectangle.VertexArray = vao;
 	
-	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
+	return coloredRectangle;
 }
 
-TexturedRectangle 
-renderer_create_textured_rectangle(RectangleGeometry geometry, const char* texturePath, OrthographicCamera* camera)
+void 
+renderer_draw_colored_rectangle(BaseObject* objectToDraw, Shader* shader, vec4 color, OrthographicCamera* camera)
 {
-	u32 shader = 
-		graphics_shader_compile(graphics_shader_load(shader_sts));
+	graphics_shader_bind(shader);
 
-	Texture2D texture = graphics_texture2d_create(texturePath);
-	graphics_texture2d_bind(&texture, 0);
+	mat4 transform = GLM_MAT4_IDENTITY_INIT;
+	glm_translate(transform, objectToDraw->Geometry.Position);
+	glm_mat4_copy(transform, objectToDraw->Geometry.Transform);
+	
+	graphics_shader_set_mat4(shader, "u_ViewProjection", 1, 0, camera->ViewProjectionMatrix[0]); 
+	graphics_shader_set_mat4(shader, "u_Transform", 1, 0, objectToDraw->Geometry.Transform[0]); 
+	graphics_shader_set_float4(shader, "u_Color", 1, color); 
 
-	f32 x1 = geometry.TopX;
-	f32 x2 = geometry.TopX + geometry.Width;
-	f32 y1 = geometry.TopY;
-	f32 y2 = geometry.TopY + geometry.Height;
+	graphics_vertex_array_bind(&(objectToDraw->VertexArray));
+	
+	glDrawElements(GL_TRIANGLES, objectToDraw->VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
+}
 
+BaseObject
+renderer_create_textured_rectangle()
+{
+	f32 x1 = -0.5f;
+	f32 x2 = 0.5f;
+	f32 y1 = -0.5f;
+	f32 y2 = 0.5f;
+	
 	f32 tx1 = (x1 >= 0.0f) ? 1.0f : 0.0f;
 	f32 tx2 = (x2 >= 0.0f) ? 1.0f : 0.0f;
 	f32 ty1 = (y1 >= 0.0f) ? 1.0f : 0.0f;
 	f32 ty2 = (y2 >= 0.0f) ? 1.0f : 0.0f;
-
-	GDEBUG("x1: %f, y1: %f, x2: %f, y2: %f\n", x1, y1, x2, y2);
-	GDEBUG("tx1: %f, ty1: %f, tx2: %f, ty2: %f\n", tx1, ty1, tx2, ty2);
 
 	f32 vertices[] =
 	{
@@ -180,72 +164,75 @@ renderer_create_textured_rectangle(RectangleGeometry geometry, const char* textu
 	graphics_vertex_array_add_ibo(&vao, ibo);
 	graphics_vertex_array_bind(&vao);
 
-	TexturedRectangle rectangle = {};
-	rectangle.Shader = shader;
-	rectangle.Texture = texture;
-	rectangle.VAO = vao;
-	rectangle.Geometry = geometry;
-	rectangle.Camera = camera;
-
-	return rectangle;
+	BaseObject texturedRectangle = {};
+	glm_mat4_identity(texturedRectangle.Geometry.Transform);
+	glm_vec3_zero(texturedRectangle.Geometry.Position);
+	texturedRectangle.VertexArray = vao;
+	
+	return texturedRectangle;
 }
 
-void 
-renderer_textured_rectangle_draw(TexturedRectangle rectangle)
+void
+renderer_draw_textured_rectangle(BaseObject* objectToDraw, Shader* shader, Texture2D* texture, OrthographicCamera* camera)
 {
-	graphics_shader_bind(rectangle.Shader);
-	graphics_texture2d_bind(&rectangle.Texture, 0);
+	graphics_shader_bind(shader);
+	graphics_texture2d_bind(texture, 0);
 
-	orthographic_camera_recalculate_view_matrix(rectangle.Camera);
-
-	graphics_shader_uniform1i(rectangle.Shader, "u_Texture", 0); 
-	graphics_shader_uniform_mat4(rectangle.Shader, "u_ViewProjection", 1, 0, rectangle.Camera->ViewProjectionMatrix[0]); 
+	mat4 transform = GLM_MAT4_IDENTITY_INIT;
+	glm_translate(transform, objectToDraw->Geometry.Position);
+	glm_mat4_copy(transform, objectToDraw->Geometry.Transform);
 	
-	graphics_vertex_array_bind(&(rectangle.VAO));
+	graphics_shader_set_1int(shader, "u_Texture", 0); 
+	graphics_shader_set_mat4(shader, "u_ViewProjection", 1, 0, camera->ViewProjectionMatrix[0]); 
+	graphics_shader_set_mat4(shader, "u_Transform", 1, 0, objectToDraw->Geometry.Transform[0]);
 	
-	glDrawElements(GL_TRIANGLES, rectangle.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
+	graphics_vertex_array_bind(&(objectToDraw->VertexArray));
+	
+	glDrawElements(GL_TRIANGLES, objectToDraw->VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
 }
+
 
 RectangleArray 
-renderer_rectangle_array_create(mat4 transform, OrthographicCamera* camera)
+renderer_rectangle_array_create(OrthographicCamera* camera)
 {
 	i32 x, y, qlen, temp_index;
-	u32 *indices, shader;
-	f32 *vertices, topx, topy, multiplier, temp_position_x, temp_position_y;
+	u32 *indices;
+	f32 *vertices, topx, topy, multiplier, tempPositionX, tempPositionY, heightMultiplier, widthMultiplier;
 	RectangleGeometry position;
+	Shader shader;
 	
 	shader = graphics_shader_compile(graphics_shader_load(shader_ss));
 
 	//2550 * 2550 = 6 502 500
-	qlen = 2000;
+	qlen = 200;
 	indices = NULL;
 	vertices = NULL;
-	multiplier = 1.5f;
-	position = (RectangleGeometry) { -2.5f, -2.5f, 0.01f, 0.01f };
-	f32 heightMultiplier = position.Height * multiplier;
-	f32 widthMultiplier = position.Width * multiplier;
+	multiplier = 1.1f;
+	position = (RectangleGeometry) { -2.5f, -2.5f, 0.1f, 0.1f };
+	heightMultiplier = position.Height * multiplier;
+	widthMultiplier = position.Width * multiplier;
 	
 	for (x = 0; x < qlen; x++)
 	{
 		topx = position.TopX + x * widthMultiplier;
-		temp_position_x = topx - position.Width;
+		tempPositionX = topx - position.Width;
 		for (y = 0; y < qlen; y++)
 		{
 			topy = position.TopY + y * heightMultiplier;
-			temp_position_y = topy - position.Height;
+			tempPositionY = topy - position.Height;
 			temp_index = (y * 4) + (x * 4 * qlen);
 			
 			array_push(vertices, topx);
 			array_push(vertices, topy);
 
-			array_push(vertices, temp_position_x);
+			array_push(vertices, tempPositionX);
 			array_push(vertices, topy);
 			
-			array_push(vertices, temp_position_x);
-			array_push(vertices, temp_position_y);
+			array_push(vertices, tempPositionX);
+			array_push(vertices, tempPositionY);
 			
 			array_push(vertices, topx);
-			array_push(vertices, temp_position_y);
+			array_push(vertices, tempPositionY);
 
 			array_push(indices, 0 + temp_index);
 			array_push(indices, 1 + temp_index);
@@ -274,7 +261,7 @@ renderer_rectangle_array_create(mat4 transform, OrthographicCamera* camera)
 	RectangleArray rectangleArray = {};
 	rectangleArray.Shader = shader;
 	rectangleArray.VAO = vao;
-	glm_mat4_copy(transform, rectangleArray.Transform);
+	glm_mat4_identity(rectangleArray.Transform);
 	rectangleArray.Camera = camera;
 
 	return rectangleArray;
@@ -283,12 +270,10 @@ renderer_rectangle_array_create(mat4 transform, OrthographicCamera* camera)
 void 
 renderer_rectangle_array_draw(RectangleArray array)
 {
-	orthographic_camera_recalculate_view_matrix(array.Camera);
-	
-	graphics_shader_bind(array.Shader);
+	graphics_shader_bind(&array.Shader);
 
-	graphics_shader_uniform_mat4(array.Shader, "u_ViewProjection", 1, 0, array.Camera->ViewProjectionMatrix[0]); 
-	graphics_shader_uniform_mat4(array.Shader, "u_Transform", 1, 0, array.Transform[0]);
+	graphics_shader_set_mat4(&array.Shader, "u_ViewProjection", 1, 0, array.Camera->ViewProjectionMatrix[0]); 
+	graphics_shader_set_mat4(&array.Shader, "u_Transform", 1, 0, array.Transform[0]);
 	
 	graphics_vertex_array_bind(&array.VAO);
 

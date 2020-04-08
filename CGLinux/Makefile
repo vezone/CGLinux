@@ -102,6 +102,7 @@ OBJECTS := \
 	$(OBJDIR)/Linux.o \
 	$(OBJDIR)/Array.o \
 	$(OBJDIR)/String.o \
+	$(OBJDIR)/stb_ds.o \
 	$(OBJDIR)/stb_image.o \
 	$(OBJDIR)/main.o \
 
@@ -190,6 +191,9 @@ $(OBJDIR)/Array.o: src/Utils/Array.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/String.o: src/Utils/String.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/stb_ds.o: src/Utils/stb_ds.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/stb_image.o: src/Utils/stb_image.c
