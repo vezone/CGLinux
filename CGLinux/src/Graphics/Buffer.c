@@ -23,16 +23,33 @@ graphics_vertex_buffer_create(VertexBuffer* buffer, f32* vertices, u32 size)
   buffer->Vertices = vertices;
 }
 
+void
+graphics_vertex_buffer_allocate(VertexBuffer* buffer, u32 size)
+{
+  glGenBuffers(1, &(buffer->RendererID));
+  glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID);
+  glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+  
+  buffer->Elements = NULL;
+  buffer->Vertices = NULL;
+}
+
+
 static void
 stride_update(VertexBuffer* buffer)
 {
   //0 12 24
-  i32 offset = 0;
+  i32 offset;
+  i32 buffer_elements_length;
+  i32 i;
+
+  offset = 0;
   buffer->Stride = 0;
   
   // o: 0, stride: 12
   // o: 12, stride: 24
-  for (i32 i = 0; i < array_len(buffer->Elements); i++)
+  buffer_elements_length = array_len(buffer->Elements);
+  for (i = 0; i < buffer_elements_length; i++)
   {
       buffer->Elements[i].Offset = offset;
       offset += buffer->Elements[i].Size;
@@ -40,7 +57,8 @@ stride_update(VertexBuffer* buffer)
   }
 }
 
-void graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type)
+void
+graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type)
 {
   BufferElement element = {
       .IsNormilized = isNormalized,

@@ -1,3 +1,4 @@
 #pragma once
+#include "Utils/Types.h"
 
-void sandbox_start();
+i32 sandbox_start();

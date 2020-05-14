@@ -9,7 +9,7 @@ typedef enum DataType
    Int1, Int2, Int3, Int4
 } DataType;
 
-static uint32
+static u32
 data_type_get_size(DataType type)
 {
   switch (type)
@@ -26,7 +26,7 @@ data_type_get_size(DataType type)
   return 0;
 }
 
-static uint32
+static u32
 data_type_get_count(DataType type)
 {
   switch (type)
@@ -44,7 +44,7 @@ data_type_get_count(DataType type)
 
 typedef struct BufferElement
 {
-  int8 IsNormilized;
+  i8 IsNormilized;
   DataType Type;
   i32 Size;
   i32 Count;
@@ -58,39 +58,60 @@ typedef struct BufferLayout {
 
 typedef struct VertexBuffer
 {
-  float* Vertices;
-  uint32 RendererID;
+  f32* Vertices;
+  u32 RendererID;
   BufferElement* Elements;
   i32 Stride;
 } VertexBuffer;
 
-void graphics_vertex_buffer_create(VertexBuffer* buffer, float* vertices, uint32_t size);
-void graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type);
-void graphics_vertex_buffer_bind(VertexBuffer* vbo);
-void graphics_vertex_buffer_unbind();
+void
+graphics_vertex_buffer_create(VertexBuffer* buffer, f32* vertices, u32 size);
+void
+graphics_vertex_buffer_allocate(VertexBuffer* buffer, u32 size);
+static void
+graphics_vertex_buffer_set_data(VertexBuffer* buffer, f32* data, u32 size)
+{
+    buffer->Vertices = data;
+	glBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+}
+void
+graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataType type);
+void
+graphics_vertex_buffer_bind(VertexBuffer* vbo);
+void
+graphics_vertex_buffer_unbind();
 
 typedef struct IndexBuffer
 {
-  uint32* Indices;
-  uint32 RendererID;
-  uint32 Count;
+  u32* Indices;
+  u32 RendererID;
+  u32 Count;
 } IndexBuffer;
 
-void graphics_index_buffer_create(IndexBuffer* buffer, uint32_t* indices, uint32_t size);
-void graphics_index_buffer_bind(IndexBuffer* ibo);
-void graphics_index_buffer_unbind();
+void
+graphics_index_buffer_create(IndexBuffer* buffer, u32* indices, u32 size);
+void
+graphics_index_buffer_bind(IndexBuffer* ibo);
+void
+graphics_index_buffer_unbind();
 
 typedef struct VertexArray {
-  uint32 RendererID;
+  u32 RendererID;
   VertexBuffer* VertexBuffer;
   IndexBuffer IndexBuffer;
 } VertexArray;
 
-void graphics_vertex_array_create(VertexArray* va);
-void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo);
-void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo);
-void graphics_vertex_array_bind(VertexArray* va);
-void graphics_vertex_array_unbind();
+void
+graphics_vertex_array_create(VertexArray* va);
+void
+graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo);
+void
+graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo);
+void
+graphics_vertex_array_bind(VertexArray* va);
+void
+graphics_vertex_array_unbind();
+
 static void
 graphics_vertex_array_destroy(VertexArray* va)
 {

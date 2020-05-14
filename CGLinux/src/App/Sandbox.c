@@ -4,7 +4,6 @@
 #include <glad/glad.h>
 #include <cglm/cglm.h>
 
-#include "Utils/Types.h"
 #include "Utils/String.h"
 #include "Utils/Logger.h"
 #include "Utils/Array.h"
@@ -21,6 +20,7 @@
 // WINDOW GLOBAL
 #define HD 1
 #define FULLHD 0
+#define DRAW_BASE_SCENE 1
 
 #if HD == 1
 f32 Width = 1280.0f; 
@@ -38,7 +38,7 @@ static i8 g_is_cursor_enabled = 1;
 static i8 g_is_freqency_visible = 0;
 static u64 g_freqency;
 
-f32 g_CameraSpeed = 3.0f;
+f32 g_CameraSpeed = 4.0f;
 OrthographicCamera g_Camera;
 f32 g_ZoomLevel = 1.0f;
 f32 g_AspectRatio;
@@ -96,7 +96,7 @@ window_resize_callback(GLFWwindow* window, i32 width, i32 height)
 	glViewport(0, 0, width, height);
 }
 
-void 
+i32 
 sandbox_start()
 {
 	//app
@@ -108,6 +108,7 @@ sandbox_start()
 	if (isWindowCreated == -1) 
 	{
 		GLOG(RED("Can't create window!\n"));
+		return(-1);
 	}
 	
 	window_set_vsync(1);
@@ -119,6 +120,7 @@ sandbox_start()
 	if (status == 0)
 	{
 		GLOG(RED("Failed to init GLAD\n"));
+		return(-1);
 	}
 	GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
 
@@ -127,43 +129,27 @@ sandbox_start()
 		g_AspectRatio *g_ZoomLevel, 
 		-g_ZoomLevel, g_ZoomLevel);
 	g_AspectRatio = Width / Height;
+
 	char windowTitle[33];
 	vec4 triangleColor = { 0.2f, 0.5f, 1.0f, 1.0f };
 	vec4 redColor = { 0.8f, 0.1f, 0.1f, 1.0f };
 	vec4 yellowColor = { 1.0f, 1.0f, 0.0f, 1.0f };
 	vec4 blueColor = { 0.1f, 0.1f, 0.8f, 1.0f };
+
 	Shader texturedShader = graphics_shader_compile(		graphics_shader_load("CGLinux/resource/simple_texture_shader.glsl"));
 	Shader positionGradientShader = graphics_shader_compile(		graphics_shader_load("CGLinux/resource/simple_shader.glsl"));
 	Shader colorShader = graphics_shader_compile(		graphics_shader_load("CGLinux/resource/simple_color_shader.glsl"));
+	Shader batchedColorShader = graphics_shader_compile(		graphics_shader_load("CGLinux/resource/simple_batched_color_shader.glsl"));
 	
 	Texture2D hazelLogoTexture = graphics_texture2d_create("CGLinux/resource/Hazel.png");
 	Texture2D chibiTexture = graphics_texture2d_create("CGLinux/resource/AnimeChibi.png");
-	
-	BaseObject triangle = renderer_create_colored_triangle();
-	BaseObject rectangle = renderer_create_colored_rectangle();
-	BaseObject rectangle2 = renderer_create_colored_rectangle();
-	BaseObject rectangle3 = renderer_create_colored_rectangle();
-	BaseObject rectangle4 = renderer_create_colored_rectangle();
-	BaseObject hazelRectangle = renderer_create_textured_rectangle();
-	BaseObject chibiRectangle = renderer_create_textured_rectangle(); 
 
-	triangle.Geometry.Position[0] = 2.5f;
-	triangle.Geometry.Position[1] = 1.5f;
-	rectangle.Geometry.Position[0] -= 0.1f;
-	rectangle.Geometry.Position[1] -= 1.1f;
-	rectangle2.Geometry.Position[0] -= 2.1f;
-	rectangle2.Geometry.Position[1] -= 2.1f;
-	rectangle3.Geometry.Position[1] -= 0.3f;
-	hazelRectangle.Geometry.Position[0] += 1.1f;
-	hazelRectangle.Geometry.Position[1] += 1.1f;
-	chibiRectangle.Geometry.Position[0] += 0.8f;
-	chibiRectangle.Geometry.Position[1] -= 1.1f;
+	BaseObject chibiRectangle = renderer_create_textured_rectangle(-0.5f, -0.5f);
+	BaseObject hazelRectangle = renderer_create_textured_rectangle(-0.5f, -0.5f);
 	
-	RectangleArray quadArray = renderer_rectangle_array_create(&g_Camera);
+	color_renderer_batch_init();	
 
-    #if 0
-	#endif
-	i32 movementControlState = 1;
+    i32 movementControlState = 1;
 	f32 tempTime;
 	while (!window_should_close(&window))
 	{
@@ -210,26 +196,28 @@ sandbox_start()
 				g_Camera.Position[0] += g_CameraSpeed * g_TimeStep;
 			}
 		}
+#if DRAW_BASE_SCENE == 1
 		else
 		{		
 			if (window_is_key_pressed(&window, KEY_W))
 			{
-				chibiRectangle.Geometry.Position[1] += 0.1f * g_TimeStep;
+				chibiRectangle.Geometry.Position[1] += 0.5f * g_TimeStep;
 			}
 			else if (window_is_key_pressed(&window, KEY_S))
 	    	{
-				chibiRectangle.Geometry.Position[1] -= 0.1f * g_TimeStep;
+				chibiRectangle.Geometry.Position[1] -= 0.5f * g_TimeStep;
 	    	}
 			
 			if (window_is_key_pressed(&window, KEY_A))
 			{
-				chibiRectangle.Geometry.Position[0] -= 0.1f * g_TimeStep;
+				chibiRectangle.Geometry.Position[0] -= 0.5f * g_TimeStep;
 			}
 			else if (window_is_key_pressed(&window, KEY_D))
 			{
-				chibiRectangle.Geometry.Position[0] += 0.1f * g_TimeStep;
+				chibiRectangle.Geometry.Position[0] += 0.5f * g_TimeStep;
 			}	
 		}
+#endif	
 		
 		if (window_is_key_pressed(&window, KEY_Q))
 		{
@@ -249,23 +237,56 @@ sandbox_start()
 			-g_ZoomLevel, g_ZoomLevel);
 		orthographic_camera_recalculate_view_matrix(&g_Camera);
 	
-		glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+		glClearColor(0.2f, 0.345f, 0.456f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT);
 		
-		#if 1
-		renderer_draw_colored_triangle(&triangle, &colorShader, triangleColor, &g_Camera);
-		
-		renderer_draw_colored_rectangle(&rectangle, &colorShader, redColor, &g_Camera);
-		renderer_draw_colored_rectangle(&rectangle2, &colorShader, blueColor, &g_Camera);
-		renderer_draw_colored_rectangle(&rectangle3, &colorShader, yellowColor, &g_Camera);
-		renderer_rectangle_array_draw(quadArray);
+#if DRAW_BASE_SCENE == 1
 
 		renderer_draw_textured_rectangle(&hazelRectangle, &texturedShader, &hazelLogoTexture, &g_Camera);
 		renderer_draw_textured_rectangle(&chibiRectangle, &texturedShader, &chibiTexture, &g_Camera);
 		
-        #else
-		#endif
+		color_renderer_submit_rectangle(
+			(vec3) {0.5f, -0.5f, 0.0f},
+			(vec2){1.0f, 1.0f}, 0,
+	        (vec4) {0.9f, 0.0f, 0.0f, 1.0f},
+		    (vec4) {0.7f, 0.6f, 0.6f, 1.0f},
+		    (vec4) {0.5f, 0.6f, 0.8f, 1.0f},
+		    (vec4) {0.4f, 0.4f, 0.9f, 1.0f});
 
+		color_renderer_submit_rectangle(
+		    (vec3) {1.5f, 1.5f, 0.0f},
+			(vec2) {0.5f, 2.5f}, 0,
+	        (vec4) {0.6f, 0.4f, 0.2f, 1.0f},
+		    (vec4) {0.7f, 0.5f, 0.3f, 1.0f},
+		    (vec4) {0.8f, 0.6f, 0.4f, 1.0f},
+		    (vec4) {0.9f, 0.7f, 0.5f, 1.0f});
+
+		color_renderer_submit_rectangle(
+		    (vec3) {-1.5f, -1.5f, 0.0f},
+			(vec2) {1.5f, 0.5f}, 0,
+	        (vec4) {0.6f, 0.4f, 0.2f, 1.0f},
+		    (vec4) {0.7f, 0.5f, 0.3f, 1.0f},
+		    (vec4) {0.8f, 0.6f, 0.4f, 1.0f},
+		    (vec4) {0.9f, 0.7f, 0.5f, 1.0f});
+ 
+		f32 diff = 0.1f;
+		f32 startx = -8.0f, starty = -8.0f;
+		f32 endx = -2.0f, endy = -2.0f;
+		for (f32 x = startx; x < endx; x += diff+0.005f)
+		{
+		  for (f32 y = starty; y < endy; y += diff+0.005f)
+		  {
+			color_renderer_submit_rectangle(
+			    (vec3) {x, y, 0.0f},
+				(vec2) {diff, diff}, 1,
+				(vec4) {0.1f, 0.5f, 0.9f, 1.0f}, NULL, NULL, NULL);
+		  }
+		}
+		
+		color_renderer_flush(&batchedColorShader, &g_Camera);
+
+#endif
+		
 		window_on_update(&window);
 	}
 
@@ -273,11 +294,10 @@ sandbox_start()
 	
 	graphics_shader_delete_collection();
 
-	renderer_destroy_base_object(&triangle);
-	renderer_destroy_base_object(&rectangle);
-	renderer_destroy_base_object(&rectangle2);
+#if 1
 	renderer_destroy_base_object(&hazelRectangle);
 	renderer_destroy_base_object(&chibiRectangle);
+#endif
 	
-	//renderer_rectangle_array_destroy(quadArray);	
+	return 0;
 }
