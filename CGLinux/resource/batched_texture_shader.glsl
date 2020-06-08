@@ -1,0 +1,33 @@
+#vertex shader
+#version 330 core
+layout(location = 0) in vec3 i_Position;
+layout(location = 1) in vec2 i_TextureCoordinates;
+layout(location = 2) in float i_TextureId;
+
+out vec2 o_TextureCoordinates;
+out float o_TextureId;
+
+uniform mat4 u_ViewProjection;
+
+void main()
+{
+	o_TextureCoordinates = i_TextureCoordinates;
+	o_TextureId = i_TextureId;
+	gl_Position = u_ViewProjection * vec4(i_Position, 1.0);
+}
+
+#fragment shader
+#version 330 core
+layout(location = 0) out vec4 o_Color;
+
+in vec2 o_TextureCoordinates;
+in float o_TextureId;
+
+uniform sampler2D u_Textures[32];
+
+void main()
+{
+	int index = int(o_TextureId); 
+	o_Color = vec4(1 / (index + 0.1), 0.0, 0.0, 1.0);	
+	o_Color = texture(u_Textures[index], o_TextureCoordinates);
+}

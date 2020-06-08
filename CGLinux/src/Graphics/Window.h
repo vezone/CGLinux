@@ -1,6 +1,8 @@
 #pragma once
 
 #include <GLFW/glfw3.h>
+
+//#include "Event/Event.h"
 #include "Utils/Types.h"
 
 typedef struct Window {
@@ -9,6 +11,11 @@ typedef struct Window {
     const char* Title;
     GLFWwindow* GlfwWindow;
 } Window;
+
+typedef struct Event Event;
+
+//typedef (*window_on_event_delegate)(Event* event);
+//window_on_event_delegate window_on_event_function; 
 
 #define window_should_close(window) glfwWindowShouldClose((window)->GlfwWindow)
 #define window_set_should_close(window, x) glfwSetWindowShouldClose((window)->GlfwWindow, x)

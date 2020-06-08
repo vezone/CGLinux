@@ -92,7 +92,9 @@ all: prebuild prelink $(TARGET)
 endif
 
 OBJECTS := \
+	$(OBJDIR)/Application.o \
 	$(OBJDIR)/Sandbox.o \
+	$(OBJDIR)/Event.o \
 	$(OBJDIR)/Buffer.o \
 	$(OBJDIR)/OrthographicCamera.o \
 	$(OBJDIR)/Renderer2D.o \
@@ -163,7 +165,13 @@ else
 $(OBJECTS): | $(OBJDIR)
 endif
 
+$(OBJDIR)/Application.o: src/App/Application.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Sandbox.o: src/App/Sandbox.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/Event.o: src/Event/Event.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Buffer.o: src/Graphics/Buffer.c

@@ -70,6 +70,20 @@ renderer_destroy_base_object(BaseObject* object)
 	graphics_vertex_array_destroy(&object->VertexArray);
 }
 
+static void
+renderer_set_viewport(u32 width, u32 height)
+{
+  //OpenGL stuff
+  glViewport(0, 0, width, height);
+}
+
+//0.2f, 0.345f, 0.456f, 1.0f
+static void
+renderer_clear(vec4 color)
+{
+  glClearColor(color[0], color[1], color[2], color[3]);
+  glClear(GL_COLOR_BUFFER_BIT);
+}
 
 /*
   Batch renderers
@@ -80,8 +94,7 @@ renderer_destroy_base_object(BaseObject* object)
 #define MaxIndices 6 * VertexCount
 #define SizeofVertices MaxVertices * 6
 
-typedef struct QuadVertex
-{
+typedef struct QuadVertex{
   vec2 Position;
   vec4 Color;
 } QuadVertex;

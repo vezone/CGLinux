@@ -348,7 +348,9 @@ graphics_shader_set_int1(Shader* shader, const char* uniformName, i32 count, i32
 	}
 
 	if (location >= 0)
-		glUniform4iv(location, count, values);
+	{
+		glUniform1iv(location, count, values);
+	}
 }
 
 static void
