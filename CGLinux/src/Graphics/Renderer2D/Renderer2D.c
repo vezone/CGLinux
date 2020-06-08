@@ -372,7 +372,7 @@ color_renderer_batch_init()
 	    &vbo,
 		SizeofVertices);
 	graphics_vertex_buffer_bind(&vbo);
-	
+
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float4);
 	

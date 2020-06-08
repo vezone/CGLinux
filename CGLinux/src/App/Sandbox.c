@@ -47,7 +47,8 @@ f32 g_LastFrameTime = 0.0f;
 
 //Textures
 const char* texture_anime_chibi = "CGLinux/resource/anime_chibi.png";
-const char* texture_cherno_hazel_logo = "CGLinux/resource/Hazel.png";
+const char* texture_cherno_hazel_logo = "CGLinux/resource/hazel.png";
+const char* texture_hotline_miami = "CGLinux/resource/assets/textures/other/hotline_miami.png";
 
 typedef struct TexturedQuadVertex
 {
@@ -61,17 +62,12 @@ typedef struct TexturedQuad
   TexturedQuadVertex vertex[4];
 } TexturedQuad;
 
+#define MaxObjectToDraw 10000
 #define MaxTextureSlots 32
 #define QuadVerticesCount ((3 + 2 + 1) * 4) 
-#define VerticesCount (MaxTextureSlots * QuadVerticesCount)
-#define IndicesCount (MaxTextureSlots * 6)
+#define VerticesCount (MaxObjectToDraw * QuadVerticesCount)
+#define IndicesCount (MaxObjectToDraw * 6)
 #define TexturedDataSize (VerticesCount * sizeof(f32))
-
-//typedef struct TextureWithSlot
-//{
-  //  u32 TextureSlot;
-  //  Texture2D Texture;
-  //} TextureWithSlot;
 
 typedef struct TexturedBatchRenderer2DData
 {
@@ -84,6 +80,7 @@ typedef struct TexturedBatchRenderer2DData
   u32 NextTextureIndex;
   Texture2D Textures[32];
   VertexArray Vao;
+  Shader Shader;
   mat4 Transform;
 } TexturedBatchRenderer2DData;
 
@@ -117,25 +114,10 @@ convert_quad_to_array(f32* destination, TexturedQuad* source, u32 start_index)
 
 	   destination[i++] = (f32) vertex.TextureId;
 	}
-
-	#if 0
-	i = start_index;
-	for ( ;i < number_of_vertices; )
-	{
-	  printf("(%f %f %f %f %f %f)\n",
-			 destination[i],
-			 destination[i+1],
-			 destination[i+2],
-			 destination[i+3],
-			 destination[i+4],
-			 destination[i+5]);
-	}
-	#endif
-
 }
 
 static void
-textured_quad_create(TexturedQuad* quad, vec3 position, vec2 size, i32 textureId, char*dname)
+textured_quad_create(TexturedQuad* quad, vec3 position, vec2 size, i32 textureId)
 {
 	quad->vertex[0].Position[0] = position[0];
 	quad->vertex[0].Position[1] = position[1];
@@ -166,8 +148,6 @@ textured_quad_create(TexturedQuad* quad, vec3 position, vec2 size, i32 textureId
 	quad->vertex[1].TextureId = (f32) textureId;
 	quad->vertex[2].TextureId = (f32) textureId;
 	quad->vertex[3].TextureId = (f32) textureId;
-
-	GLOG("texture id (%s): %d\n", dname, textureId);
 }
 
 void
@@ -196,7 +176,7 @@ textured_renderer_batch_init()
 }
 
 void
-textured_renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture)
+textured_renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture, Shader* shader, OrthographicCamera* camera)
 {
     i32 textureId;
     if (TextureRenderer2DData.NextTextureIndex < 31)
@@ -209,12 +189,12 @@ textured_renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture)
 		if (id == texture->RendererID)
 		{
 		  isAlreadyInArray = i;
+		  break;
 		}
 	  }
 
 	  if (isAlreadyInArray != -1)
 	  {
-		GLOG(RED("ALREADY THERE!\n"));
 		textureId = isAlreadyInArray;
 	  }
 	  else
@@ -227,8 +207,7 @@ textured_renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture)
 	}
 	else
 	{
-	  GLOG(RED5("ERROR: FLUSH!!!!\n"));
-	  //textured_renderer_flush(shader, camera);
+	  textured_renderer_flush(shader, camera);
 	  textureId = 0;
 	  TextureRenderer2DData.DataCount = 0;
 	  TextureRenderer2DData.IndexCount = 0;
@@ -236,7 +215,7 @@ textured_renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture)
 	}
   
     TexturedQuad quad = {};
-    textured_quad_create(&quad, position, size, textureId, texture->RendererID == 1 ? "hazel" : "chibi");
+    textured_quad_create(&quad, position, size, textureId);
 
 	convert_quad_to_array(TextureRenderer2DData.Data, &quad, TextureRenderer2DData.DataCount);
 
@@ -250,41 +229,26 @@ textured_renderer_flush(Shader* shader, OrthographicCamera* camera)
 	graphics_shader_bind(shader);	
 	graphics_vertex_array_bind(&(TextureRenderer2DData.Vao));
 
-	GDEBUG("Texture id: %d\n", TextureRenderer2DData.NextTextureIndex);
-
-	i32 array[2];// = { 0, 31 };
-	array[0] = 0;
-	array[1] = TextureRenderer2DData.NextTextureIndex - 1;
+	i32 textureIndices[32];
+	for (i32 i = 0; i < TextureRenderer2DData.NextTextureIndex; i++)
+	{
+	  textureIndices[i] = i;
+	}
+	
 	for (i32 i = 0; i < TextureRenderer2DData.NextTextureIndex; i++)
 	{
 	  graphics_texture2d_bind(&(TextureRenderer2DData.Textures[i]), i);
-	  GLOG("%d\n", TextureRenderer2DData.Textures[i].RendererID);
 	}
-	
+
 	u32 size = TextureRenderer2DData.DataCount * sizeof(f32); 
 	graphics_vertex_buffer_set_data(
    		TextureRenderer2DData.Vao.VertexBuffer,
 		TextureRenderer2DData.Data, size);
 
-#if 0	
-	printf("DataCount: %d\n", TextureRenderer2DData.DataCount);
-	for (i32 i = 0; i < TextureRenderer2DData.DataCount; i+=6)
-	{
-	  printf("(%f %f %f %f %f %f)\n", TextureRenderer2DData.Data[i],
-			 TextureRenderer2DData.Data[i+1],
-			 TextureRenderer2DData.Data[i+2],
-			 TextureRenderer2DData.Data[i+3],
-			 TextureRenderer2DData.Data[i+4],
-			 TextureRenderer2DData.Data[i+5]);
-	}
-	f32 fval;
-	scanf("%f", &fval);
-#endif
-	
 	graphics_shader_set_mat4(shader,
 		"u_ViewProjection", 1, 0,
 		camera->ViewProjectionMatrix[0]); 
-	graphics_shader_set_int1(shader, "u_Textures", TextureRenderer2DData.NextTextureIndex, array);
+	graphics_shader_set_int1(shader, "u_Textures", TextureRenderer2DData.NextTextureIndex, textureIndices);
 	
 	glDrawElements(GL_TRIANGLES,
 				   TextureRenderer2DData.IndexCount,
@@ -363,6 +327,7 @@ Shader batchedTextureShader;
 	
 Texture2D hazelLogoTexture;
 Texture2D chibiTexture;
+Texture2D hotlineMiamiTexture;
 
 BaseObject chibiRectangle;
 BaseObject hazelRectangle;
@@ -412,11 +377,11 @@ sandbox_on_attach()
 	    graphics_shader_load(
 		"CGLinux/resource/batched_texture_shader.glsl"));
 	
-	hazelLogoTexture = graphics_texture2d_create("CGLinux/resource/Hazel.png");
-	chibiTexture = graphics_texture2d_create("CGLinux/resource/AnimeChibi.png");
-
-	GLOG("%d:%s %d:%s\n", hazelLogoTexture.RendererID, "hazel", chibiTexture.RendererID, "chibi");
-	
+	hazelLogoTexture = graphics_texture2d_create(texture_cherno_hazel_logo);
+	chibiTexture = graphics_texture2d_create(texture_anime_chibi);
+	hotlineMiamiTexture =
+graphics_texture2d_create(texture_hotline_miami);
+	  
 	chibiRectangle = renderer_create_textured_rectangle(-0.5f, -0.5f);
 	hazelRectangle = renderer_create_textured_rectangle(-0.5f, -0.5f);
 	
@@ -574,11 +539,10 @@ void sandbox_on_update()
   }
   color_renderer_flush(&batchedColorShader, &g_Camera);
 
-  // hazelLogoTexture &chibiTexture
-  textured_renderer_submit_rectangle((vec3) {-1.5f, -0.5f, 0.0f}, (vec2) {1.0f, 1.0f}, &hazelLogoTexture);
-  textured_renderer_submit_rectangle((vec3) {-1.5f, -2.5f, 0.0f}, (vec2) {2.0f, 2.0f}, &chibiTexture);
-  textured_renderer_submit_rectangle((vec3) {-3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &chibiTexture);
-  textured_renderer_submit_rectangle((vec3) {3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &hazelLogoTexture);
+  textured_renderer_submit_rectangle((vec3) {-1.5f, -0.5f, 0.0f}, (vec2) {1.0f, 1.0f}, &hazelLogoTexture, &batchedTextureShader, &g_Camera);
+  textured_renderer_submit_rectangle((vec3) {-1.5f, -2.5f, 0.0f}, (vec2) {2.0f, 2.0f}, &chibiTexture, &batchedTextureShader, &g_Camera);
+  textured_renderer_submit_rectangle((vec3) {-3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &chibiTexture, &batchedTextureShader, &g_Camera);
+  textured_renderer_submit_rectangle((vec3) {3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &hotlineMiamiTexture, &batchedTextureShader, &g_Camera);
   
   textured_renderer_flush(&batchedTextureShader, &g_Camera);
   
