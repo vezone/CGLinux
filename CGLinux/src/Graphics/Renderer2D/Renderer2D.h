@@ -89,58 +89,118 @@ renderer_clear(vec4 color)
   Batch renderers
 */
 
-#define VertexCount 10000000 
-#define MaxVertices 6 * VertexCount
-#define MaxIndices 6 * VertexCount
-#define SizeofVertices MaxVertices * 6
-
-typedef struct QuadVertex{
-  vec2 Position;
+typedef struct QuadVertex
+{
+  vec3 Position;
   vec4 Color;
+  vec2 TexturePosition;
+  f32 TextureId;
 } QuadVertex;
 
 typedef struct Quad
 {
-  i8 IsSolidColor;
   QuadVertex vertex[4];
 } Quad;
 
-typedef struct ColoredBatchRenderer2DData
+#define MaxObjectToDraw 10000
+#define MaxTextureSlots 32
+
+#define QuadVertexElementCount (3 + 4 + 2 + 1)
+#define QuadVerticesCount (4 * QuadVertexElementCount) 
+#define SizeofQuadVertex (QuadVertexElementCount * sizeof(f32))
+#define VerticesCount (MaxObjectToDraw * QuadVerticesCount)
+#define IndicesCount (MaxObjectToDraw * 6)
+#define VertexBufferSize (VerticesCount * sizeof(f32))
+
+typedef struct BatchRenderer2DData
 {
   u32 DataCount;
-  f32 Data[MaxVertices];
+  u32 NextTextureIndex;
+  f32 Data[VerticesCount];
 
   u32 IndexCount;
-  u32 Indices[MaxIndices];
+  u32 Indices[IndicesCount];
 
   VertexArray Vao;
-  mat4 Transform;
-} ColoredBatchRenderer2DData;
+  Shader Shader;
+  Texture2D Textures[32];
+} BatchRenderer2DData;
+
+static void
+fill_indices_array(u32* indices, u32 length)
+{
+    i32 i;
+    u32 temp;
+    for (i = 0, temp = 0; i < length; i += 6, temp += 4)
+	{
+	    indices[i]     = 0 + temp;
+	    indices[i + 1] = 1 + temp;
+	    indices[i + 2] = 2 + temp;
+	    indices[i + 3] = 2 + temp;
+	    indices[i + 4] = 3 + temp;
+	    indices[i + 5] = 0 + temp;
+	}
+}
+
+static void
+fill_data_array(f32* destination, vec3 position, vec2 size, vec4 color, i32 textureId, u32 start_index)
+{
+    i32 i = start_index;
+  
+    destination[i++] = position[0];
+	destination[i++] = position[1];
+	destination[i++] = position[2];
+	destination[i++] = color[0];
+	destination[i++] = color[1];
+	destination[i++] = color[2];
+	destination[i++] = color[3];
+	destination[i++] = 0;
+	destination[i++] = 0;
+	destination[i++] = (f32) textureId;
+	
+	destination[i++] = position[0];
+	destination[i++] = position[1] + size[1];
+	destination[i++] = position[2];
+	destination[i++] = color[0];
+	destination[i++] = color[1];
+	destination[i++] = color[2];
+	destination[i++] = color[3];
+	destination[i++] = 0;
+	destination[i++] = 1;
+	destination[i++] = (f32) textureId;
+	
+	destination[i++] = position[0] + size[0];
+	destination[i++] = position[1] + size[1];
+	destination[i++] = position[2];
+	destination[i++] = color[0];
+	destination[i++] = color[1];
+	destination[i++] = color[2];
+	destination[i++] = color[3];
+	destination[i++] = 1;
+	destination[i++] = 1;
+	destination[i++] = (f32) textureId;
+	
+	destination[i++] = position[0] + size[0];
+	destination[i++] = position[1];
+	destination[i++] = position[2];
+	destination[i++] = color[0];
+	destination[i++] = color[1];
+	destination[i++] = color[2];
+	destination[i++] = color[3];
+	destination[i++] = 1;
+	destination[i++] = 0;
+	destination[i++] = (f32) textureId;
+}
 
 void
-fill_indices_array(u32* indices, u32 length);
+renderer_batch_init();
 
 void
-quad_fill_data_to_array(f32* destination, Quad* source, u32 start_index);
-
-//NOTE(vez): we are not handle z axis for now
-//size[0] - width
-//size[1] - height
-void
-quad_vertex_create_color(Quad* quad, vec3 position, vec2 size, vec4 c11);
-
-//NOTE(vez): we are not handle z axis for now
-//size[0] - width
-//size[1] - height
-void
-quad_vertex_create_gradient(Quad* quad, vec3 position, vec2 size, vec4 c11, vec4 c12, vec4 c22, vec4 c21);
+renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture, Shader* shader, OrthographicCamera* camera);
 
 void
-color_renderer_batch_init();
+renderer_submit_colored_rectangle(vec3 position, vec2 size, vec4 color);
 
 void
-color_renderer_submit_rectangle(vec3 position, vec2 size, i8 isSolid, vec4 c11, vec4 c12, vec4 c22, vec4 c21);
-
-void
-color_renderer_flush(Shader* shader, OrthographicCamera* camera);
+renderer_flush(Shader* shader, OrthographicCamera* camera);
 

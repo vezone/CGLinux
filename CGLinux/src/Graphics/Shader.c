@@ -209,7 +209,6 @@ graphics_shader_delete_collection()
 	{
 		shader = ShadersCollection[i];
 		graphics_shader_delete(&shader);
-		shfree(shader.UniformTable);
 	}
 
 	SHADERLOG(GREEN("Delete shader's collection\n"));

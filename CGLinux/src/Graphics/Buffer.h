@@ -58,10 +58,10 @@ typedef struct BufferLayout {
 
 typedef struct VertexBuffer
 {
-  f32* Vertices;
   u32 RendererID;
-  BufferElement* Elements;
   i32 Stride;
+  f32* Vertices;
+  BufferElement* Elements;
 } VertexBuffer;
 
 void
@@ -83,9 +83,9 @@ graphics_vertex_buffer_unbind();
 
 typedef struct IndexBuffer
 {
-  u32* Indices;
   u32 RendererID;
   u32 Count;
+  u32* Indices;
 } IndexBuffer;
 
 void

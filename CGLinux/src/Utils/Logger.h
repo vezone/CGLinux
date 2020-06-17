@@ -15,7 +15,7 @@
 #define ISBUFFERLOG 0
 
 #if ISGLOBALLOG == 1
-#define GLOG(format, ...) printf("file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
+#define GLOG(format, ...) printf("[LOG] file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
 #else
 #define GLOG(format, ...)
 #endif
@@ -23,10 +23,12 @@
 #define GERROR(format, ...) GLOG(RED(format), ##__VA_ARGS__) 
 
 #if ISGLOBALDEBUG == 1
-#define GDEBUG(format, ...) printf("file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
+#define GDEBUG(format, ...) printf("[DEBUG] file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
 #else
 #define GDEBUG(format, ...)
 #endif
+#define GPRINTI32(var) const char* format = #var;\
+  GLOG(#var": %d\n", var)
 
 #if ISFORMATTOSTRING == 1
 #define GFORMAT(string, format, ...) sprintf(string, format, __VA_ARGS__)

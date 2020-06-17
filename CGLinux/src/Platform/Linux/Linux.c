@@ -9,7 +9,8 @@ void linux_set_application_stack(i64 currentBytesNumber, i64 maxBytesNumber)
 	int result = getrlimit(RLIMIT_STACK, &resource_limit);
 	if (result < 0)
 	{
-		GLOG(RED("get r limit error!\n"));
+		GLOG(RED("Get RLIMIT_STACK error!\n"));
+		return;
 	}
 	else 
 	{

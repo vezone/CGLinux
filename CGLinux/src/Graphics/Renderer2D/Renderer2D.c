@@ -279,164 +279,137 @@ renderer_rectangle_array_draw(RectangleArray array)
   Batch renderer
 */
 
-ColoredBatchRenderer2DData Renderer2DData =
+BatchRenderer2DData RendererData =
 {
 	.DataCount = 0,
-	.IndexCount = 0
+	.IndexCount = 0,
+	.NextTextureIndex = 1
 };
 
 void
-fill_indices_array(u32* indices, u32 length)
-{
-    i32 i;
-    u32 temp = 0;
-    for (i = 0; i < length; i += 6)
-	{
-	    indices[i]     = 0 + temp;
-	    indices[i + 1] = 1 + temp;
-	    indices[i + 2] = 2 + temp;
-	    indices[i + 3] = 2 + temp;
-	    indices[i + 4] = 3 + temp;
-	    indices[i + 5] = 0 + temp;
-	    temp += 4;
-	}
-}
-
-void
-quad_fill_data_to_array(f32* destination, Quad* source, u32 start_index)
-{
-    i32 i = start_index;
-	i32 s = 0;
-	i32 number_of_vertices = start_index + (6 * 4);
-	for ( ;i < number_of_vertices; )
-	{
-	   QuadVertex vertex = source->vertex[s];
-	   s++;
-	   
-	   destination[i++] = vertex.Position[0];
-	   destination[i++] = vertex.Position[1];
-	   
-	   destination[i++] = vertex.Color[0];
-	   destination[i++] = vertex.Color[1];
-	   destination[i++] = vertex.Color[2];
-	   destination[i++] = vertex.Color[3];
-	}
-}
-
-void
-quad_vertex_create_color(Quad* quad, vec3 position, vec2 size, vec4 c11)
-{
-	quad->vertex[0].Position[0] = position[0];
-	quad->vertex[0].Position[1] = position[1];
-	quad->vertex[1].Position[0] = position[0];
-	quad->vertex[1].Position[1] = position[1] + size[1];
-	quad->vertex[2].Position[0] = position[0] + size[0];
-	quad->vertex[2].Position[1] = position[1] + size[1];
-	quad->vertex[3].Position[0] = position[0] + size[0];
-	quad->vertex[3].Position[1] = position[1];
-       
-	glm_vec4_copy(c11, quad->vertex[0].Color);
-	glm_vec4_copy(c11, quad->vertex[1].Color);
-	glm_vec4_copy(c11, quad->vertex[2].Color);
-	glm_vec4_copy(c11, quad->vertex[3].Color);
-	
-	quad->IsSolidColor = 1;
-}
-
-//NOTE(vez): we are not handle z axis for now
-//size[0] - width
-//size[1] - height
-void
-quad_vertex_create_gradient(Quad* quad, vec3 position, vec2 size, vec4 c11, vec4 c12, vec4 c22, vec4 c21)
-{
-	quad->vertex[0].Position[0] = position[0];
-	quad->vertex[0].Position[1] = position[1];
-	quad->vertex[1].Position[0] = position[0];
-	quad->vertex[1].Position[1] = position[1] + size[1];
-	quad->vertex[2].Position[0] = position[0] + size[0];
-	quad->vertex[2].Position[1] = position[1] + size[1];
-	quad->vertex[3].Position[0] = position[0] + size[0];
-	quad->vertex[3].Position[1] = position[1];
-    
-	glm_vec4_copy(c11, quad->vertex[0].Color);
-	glm_vec4_copy(c12, quad->vertex[1].Color);
-	glm_vec4_copy(c22, quad->vertex[2].Color);
-	glm_vec4_copy(c21, quad->vertex[3].Color);
-}
-
-void
-color_renderer_batch_init()
+renderer_batch_init()
 {
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_allocate(
-	    &vbo,
-		SizeofVertices);
+	    &vbo, VertexBufferSize);
 	graphics_vertex_buffer_bind(&vbo);
-
-	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float3);
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float4);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
+	graphics_vertex_buffer_add_layout(&vbo, 0, Float1);
 	
 	IndexBuffer ibo = {};
-	fill_indices_array(Renderer2DData.Indices, MaxIndices);
-	graphics_index_buffer_create(&ibo, Renderer2DData.Indices, MaxIndices);
+	fill_indices_array(RendererData.Indices, IndicesCount);
+	graphics_index_buffer_create(&ibo, RendererData.Indices, IndicesCount);
 	graphics_index_buffer_bind(&ibo);
 
-	graphics_vertex_array_create(&Renderer2DData.Vao);
-	graphics_vertex_array_add_vbo(&Renderer2DData.Vao, vbo);
-	graphics_vertex_array_add_ibo(&Renderer2DData.Vao, ibo);
-	graphics_vertex_array_bind(&Renderer2DData.Vao);
+	graphics_vertex_array_create(&RendererData.Vao);
+	graphics_vertex_array_add_vbo(&RendererData.Vao, vbo);
+	graphics_vertex_array_add_ibo(&RendererData.Vao, ibo);
+	graphics_vertex_array_bind(&RendererData.Vao);
 	
-	glm_mat4_identity(Renderer2DData.Transform);
+	Texture2D whiteTexture =  graphics_texture2d_create("CGLinux/resource/assets/textures/default/white_texture.png");
+	RendererData.Textures[0] = whiteTexture; 
 }
 
 void
-color_renderer_submit_rectangle(vec3 position, vec2 size, i8 isSolid, vec4 c11, vec4 c12, vec4 c22, vec4 c21)
+renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture, Shader* shader, OrthographicCamera* camera)
 {
-	Quad quad = {};
-	if (isSolid)
+    i32 textureId;
+    Quad quad = {};
+	vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
+
+	if (RendererData.NextTextureIndex < 31)
 	{
-	  quad_vertex_create_color(&quad, position, size, c11);  
+	  i8 isAlreadyInArray = -1;
+	  for (i32 i = 1;
+		   i < RendererData.NextTextureIndex;
+		   i++)
+	  {
+		u32 id = RendererData.Textures[i].RendererID;
+		if (id == texture->RendererID)
+		{
+		  isAlreadyInArray = i;
+		  break;
+		}
+	  }
+
+	  if (isAlreadyInArray != -1)
+	  {
+		textureId = isAlreadyInArray;
+	  }
+	  else
+	  {
+		textureId = RendererData.NextTextureIndex;
+		RendererData.Textures[textureId] = *texture;
+		++RendererData.NextTextureIndex;	  
+	  }
 	}
 	else
 	{
-	  quad_vertex_create_gradient(&quad, position, size, c11, c12, c21, c22);	
+	  GLOG(RED("FLUSH!\n"));
+	  renderer_flush(shader, camera);
+	  textureId = 1;
+	  RendererData.Textures[textureId] = *texture;
+	  ++RendererData.NextTextureIndex;
 	}
-
-	quad_fill_data_to_array(Renderer2DData.Data, &quad, Renderer2DData.DataCount);
 	
-	Renderer2DData.DataCount  += (4 * 6);
-	Renderer2DData.IndexCount += 6;
+	fill_data_array(RendererData.Data, position, size, color, textureId, RendererData.DataCount);
+	RendererData.DataCount  += QuadVerticesCount;
+	RendererData.IndexCount += 6;
 }
 
 void
-color_renderer_flush(Shader* shader, OrthographicCamera* camera)
+renderer_submit_colored_rectangle(vec3 position, vec2 size, vec4 color)
 {
-	graphics_shader_bind(shader);	
+    i32 textureId;
+    Quad quad = {};
+	fill_data_array(RendererData.Data, position, size, color, 0, RendererData.DataCount);
+	
+	RendererData.DataCount  += QuadVerticesCount;
+	RendererData.IndexCount += 6;
+}
 
-	graphics_vertex_array_bind(&(Renderer2DData.Vao));
+void
+renderer_flush(Shader* shader, OrthographicCamera* camera)
+{
+    graphics_shader_bind(shader);	
+	graphics_vertex_array_bind(&RendererData.Vao);
+ 
+	i32 textureIndices[32];
+	for (i32 i = 0; i < 32; i++)
+	{
+	  textureIndices[i] = i;
+	}
 
-	u32 size = Renderer2DData.DataCount * sizeof(f32); 
+	for (i32 i = 0; i < RendererData.NextTextureIndex; i++)
+	{
+	  graphics_texture2d_bind(&(RendererData.Textures[i]), i);
+	}
+
+	static i8 show = 1;
+	if (show == 1)
+	{
+	  GDEBUG("DataCount: %d\n", RendererData.DataCount);
+	  show = 0;
+	}
+
+	u32 size = RendererData.DataCount * sizeof(f32); 
 	graphics_vertex_buffer_set_data(
-   		Renderer2DData.Vao.VertexBuffer,
-		Renderer2DData.Data, size);
-	
-	mat4 transform = GLM_MAT4_IDENTITY_INIT;
-	glm_mat4_copy(transform, Renderer2DData.Transform);
+   		RendererData.Vao.VertexBuffer,
+		RendererData.Data, size);
 
 	graphics_shader_set_mat4(shader,
-							"u_ViewProjection", 1, 0,
-							camera->ViewProjectionMatrix[0]); 
-	graphics_shader_set_mat4(shader,
-							 "u_Transform",
-							 1, 0,
-							 Renderer2DData.Transform[0]);
-	
+		"u_ViewProjection", 1, 0,
+		camera->ViewProjectionMatrix[0]); 
+	graphics_shader_set_int1(shader, "u_Textures", RendererData.NextTextureIndex, textureIndices);
+
 	glDrawElements(GL_TRIANGLES,
-				   Renderer2DData.IndexCount,
+				   RendererData.IndexCount,
 				   GL_UNSIGNED_INT,
 				   NULL);
 
-	Renderer2DData.DataCount  = 0;
-	Renderer2DData.IndexCount = 0;
+	RendererData.DataCount  = 0;
+	RendererData.IndexCount = 0;
+	RendererData.NextTextureIndex = 1;
 }
-
