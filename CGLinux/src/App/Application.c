@@ -10,18 +10,18 @@ void application_on_event(Event* event)
   GLOG("event: %s\n", EventTypeToString[event->Type]);
 }
 
-void application_init()
+void application_init(u32 width, u32 height, const char* name)
 {
   //create window there
   //all stuff
   //
-  linux_set_application_stack(MB(100), MB(128));
+  linux_set_application_stack(MB(500), MB(528));
   event_init_table(EventTypeToString, 32);
   
-  i32 isWindowCreated = window_create(&window, 1280, 720, "Demo");
+  i32 isWindowCreated = window_create(&window, width, height, name);
   if (isWindowCreated == -1) 
   {
-	  GLOG(RED("Can't create window!\n"));
+	  GERROR("Can't create window!\n");
 	  return;
   }
   //window_on_event_function = application_on_event; 
@@ -31,7 +31,7 @@ void application_init()
   i32 status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
   if (status == 0)
   {
-	GLOG(RED("Failed to init GLAD\n"));
+	GERROR("Failed to init GLAD\n");
 	return;
   }
   GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));

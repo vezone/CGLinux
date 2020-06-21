@@ -15,7 +15,7 @@ ifeq ($(config),debug)
   TARGETDIR = ../bin/Debug-linux-x86_64/CGLinux
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/CGLinux
-  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG\ =\ 1
   INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -42,7 +42,7 @@ ifeq ($(config),release)
   TARGETDIR = ../bin/Release-linux-x86_64/CGLinux
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/CGLinux
-  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_RELEASE
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG\ =\ 0
   INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
@@ -96,6 +96,7 @@ OBJECTS := \
 	$(OBJDIR)/Sandbox.o \
 	$(OBJDIR)/Event.o \
 	$(OBJDIR)/Buffer.o \
+	$(OBJDIR)/OpenGLBase.o \
 	$(OBJDIR)/OrthographicCamera.o \
 	$(OBJDIR)/Renderer2D.o \
 	$(OBJDIR)/Shader.o \
@@ -175,6 +176,9 @@ $(OBJDIR)/Event.o: src/Event/Event.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Buffer.o: src/Graphics/Buffer.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/OpenGLBase.o: src/Graphics/OpenGLBase.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/OrthographicCamera.o: src/Graphics/Renderer2D/OrthographicCamera.c

@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 
+#include "OpenGLBase.h"
 #include "Utils/Array.h"
 #include "Utils/stb_image.h"
 #include "Utils/Logger.h"
@@ -19,8 +20,8 @@ graphics_texture2d_create(const char* path)
     GDEBUG("Texture path: %s\n", path);
 
     //Enable blending
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GLCheck(glEnable(GL_BLEND));
+    GLCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     stbi_set_flip_vertically_on_load(1);
     stbi_uc* data = stbi_load(path, 
@@ -47,22 +48,22 @@ graphics_texture2d_create(const char* path)
         internalFormat = GL_RGBA8;
     }
 
-    glCreateTextures(GL_TEXTURE_2D, 1, &texture.RendererID);
-    glTextureStorage2D(texture.RendererID, 1, internalFormat,
-        texture.Width, texture.Height);
+    GLCheck(glCreateTextures(GL_TEXTURE_2D, 1, &texture.RendererID));
+    GLCheck(glTextureStorage2D(texture.RendererID, 1, internalFormat,
+        texture.Width, texture.Height));
     
-    glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-    glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_WRAP_S, GL_REPEAT);
-	glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_WRAP_T, GL_REPEAT);
+    GLCheck(glTextureParameteri(texture.RendererID, 
+        GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    GLCheck(glTextureParameteri(texture.RendererID, 
+        GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    GLCheck(glTextureParameteri(texture.RendererID, 
+        GL_TEXTURE_WRAP_S, GL_REPEAT));
+	GLCheck(glTextureParameteri(texture.RendererID, 
+        GL_TEXTURE_WRAP_T, GL_REPEAT));
 
-    glTextureSubImage2D(texture.RendererID, 0, 0, 0, 
+    GLCheck(glTextureSubImage2D(texture.RendererID, 0, 0, 0, 
         texture.Width, texture.Height,
-        dataFormat, GL_UNSIGNED_BYTE, data);
+        dataFormat, GL_UNSIGNED_BYTE, data));
 
     if (data) 
     {
@@ -78,17 +79,17 @@ void
 graphics_texture2d_bind(Texture2D* texture, u32 slot)
 {
     texture->Slot = slot;
-    glBindTextureUnit(slot, texture->RendererID);
+    GLCheck(glBindTextureUnit(slot, texture->RendererID));
 }
 
 void
 graphics_texture2d_unbind(Texture2D* texture)
 {
-    glBindTextureUnit(texture->Slot, 0);
+    GLCheck(glBindTextureUnit(texture->Slot, 0));
 }
 
 void
 graphics_texture2d_delete(Texture2D* texture)
 {
-    glDeleteTextures(1, &texture->RendererID);
+    GLCheck(glDeleteTextures(1, &texture->RendererID));
 }

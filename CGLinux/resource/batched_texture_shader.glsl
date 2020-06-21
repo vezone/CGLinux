@@ -1,5 +1,5 @@
 #vertex shader
-#version 330 core
+#version 400 core
 layout(location = 0) in vec3 i_Position;
 layout(location = 1) in vec4 i_Color;
 layout(location = 2) in vec2 i_TextureCoordinates;
@@ -20,7 +20,7 @@ void main()
 }
 
 #fragment shader
-#version 330 core
+#version 400 core
 layout(location = 0) out vec4 Color;
 
 in vec4 o_Color;

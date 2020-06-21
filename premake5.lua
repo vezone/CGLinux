@@ -70,11 +70,11 @@ project "CGLinux"
 	}
 
 	filter "configurations:Debug"
-		defines "CG_DEBUG"
+		defines "CG_DEBUG = 1"
 		symbols "On"
 
 	filter "configurations:Release"
-		defines "CG_RELEASE"
+		defines "CG_DEBUG = 0"
 		optimize "On"
 
 	filter "configurations:Dist"

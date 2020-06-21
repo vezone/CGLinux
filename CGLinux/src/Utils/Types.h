@@ -99,9 +99,9 @@ typedef double f64;
 
 #define ARRAY_LENGTH(x) (sizeof(x) / sizeof(x[0]))
 #define TO_STRING(x) #x
-#define KB(x) 1024 * x
-#define MB(x) 1024 * KB(x)
-#define GB(x) 1024 * MB(x)
+#define KB(x) (i64)1024 * (i64)x
+#define MB(x) (i64)1024 * KB(x)
+#define GB(x) (i64)1024 * MB(x)
 #define nullptr ((void*) 0)
 
 #define TOKB(x) ((f64) x) / 1024

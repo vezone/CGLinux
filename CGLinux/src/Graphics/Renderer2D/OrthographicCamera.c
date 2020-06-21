@@ -32,14 +32,8 @@ orthographic_camera_recalculate_view_matrix(OrthographicCamera* camera)
 	vec3 rotate_vec = { 0.0f, 0.0f, 1.0f };
 
 	glm_translate(identityTranslate, camera->Position);
-	glm_rotate(identityRotate, 
-		glm_rad(camera->Rotation), 
-		rotate_vec);
-	glm_mat4_mul(identityTranslate, 
-		identityRotate, 
-		transform);
+	glm_rotate(identityRotate, glm_rad(camera->Rotation), rotate_vec);
+	glm_mat4_mul(identityTranslate, identityRotate, transform);
 	glm_mat4_inv(transform, camera->ViewMatrix);
-	glm_mat4_mul(camera->ProjectionMatrix, 
-		camera->ViewMatrix, 
-		camera->ViewProjectionMatrix);
+	glm_mat4_mul(camera->ProjectionMatrix, camera->ViewMatrix, camera->ViewProjectionMatrix);
 }

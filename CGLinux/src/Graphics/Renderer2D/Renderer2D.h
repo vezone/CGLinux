@@ -10,12 +10,6 @@
 
 typedef struct BaseGeometry
 {
-	/*
-	  if we want to move object at x coord:
-	      instance.Position[0] += 0.1;
-	  in update function we should do smth like that:
-	      glm_translate(rectangle.Transform, rectangle.Position);
-	 */
 	vec3 Position;
 	mat4 Transform;
 } BaseGeometry;
@@ -53,16 +47,6 @@ BaseObject
 renderer_create_textured_rectangle(f32 x, f32 y);
 void
 renderer_draw_textured_rectangle(BaseObject* objectToDraw, Shader* shader, Texture2D* texture, OrthographicCamera* camera);
-
-RectangleArray 
-renderer_rectangle_array_create(OrthographicCamera* camera);
-void 
-renderer_rectangle_array_draw(RectangleArray array);
-static void
-renderer_rectangle_array_destroy(RectangleArray array)
-{
-	graphics_vertex_array_destroy(&array.VAO);
-}
 
 static void
 renderer_destroy_base_object(BaseObject* object)
@@ -102,7 +86,7 @@ typedef struct Quad
   QuadVertex vertex[4];
 } Quad;
 
-#define MaxObjectToDraw 10000
+#define MaxObjectToDraw (i64)1000000
 #define MaxTextureSlots 32
 
 #define QuadVertexElementCount (3 + 4 + 2 + 1)
@@ -193,14 +177,14 @@ fill_data_array(f32* destination, vec3 position, vec2 size, vec4 color, i32 text
 }
 
 void
-renderer_batch_init();
+renderer_batch_init(Shader* shader, OrthographicCamera* camera);
 
 void
-renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture, Shader* shader, OrthographicCamera* camera);
+renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture);
 
 void
 renderer_submit_colored_rectangle(vec3 position, vec2 size, vec4 color);
 
 void
-renderer_flush(Shader* shader, OrthographicCamera* camera);
+renderer_flush();
 

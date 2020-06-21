@@ -93,7 +93,7 @@ graphics_shader_load(const char* shader_path)
 	SHADERDEBUG(CYAN("shader source: %s\n"), shader_source);
 	if (shader_source == NULL)
 	{
-		SHADERLOG(BRIGHTRED("shader file open error!"));
+		GERROR("shader file open error!");
 	}
 	   	
 	vertex_index   = vstring_index_of_string(shader_source, "#vertex shader");
@@ -108,8 +108,8 @@ graphics_shader_load(const char* shader_path)
 		vstring_substring(shader_source, 
 		fragment_index + fragment_keyword_length + 1);
 	
-	SHADERLOG("vertex shader:\n"YELLOW("%s\n"), vertex_shader_source);
-    SHADERLOG("fragment shader:\n"GREEN("%s\n"), fragment_shader_source);
+	SHADERDEBUG("vertex shader:\n"YELLOW("%s\n"), vertex_shader_source);
+    SHADERDEBUG("fragment shader:\n"GREEN("%s\n"), fragment_shader_source);
 	
 	source.name = shader_name;
 	source.vertex_shader   = (const char*) vertex_shader_source;
@@ -126,14 +126,14 @@ graphics_shader_load(const char* shader_path)
 static void
 shader_error_check(u32 shader_id)
 {
-	i32 shader_compiled;
-	glGetShaderiv(shader_id, GL_COMPILE_STATUS, &shader_compiled);
-	if (shader_compiled == GL_FALSE)
+	i32 is_compiled;
+	GLCheck(glGetShaderiv(shader_id, GL_COMPILE_STATUS, &is_compiled));
+	if (is_compiled == GL_FALSE)
 	{
 		i32 log_length = 0;
-		char error_message[1024];
-		glGetShaderInfoLog(shader_id, 1024, &log_length, error_message);
-		SHADERLOG(BRIGHTRED("compiling error[is_compiled: %d, length:%d]: %s\n"), shader_compiled, log_length, error_message);
+		char error_message[1024]; 
+		GLCheck(glGetShaderInfoLog(shader_id, 1024, &log_length, error_message));
+		GERROR("shader_error_check[is_compiled: %d, log_length:%d]: %s\n", is_compiled, log_length, error_message);
 	}
 }
 
@@ -148,31 +148,31 @@ graphics_shader_compile(ShaderSource source)
 	SHADERDEBUG(GREEN5("SHADER")" %s\n", source.name);
 
 	SHADERDEBUG(GREEN("Compiling")" vertex shader\n");
-	vertex_shader_id = glCreateShader(GL_VERTEX_SHADER);
-	glShaderSource(vertex_shader_id, 1, &source.vertex_shader, 0);
-	glCompileShader(vertex_shader_id);
+	GLCheck(vertex_shader_id = glCreateShader(GL_VERTEX_SHADER));
+	GLCheck(glShaderSource(vertex_shader_id, 1, &source.vertex_shader, 0));
+	GLCheck(glCompileShader(vertex_shader_id));
 	shader_error_check(vertex_shader_id);
 
 	SHADERDEBUG(GREEN("Compiling")" fragment shader\n");
 	//HERE WE GET AN ERROR
-	fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER);
-	glShaderSource(fragment_shader_id, 1, &source.fragment_shader, 0);
-	glCompileShader(fragment_shader_id);
+	GLCheck(fragment_shader_id = glCreateShader(GL_FRAGMENT_SHADER));
+	GLCheck(glShaderSource(fragment_shader_id, 1, &source.fragment_shader, 0));
+	GLCheck(glCompileShader(fragment_shader_id));
 	shader_error_check(fragment_shader_id);
 
 	SHADERDEBUG(GREEN("Linking")" program\n");
-	shader_program_id = glCreateProgram();
+	GLCheck(shader_program_id = glCreateProgram());
 	SHADERDEBUG("SHADER ID: %d\n", shader_program_id);
-	glAttachShader(shader_program_id, vertex_shader_id);
-	glAttachShader(shader_program_id, fragment_shader_id);
-	glLinkProgram(shader_program_id);
+	GLCheck(glAttachShader(shader_program_id, vertex_shader_id));
+	GLCheck(glAttachShader(shader_program_id, fragment_shader_id));
+	GLCheck(glLinkProgram(shader_program_id));
 	shader_error_check(shader_program_id);
 
-	glDetachShader(shader_program_id, vertex_shader_id);
-	glDetachShader(shader_program_id, fragment_shader_id);
+	GLCheck(glDetachShader(shader_program_id, vertex_shader_id));
+	GLCheck(glDetachShader(shader_program_id, fragment_shader_id));
 
-	glDeleteShader(vertex_shader_id);
-	glDeleteShader(fragment_shader_id);
+	GLCheck(glDeleteShader(vertex_shader_id));
+	GLCheck(glDeleteShader(fragment_shader_id));
 
 	shader.ShaderID = shader_program_id;
 	shader.UniformTable = NULL;
@@ -185,20 +185,20 @@ graphics_shader_compile(ShaderSource source)
 void 
 graphics_shader_delete(Shader* shader)
 {
-	glDeleteProgram(shader->ShaderID);
+    GLCheck(glDeleteProgram(shader->ShaderID));
 	shfree(shader->UniformTable);
 }
 
 void 
 graphics_shader_bind(Shader* shader)
 {
-	glUseProgram(shader->ShaderID);
+    GLCheck(glUseProgram(shader->ShaderID));
 }
 
 void 
 graphics_shader_unbind()
 {
-	glUseProgram(0);
+    GLCheck(glUseProgram(0));
 }
 
 void
@@ -211,5 +211,5 @@ graphics_shader_delete_collection()
 		graphics_shader_delete(&shader);
 	}
 
-	SHADERLOG(GREEN("Delete shader's collection\n"));
+	GLOG(GREEN("Delete collection of shaders\n"));
 }

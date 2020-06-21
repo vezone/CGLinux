@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Utils/Types.h"
-#include <glad/glad.h>
+#include "OpenGLBase.h"
 
 typedef enum DataType
 {

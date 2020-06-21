@@ -19,3 +19,25 @@ orthographic_camera_set_projection(OrthographicCamera* camera, f32 left, f32 rig
 
 void
 orthographic_camera_recalculate_view_matrix(OrthographicCamera* camera);
+
+static void
+orthographic_camera_on_update(OrthographicCamera* camera, f32 aspectRatio, f32 zoomLevel)
+{
+  orthographic_camera_set_projection(camera, 
+      -aspectRatio * zoomLevel, 
+       aspectRatio * zoomLevel, 
+      -zoomLevel,
+       zoomLevel);
+  orthographic_camera_recalculate_view_matrix(camera);
+}
+
+static void
+orthographic_camera_resize(OrthographicCamera* camera, f32 width, f32 height, f32 zoomLevel)
+{
+  f32 aspectRatio = width / height;
+  orthographic_camera_set_projection(camera, 
+		 aspectRatio * zoomLevel, 
+		 aspectRatio * zoomLevel, 
+		-zoomLevel,
+		 zoomLevel);
+}

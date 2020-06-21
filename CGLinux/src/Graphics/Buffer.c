@@ -1,7 +1,6 @@
 #include "Buffer.h"
 
 #include <stdlib.h>
-#include <glad/glad.h>
 #include "Utils/Array.h"
 #include "Utils/Logger.h"
 
@@ -15,9 +14,9 @@ buffer_element_print(BufferElement element)
 void 
 graphics_vertex_buffer_create(VertexBuffer* buffer, f32* vertices, u32 size)
 {
-  glGenBuffers(1, &(buffer->RendererID));
-  glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID);
-  glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW);
+  GLCheck(glGenBuffers(1, &(buffer->RendererID)));
+  GLCheck(glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID));
+  GLCheck(glBufferData(GL_ARRAY_BUFFER, size, vertices, GL_STATIC_DRAW));
   
   buffer->Elements = NULL;
   buffer->Vertices = vertices;
@@ -26,9 +25,9 @@ graphics_vertex_buffer_create(VertexBuffer* buffer, f32* vertices, u32 size)
 void
 graphics_vertex_buffer_allocate(VertexBuffer* buffer, u32 size)
 {
-  glGenBuffers(1, &(buffer->RendererID));
-  glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID);
-  glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW);
+  GLCheck(glGenBuffers(1, &(buffer->RendererID)));
+  GLCheck(glBindBuffer(GL_ARRAY_BUFFER, buffer->RendererID));
+  GLCheck(glBufferData(GL_ARRAY_BUFFER, size, NULL, GL_DYNAMIC_DRAW));
   
   buffer->Elements = NULL;
   buffer->Vertices = NULL;
@@ -39,9 +38,9 @@ static void
 stride_update(VertexBuffer* buffer)
 {
   //0 12 24
+  i32 i;
   i32 offset;
   i32 buffer_elements_length;
-  i32 i;
 
   offset = 0;
   buffer->Stride = 0;
@@ -74,7 +73,7 @@ graphics_vertex_buffer_add_layout(VertexBuffer* buffer, i8 isNormalized, DataTyp
 void 
 graphics_vertex_buffer_bind(VertexBuffer* vbo)
 {
-  glBindBuffer(GL_ARRAY_BUFFER, vbo->RendererID);
+  GLCheck(glBindBuffer(GL_ARRAY_BUFFER, vbo->RendererID));
 }
 
 void 
@@ -88,34 +87,34 @@ graphics_index_buffer_create(IndexBuffer* buffer, u32* indices, u32 count)
 {
   buffer->Count = count;
   buffer->Indices = indices;
-  glGenBuffers(1, &(buffer->RendererID));
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->RendererID);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(u32), indices, GL_STATIC_DRAW);
+  GLCheck(glGenBuffers(1, &(buffer->RendererID)));
+  GLCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer->RendererID));
+  GLCheck(glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(u32), indices, GL_STATIC_DRAW));
 }
 
 void 
 graphics_index_buffer_bind(IndexBuffer* ibo)
 {
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->RendererID);
+  GLCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo->RendererID));
 }
 
 void 
 graphics_index_buffer_unbind()
 {
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+  GLCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0));
 }
 
 void graphics_vertex_array_create(VertexArray* va) 
 {
-  glCreateVertexArrays(1, &(va->RendererID));
+  GLCheck(glCreateVertexArrays(1, &(va->RendererID)));
 }
 
 void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
 {
   va->VertexBuffer = &vbo;
     
-  glBindVertexArray(va->RendererID);
-  glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID);
+  GLCheck(glBindVertexArray(va->RendererID));
+  GLCheck(glBindBuffer(GL_ARRAY_BUFFER, va->VertexBuffer->RendererID));
   BUFFERDEBUG("Stride: %d\n", vbo.Stride);
 
   BufferElement* layout = vbo.Elements;
@@ -125,24 +124,24 @@ void graphics_vertex_array_add_vbo(VertexArray* va, VertexBuffer vbo)
                
       buffer_element_print(element);
 		
-      glEnableVertexAttribArray(i);
-      glVertexAttribPointer(i, element.Count, GL_FLOAT, element.IsNormilized, vbo.Stride, (const void*)element.Offset);
+      GLCheck(glEnableVertexAttribArray(i));
+      GLCheck(glVertexAttribPointer(i, element.Count, GL_FLOAT, element.IsNormilized, vbo.Stride, (const void*)element.Offset));
    }
 }
 
 void graphics_vertex_array_add_ibo(VertexArray* va, IndexBuffer ibo)
 {
   va->IndexBuffer = ibo;
-  glBindVertexArray(va->RendererID);
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo.RendererID);
+  GLCheck(glBindVertexArray(va->RendererID));
+  GLCheck(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo.RendererID));
 }
 
 void graphics_vertex_array_bind(VertexArray* va) 
 {
-  glBindVertexArray(va->RendererID);
+  GLCheck(glBindVertexArray(va->RendererID));
 }
 
 void graphics_vertex_array_unbind()
 {
-  glBindVertexArray(0);
+  GLCheck(glBindVertexArray(0));
 }

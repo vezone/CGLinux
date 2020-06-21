@@ -2,9 +2,9 @@
 
 #include <glad/glad.h>
 #include <Graphics/Shader.h>
+#include <Graphics/Constants.h>
 #include <Utils/Logger.h>
-#include "Utils/Array.h"
-#include "Graphics/Constants.h"
+#include <Utils/Array.h>
 
 BaseObject
 renderer_create_colored_triangle()
@@ -182,104 +182,13 @@ renderer_draw_textured_rectangle(BaseObject* objectToDraw, Shader* shader, Textu
 	glDrawElements(GL_TRIANGLES, objectToDraw->VertexArray.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
 }
 
-
-RectangleArray 
-renderer_rectangle_array_create(OrthographicCamera* camera)
-{
-#if 0
-	i32 x, y, qlen, temp_index;
-	u32 *indices;
-	f32 *vertices, topx, topy, multiplier, tempPositionX, tempPositionY, heightMultiplier, widthMultiplier;
-	RectangleGeometry position;
-	Shader shader;
-	
-	shader = graphics_shader_compile(graphics_shader_load(shader_ss));
-
-	//2550 * 2550 = 6 502 500
-	qlen = 200;
-	indices = NULL;
-	vertices = NULL;
-	multiplier = 1.1f;
-	position = (RectangleGeometry) { -2.5f, -2.5f, 0.1f, 0.1f };
-	heightMultiplier = position.Height * multiplier;
-	widthMultiplier = position.Width * multiplier;
-
-	for (x = 0; x < qlen; x++)
-	{
-		topx = position.TopX + x * widthMultiplier;
-		tempPositionX = topx - position.Width;
-		for (y = 0; y < qlen; y++)
-		{
-			topy = position.TopY + y * heightMultiplier;
-			tempPositionY = topy - position.Height;
-			temp_index = (y * 4) + (x * 4 * qlen);
-			
-			array_push(vertices, topx);
-			array_push(vertices, topy);
-
-			array_push(vertices, tempPositionX);
-			array_push(vertices, topy);
-			
-			array_push(vertices, tempPositionX);
-			array_push(vertices, tempPositionY);
-			
-			array_push(vertices, topx);
-			array_push(vertices, tempPositionY);
-
-			array_push(indices, 0 + temp_index);
-			array_push(indices, 1 + temp_index);
-			array_push(indices, 2 + temp_index);
-			array_push(indices, 2 + temp_index);
-			array_push(indices, 3 + temp_index);
-			array_push(indices, 0 + temp_index);
-		}
-	}
-	
-	VertexBuffer vbo = {};
-	graphics_vertex_buffer_create(&vbo, vertices, array_len(vertices) * sizeof(f32));
-	graphics_vertex_buffer_bind(&vbo);
-	graphics_vertex_buffer_add_layout(&vbo, 0, Float2);
-
-	IndexBuffer ibo = {};
-	graphics_index_buffer_create(&ibo, indices, array_len(indices));
-	graphics_index_buffer_bind(&ibo);
-
-	VertexArray vao = {};
-	graphics_vertex_array_create(&vao);
-	graphics_vertex_array_add_vbo(&vao, vbo);
-	graphics_vertex_array_add_ibo(&vao, ibo);
-	graphics_vertex_array_bind(&vao);
-
-	
-	RectangleArray rectangleArray = {};
-	rectangleArray.Shader = shader;
-	rectangleArray.VAO = vao;
-	glm_mat4_identity(rectangleArray.Transform);
-	rectangleArray.Camera = camera;
-
-	return rectangleArray;
-#endif
-}
-
-void 
-renderer_rectangle_array_draw(RectangleArray array)
-{
-	graphics_shader_bind(&array.Shader);
-
-	graphics_shader_set_mat4(&array.Shader, "u_ViewProjection", 1, 0, array.Camera->ViewProjectionMatrix[0]); 
-	graphics_shader_set_mat4(&array.Shader, "u_Transform", 1, 0, array.Transform[0]);
-	
-	graphics_vertex_array_bind(&array.VAO);
-
-	glDrawElements(GL_TRIANGLES, array.VAO.IndexBuffer.Count, GL_UNSIGNED_INT, NULL);
-}
-
-
 /*
   Batch renderer
 */
 
-BatchRenderer2DData RendererData =
+static Shader* g_Shader;
+static OrthographicCamera* g_Camera;
+static BatchRenderer2DData g_RendererData =
 {
 	.DataCount = 0,
 	.IndexCount = 0,
@@ -287,8 +196,11 @@ BatchRenderer2DData RendererData =
 };
 
 void
-renderer_batch_init()
+renderer_batch_init(Shader* shader, OrthographicCamera* camera)
 {
+    g_Shader = shader;
+    g_Camera = camera;
+  
 	VertexBuffer vbo = {};
 	graphics_vertex_buffer_allocate(
 	    &vbo, VertexBufferSize);
@@ -299,34 +211,34 @@ renderer_batch_init()
 	graphics_vertex_buffer_add_layout(&vbo, 0, Float1);
 	
 	IndexBuffer ibo = {};
-	fill_indices_array(RendererData.Indices, IndicesCount);
-	graphics_index_buffer_create(&ibo, RendererData.Indices, IndicesCount);
+	fill_indices_array(g_RendererData.Indices, IndicesCount);
+	graphics_index_buffer_create(&ibo, g_RendererData.Indices, IndicesCount);
 	graphics_index_buffer_bind(&ibo);
 
-	graphics_vertex_array_create(&RendererData.Vao);
-	graphics_vertex_array_add_vbo(&RendererData.Vao, vbo);
-	graphics_vertex_array_add_ibo(&RendererData.Vao, ibo);
-	graphics_vertex_array_bind(&RendererData.Vao);
+	graphics_vertex_array_create(&g_RendererData.Vao);
+	graphics_vertex_array_add_vbo(&g_RendererData.Vao, vbo);
+	graphics_vertex_array_add_ibo(&g_RendererData.Vao, ibo);
+	graphics_vertex_array_bind(&g_RendererData.Vao);
 	
 	Texture2D whiteTexture =  graphics_texture2d_create("CGLinux/resource/assets/textures/default/white_texture.png");
-	RendererData.Textures[0] = whiteTexture; 
+	g_RendererData.Textures[0] = whiteTexture; 
 }
 
 void
-renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture, Shader* shader, OrthographicCamera* camera)
+renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture)
 {
     i32 textureId;
     Quad quad = {};
 	vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-	if (RendererData.NextTextureIndex < 31)
+	if (g_RendererData.NextTextureIndex < 31)
 	{
 	  i8 isAlreadyInArray = -1;
 	  for (i32 i = 1;
-		   i < RendererData.NextTextureIndex;
+		   i < g_RendererData.NextTextureIndex;
 		   i++)
 	  {
-		u32 id = RendererData.Textures[i].RendererID;
+		u32 id = g_RendererData.Textures[i].RendererID;
 		if (id == texture->RendererID)
 		{
 		  isAlreadyInArray = i;
@@ -340,23 +252,23 @@ renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture, Shader* 
 	  }
 	  else
 	  {
-		textureId = RendererData.NextTextureIndex;
-		RendererData.Textures[textureId] = *texture;
-		++RendererData.NextTextureIndex;	  
+		textureId = g_RendererData.NextTextureIndex;
+		g_RendererData.Textures[textureId] = *texture;
+		++g_RendererData.NextTextureIndex;	  
 	  }
 	}
 	else
 	{
 	  GLOG(RED("FLUSH!\n"));
-	  renderer_flush(shader, camera);
+	  renderer_flush();
 	  textureId = 1;
-	  RendererData.Textures[textureId] = *texture;
-	  ++RendererData.NextTextureIndex;
+	  g_RendererData.Textures[textureId] = *texture;
+	  ++g_RendererData.NextTextureIndex;
 	}
 	
-	fill_data_array(RendererData.Data, position, size, color, textureId, RendererData.DataCount);
-	RendererData.DataCount  += QuadVerticesCount;
-	RendererData.IndexCount += 6;
+	fill_data_array(g_RendererData.Data, position, size, color, textureId, g_RendererData.DataCount);
+	g_RendererData.DataCount  += QuadVerticesCount;
+	g_RendererData.IndexCount += 6;
 }
 
 void
@@ -364,17 +276,17 @@ renderer_submit_colored_rectangle(vec3 position, vec2 size, vec4 color)
 {
     i32 textureId;
     Quad quad = {};
-	fill_data_array(RendererData.Data, position, size, color, 0, RendererData.DataCount);
+	fill_data_array(g_RendererData.Data, position, size, color, 0, g_RendererData.DataCount);
 	
-	RendererData.DataCount  += QuadVerticesCount;
-	RendererData.IndexCount += 6;
+	g_RendererData.DataCount  += QuadVerticesCount;
+	g_RendererData.IndexCount += 6;
 }
 
 void
-renderer_flush(Shader* shader, OrthographicCamera* camera)
+renderer_flush()
 {
-    graphics_shader_bind(shader);	
-	graphics_vertex_array_bind(&RendererData.Vao);
+    graphics_shader_bind(g_Shader);	
+	graphics_vertex_array_bind(&g_RendererData.Vao);
  
 	i32 textureIndices[32];
 	for (i32 i = 0; i < 32; i++)
@@ -382,34 +294,34 @@ renderer_flush(Shader* shader, OrthographicCamera* camera)
 	  textureIndices[i] = i;
 	}
 
-	for (i32 i = 0; i < RendererData.NextTextureIndex; i++)
+	for (i32 i = 0; i < g_RendererData.NextTextureIndex; i++)
 	{
-	  graphics_texture2d_bind(&(RendererData.Textures[i]), i);
+	  graphics_texture2d_bind(&(g_RendererData.Textures[i]), i);
 	}
 
 	static i8 show = 1;
 	if (show == 1)
 	{
-	  GDEBUG("DataCount: %d\n", RendererData.DataCount);
+	  GDEBUG("DataCount: %d\n", g_RendererData.DataCount);
 	  show = 0;
 	}
 
-	u32 size = RendererData.DataCount * sizeof(f32); 
+	u32 size = g_RendererData.DataCount * sizeof(f32); 
 	graphics_vertex_buffer_set_data(
-   		RendererData.Vao.VertexBuffer,
-		RendererData.Data, size);
+   		g_RendererData.Vao.VertexBuffer,
+		g_RendererData.Data, size);
 
-	graphics_shader_set_mat4(shader,
+	graphics_shader_set_mat4(g_Shader,
 		"u_ViewProjection", 1, 0,
-		camera->ViewProjectionMatrix[0]); 
-	graphics_shader_set_int1(shader, "u_Textures", RendererData.NextTextureIndex, textureIndices);
+		g_Camera->ViewProjectionMatrix[0]); 
+	graphics_shader_set_int1(g_Shader, "u_Textures", g_RendererData.NextTextureIndex, textureIndices);
 
 	glDrawElements(GL_TRIANGLES,
-				   RendererData.IndexCount,
+				   g_RendererData.IndexCount,
 				   GL_UNSIGNED_INT,
 				   NULL);
 
-	RendererData.DataCount  = 0;
-	RendererData.IndexCount = 0;
-	RendererData.NextTextureIndex = 1;
+	g_RendererData.DataCount  = 0;
+	g_RendererData.IndexCount = 0;
+	g_RendererData.NextTextureIndex = 1;
 }
