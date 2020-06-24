@@ -12,9 +12,18 @@ typedef enum EventType
     None = 0,
     WindowClosed, WindowResized, WindowFocused, WindowUnfocused, WindowMoved,
     AppTick, AppUpdate, AppRender,
-    KeyPressed, KeyRealeased, KeyTyped,
+    KeyPressed, KeyRepeatPressed, KeyRealeased, KeyTyped,
     MouseButtonPressed, MouseButtonReleased, MouseMoved, MouseScrolled
 } EventType;
+
+typedef enum EventCategory
+{
+  NoneCategory = 0,
+  WindowCategory,
+  AppCategory,
+  KeyCategory,
+  MouseCategory
+} EventCategory;
 
 void event_init_table(char** EventTypeToString, i32 count);
 
@@ -22,6 +31,7 @@ typedef struct Event
 {
   i8 IsHandled;
   EventType Type;
+  EventCategory Category;
 } Event;
 
 typedef struct KeyPressedEvent 
@@ -62,7 +72,7 @@ typedef struct MouseButtonEvent
 {
   Event Base;
   i32 MouseCode;
-} MousePressedEvent;
+} MouseButtonEvent;
 
 // NOTE(vez): for this type event don't use struct
 // only Event .Type =  WindowClosedEvent

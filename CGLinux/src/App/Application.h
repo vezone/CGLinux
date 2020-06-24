@@ -2,23 +2,30 @@
 #define APPLICATION
 
 #include "Graphics/Window.h"
-#include "Graphics/Renderer2D/Renderer2D.h"
 #include "Graphics/KeyCodes.h"
 #include "Utils/Logger.h"
-#include "Platform/Linux/Linux.h"
 #include "Event/Event.h"
+#include "Platform/Linux/Linux.h"
 
 typedef struct Layer
 {
-  i32 Id;
-  void (*OnAttach)();
+  void (*OnAttach)(Window window);
   void (*OnUpdate)(f32 timestep);
+  void (*OnEvent)(Event* event);
+  void (*OnDestoy)();
 } Layer;
 
-void application_init();
+typedef struct Application {
+  i8 IsMinimized;
+  i8 IsRunning;
+  char* EventTypeToString[32];
+  Layer* Layers;
+  Window Window;
+} Application;
+
+void application_push_layer(Layer layer);
+void application_init(u32 width, u32 height, const char* name);
 void application_start();
 void application_on_event(Event* event);
-void application_push_layer(Layer layer);
-
 
 #endif

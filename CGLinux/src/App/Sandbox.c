@@ -10,7 +10,6 @@
 #include "Graphics/Window.h"
 #include "Graphics/KeyCodes.h"
 #include "Graphics/Buffer.h"
-#include "Graphics/Shader.h"
 #include "Graphics/Renderer2D/Renderer2D.h"
 #include "Graphics/Renderer2D/OrthographicCamera.h"
 
@@ -44,15 +43,12 @@ const char* shader_batched_texture_path = "CGLinux/resource/batched_texture_shad
 const char* texture_anime_chibi = "CGLinux/resource/anime_chibi.png";
 const char* texture_cherno_hazel_logo = "CGLinux/resource/hazel.png";
 const char* texture_hotline_miami = "CGLinux/resource/assets/textures/other/hotline_miami.png";
-Window window;
 
-f32 g_CameraSpeed = 4.0f;
+Window g_Window;
+
 OrthographicCamera g_Camera;
-f32 g_ZoomLevel = 1.0f;
-f32 g_AspectRatio;
 f32 g_LastFrameTime = 0.0f;
 
-char windowTitle[33];
 vec4 triangleColor = { 0.2f, 0.5f, 1.0f, 1.0f };
 vec4 redColor = { 0.8f, 0.1f, 0.1f, 1.0f };
 vec4 yellowColor = { 1.0f, 1.0f, 0.0f, 1.0f };
@@ -68,87 +64,16 @@ Texture2D hazelLogoTexture;
 Texture2D chibiTexture;
 Texture2D hotlineMiamiTexture;
 
-f32 tempTime;
-
 void 
-window_mouse_scroll_callback(GLFWwindow* window, f64 xoffset, f64 yoffset)
+sandbox_on_attach(Window window)
 {
-	if (yoffset < 0.0f || g_ZoomLevel > 0.1f)
-	{
-		g_ZoomLevel -= yoffset / 10;
-	}
-
-	char windowTitle[32];
-	GFORMAT(windowTitle, "Demo %f", g_ZoomLevel);
-	window_set_title(window, windowTitle);
-}
-
-void 
-window_cursor_callback(GLFWwindow* window, f64 xpos, f64 ypos)
-{
-	//empty for now
-}
-
-void 
-handle_dropped_file(const char* path)
-{
-	GLOG("Path of file = %s\n", path);
-}
-
-void 
-window_drop_callback(GLFWwindow* window, i32 count, const char** paths)
-{
-	i32 i;
-	for (i = 0; i < count; i++)
-	{
-		handle_dropped_file(paths[i]);
-	}
-}
-
-void 
-window_resize_callback(GLFWwindow* window, u32 width, u32 height)
-{
-    orthographic_camera_resize(&g_Camera, width, height, g_ZoomLevel);
-	renderer_set_viewport(width, height);
-}
-
-void sandbox_on_update(f32 timestep);
-
-void 
-sandbox_on_attach()
-{
-	//app
-	//seting stack size
-    linux_set_application_stack(MB(500), MB(528));
-
-	i32 isWindowCreated = window_create(&window, Width, Height, "Demo");
-	if (isWindowCreated == -1) 
-	{
-		GERROR("Can't create window!\n");
-		return;
-	}
-	
-	window_set_vsync(0);
-	window_set_scroll_callback(&window, window_mouse_scroll_callback);
-	window_set_resize_callback(&window, window_resize_callback);
-	GFORMAT(windowTitle, "Demo %f", g_ZoomLevel);
-	window_set_title(window.GlfwWindow, windowTitle);
-	
-	//OpenGL
-	i32 status = gladLoadGLLoader((GLADloadproc)glfwGetProcAddress);
-	if (status == 0)
-	{
-		GERROR("Failed to init GLAD\n");
-		return;
-	}
-	GLOG(MAGNETA("OpenGL version %s\n"), glGetString(GL_VERSION));
-
-	g_AspectRatio = Width / Height;
-	g_Camera = orthographic_camera_create(
-		-g_AspectRatio * g_ZoomLevel, 
-		g_AspectRatio * g_ZoomLevel, 
-		-g_ZoomLevel, g_ZoomLevel);
-	orthographic_camera_resize(&g_Camera, (u32)Width, Height, g_ZoomLevel);
+    g_Window = window;
+	f32 aspectRatio = Width / Height;
+	f32 zoomLevel = 1.0f;
+	g_Camera = orthographic_camera_create(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel);
+	g_Camera.AspectRatio = aspectRatio;
+	g_Camera.ZoomLevel = zoomLevel;
+	g_Camera.Speed = 5.0f;
 	
 	batchedTextureShader =
 	  graphics_shader_compile(
@@ -160,65 +85,12 @@ sandbox_on_attach()
 graphics_texture2d_create(texture_hotline_miami);
 	  
 	renderer_batch_init(&batchedTextureShader, &g_Camera);
-	
-	f32 timestep;
-	while (!window_should_close(&window))
-	{
-	    tempTime = (f32) glfwGetTime();
-		timestep = tempTime - g_LastFrameTime;
-		g_LastFrameTime = tempTime;
-
-        #if 1
-		printf("timestep: %fms\r", 1000 * timestep);
-		#endif
-		
-		sandbox_on_update(timestep);
-
-		window_on_update(&window);
-	}
-
-	window_terminate();
-	
-	graphics_shader_delete_collection();
-
 }
 
 void sandbox_on_update(f32 timestep)
 {
-  if (window_is_key_pressed(&window, KEY_ESCAPE))
-  {
-	  window_set_should_close(&window, 1);
-  }
+  orthographic_camera_on_update(&g_Camera, &g_Window, timestep);
 
-  if (window_is_key_pressed(&window, KEY_W))
-  {
-	  g_Camera.Position[1] += g_CameraSpeed * timestep;
-  }
-  else if (window_is_key_pressed(&window, KEY_S))
-  {
-	  g_Camera.Position[1] -= g_CameraSpeed * timestep;
-  }
-
-  if (window_is_key_pressed(&window, KEY_A))
-  {
-	  g_Camera.Position[0] -= g_CameraSpeed * timestep;
-  }
-  else if (window_is_key_pressed(&window, KEY_D))
-  {
-	  g_Camera.Position[0] += g_CameraSpeed * timestep;
-  }
-		
-  if (window_is_key_pressed(&window, KEY_Q))
-  {
-	g_Camera.Rotation += 0.1f * timestep;
-  }
-  else if (window_is_key_pressed(&window, KEY_E))
-  {
-	g_Camera.Rotation -= 0.1f * timestep;
-  }
-
-  orthographic_camera_on_update(&g_Camera, g_AspectRatio, g_ZoomLevel);
-	
   renderer_clear((vec4) { 0.2f, 0.245f, 0.356f, 1.0f });
 
   renderer_submit_rectangle((vec3) {-1.5f, -0.5f, 0.0f}, (vec2) {1.0f, 1.0f}, &hazelLogoTexture);
@@ -247,95 +119,47 @@ void sandbox_on_update(f32 timestep)
   }
   #endif
   
-  
   renderer_flush();
 }
 
-
-
-typedef void (*OnAttach)();
-typedef void (*OnUpdate)(f32 timestep);
-
-typedef struct Layer {
-  i32 Id;
-
-  OnAttach OnAttach;
-  OnUpdate OnUpdate;
-} Layer;
-
-static void layer_create(Layer* layer, OnAttach onAttach, OnUpdate onUpdate)
+void
+sandbox_on_event(Event* event)
 {
-    layer->OnAttach = onAttach;
-	layer->OnUpdate = onUpdate;
-}
-
-void App_OnUpdate(f32 timestep)
-{
-  GLOG("App_OnUpdate\n");
-}
-
-void App_OnAttach()
-{
-  
-}
-
-typedef struct App
-{
-  i8 IsMinimized;
-  Layer* Layers;
-} App;
-
-static App s_App;
-
-static void pseudo_app_add_layer(Layer layer)
-{
-  array_push(s_App.Layers, layer);
-  layer.OnAttach();
-}
-
-static void pseudo_app_run()
-{
-  Layer layer1 = {};
-  Layer layer2 = {};
-  layer_create(&layer1, App_OnAttach, App_OnUpdate);
-  layer_create(&layer2, App_OnAttach, App_OnUpdate);
-
-  pseudo_app_add_layer(layer1);
-  pseudo_app_add_layer(layer2);
-  
-  while (true)
+  if (event->IsHandled == 1)
   {
-	  if (!s_App.IsMinimized)
-	  {
-	      for (i32 i = 0; i < array_len(s_App.Layers); i++)
-	      {
-	  	      s_App.Layers[i].OnUpdate(1.0f);
-		  }	
-	  }
-	  
+	  return;
   }
-}
 
-static void pseudo_sandbox_onupdate(f32 timestep)
-{
-  //doing all sandbox stuff there
-}
-
-static void pseudo_sandbox_onattach()
-{
+  orthographic_camera_on_event(&g_Camera, event);
   
+  if (event->Category == KeyCategory)
+  {
+	KeyPressedEvent* keyEvent = (KeyPressedEvent*) event;
+	if (window_is_key_pressed(&g_Window, KEY_ESCAPE))
+	{
+	  window_set_should_close(&g_Window, 1);
+	}
+
+	event->IsHandled = 1;
+  }
+  else if (event->Category == MouseCategory)
+  {
+	char windowTitle[32];
+
+	if (event->Type == MouseButtonPressed)
+	{
+	  MouseButtonEvent* mevent = (MouseButtonEvent*) event;
+	  if (mevent->MouseCode == MOUSE_BUTTON_1)
+	  {
+		  g_Camera.ZoomLevel = 1.0f;
+	  }
+	}
+
+	GFORMAT(windowTitle, "Demo %f", g_Camera.ZoomLevel);
+	window_set_title(&g_Window, windowTitle);
+
+	event->IsHandled = 1;
+  }
+
 }
 
-static void pseudo_sandbox()
-{
-  Layer layer1 = {};
-  layer_create(&layer1, pseudo_sandbox_onattach, pseudo_sandbox_onupdate);
-  
-  pseudo_app_add_layer(layer1);
-}
-
-
-static void EntryPoint()
-{
-  pseudo_app_run();
-}

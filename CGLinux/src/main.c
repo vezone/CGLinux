@@ -1,29 +1,41 @@
 #include "App/Sandbox.h"
-#include "Utils/stb_ds.h"
+#include "App/Application.h"
 #include "Utils/Types.h"
 #include "Utils/Logger.h"
-#include "App/Application.h"
 
 /*
   TODO:
-    * big refactoring in renderer
+  * use only ansi c way of pragma once
+  * rebuild arch
 
-  TODO:
-	* create renderer2d_submit(), renderer2d_flush()
-	* create transformation (model matrix)
-	* create application
-	* create _
-
-
-  3 471
+  App + Event:
+    451
+  Graphics (only, without Renderer):
+    1 652
+  Renderer2D:
+    652
+  Platform:
+    32
+  Utils:
+    539
+  
+  3 326
+  
 */
 
 int main()
 {
-    sandbox_on_attach();
+    i32 temp;
+	Layer layer;
 
-	// application_init();
-	// application_start();
+	application_init(1280, 720, "Demo");
+	layer.OnAttach = sandbox_on_attach;
+	layer.OnUpdate = sandbox_on_update;
+	layer.OnEvent = sandbox_on_event;
+	layer.OnDestoy = sandbox_on_destroy;
+	application_push_layer(layer);
+
+	application_start();
 	
 	return 0;
 }

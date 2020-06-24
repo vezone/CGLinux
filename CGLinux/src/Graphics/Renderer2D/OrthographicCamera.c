@@ -4,7 +4,8 @@ OrthographicCamera
 orthographic_camera_create(f32 left, f32 right, f32 bot, f32 top)
 {
 	OrthographicCamera camera = {};
-
+	
+	camera.Speed = 1.0f;
 	camera.Rotation = 0.0f;
 	glm_vec3_zero(camera.Position);
 	glm_ortho(left, right, bot, top, -1.0f, 1.0f, camera.ProjectionMatrix);

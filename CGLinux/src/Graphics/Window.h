@@ -2,34 +2,53 @@
 
 #include <GLFW/glfw3.h>
 
-//#include "Event/Event.h"
+#include "Event/Event.h"
 #include "Utils/Types.h"
+
+#define window_get_frequency() glfwGetTimerFrequency()
+#define window_get_cursor_position(window, xPos, yPos) glfwGetCursorPos((window)->GlfwWindow, xPos, yPos);
+#define window_set_drop_callback(window, callback) glfwSetDropCallback((window)->GlfwWindow, callback)
 
 typedef struct Window {
     u32 Width;
     u32 Height;
     const char* Title;
+    void (*OnEvent)(Event* event);
     GLFWwindow* GlfwWindow;
 } Window;
 
-typedef struct Event Event;
+static i32
+window_should_close(Window* window)
+{
+  return glfwWindowShouldClose(window->GlfwWindow);
+}
 
-//typedef (*window_on_event_delegate)(Event* event);
-//window_on_event_delegate window_on_event_function; 
+static void
+window_set_should_close(Window* window, i8 shouldClose)
+{
+  glfwSetWindowShouldClose(window->GlfwWindow, shouldClose);
+}
 
-#define window_should_close(window) glfwWindowShouldClose((window)->GlfwWindow)
-#define window_set_should_close(window, x) glfwSetWindowShouldClose((window)->GlfwWindow, x)
-#define window_terminate() glfwTerminate()
-#define window_get_frequency() glfwGetTimerFrequency()
-#define window_get_cursor_position(window, xPos, yPos) glfwGetCursorPos((window)->GlfwWindow, xPos, yPos);
-#define window_set_title(window, title) glfwSetWindowTitle(window, title)	
-//rework it in a future
-#define window_set_scroll_callback(window, callback) glfwSetScrollCallback((window)->GlfwWindow, callback)
-#define window_set_drop_callback(window, callback) glfwSetDropCallback((window)->GlfwWindow, callback)
-#define window_set_resize_callback(window, callback) glfwSetWindowSizeCallback((window)->GlfwWindow, callback)
+static void
+window_terminate()
+{
+  glfwTerminate();
+}
+
+static void
+window_set_title(Window* window, const char* title)
+{
+  glfwSetWindowTitle(window->GlfwWindow, title); 
+}
+
+static void
+window_set_resize_callback(Window* window, void (*callback) (GLFWwindow* window, i32 width, i32 height))
+{
+  glfwSetWindowSizeCallback(window->GlfwWindow, callback);
+}
 
 i32
-window_create(Window* window, u32 width, u32 height, const char* tittle);
+window_create(Window* window, u32 width, u32 height, const char* tittle, void (*onEvent)(Event* event));
 
 static i32
 window_is_key_pressed(Window* window, i32 key)

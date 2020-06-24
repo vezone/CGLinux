@@ -3,7 +3,7 @@
 #include <stdio.h>
 
 //GLBOBAL
-#define DEBUG_MODE 1
+#define DEBUG_MODE 0
 
 #if DEBUG_MODE == 0
 #define ISGLOBALLOG 1
