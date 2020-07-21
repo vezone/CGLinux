@@ -3,25 +3,25 @@
 #include <sys/resource.h>
 #include "Utils/Logger.h"
 
-void linux_set_application_stack(i64 currentBytesNumber, i64 maxBytesNumber)
+void linux_set_current_stack_size(i64 currentBytesNumber, i64 maxBytesNumber)
 {
     struct rlimit resource_limit;
-	int result = getrlimit(RLIMIT_STACK, &resource_limit);
-	if (result < 0)
+    i32 result = getrlimit(RLIMIT_STACK, &resource_limit);
+    if (result < 0)
+    {
+	GERROR("Get RLIMIT_STACK error!\n");
+	return;
+    }
+    else
+    {
+	GLOG("Resource limit: %lld\n", (i64)resource_limit.rlim_cur, (i64)resource_limit.rlim_max);
+	resource_limit.rlim_cur = (i64) currentBytesNumber;
+	resource_limit.rlim_max = (i64) maxBytesNumber;
+	result = setrlimit(RLIMIT_STACK, &resource_limit);
+	if (result == 0) 
 	{
-		GLOG(RED("Get RLIMIT_STACK error!\n"));
-		return;
+	    GLOG("New Resource limit: %lld mb\n", 
+		(i64)TOMB(resource_limit.rlim_cur), (i64)resource_limit.rlim_max);
 	}
-	else 
-	{
-		GLOG("Resource limit: %lld\n", (i64)resource_limit.rlim_cur, (i64)resource_limit.rlim_max);
-		resource_limit.rlim_cur = (i64) currentBytesNumber;
-		resource_limit.rlim_max = (i64) maxBytesNumber;
-		result = setrlimit(RLIMIT_STACK, &resource_limit);
-		if (result == 0) 
-		{
-			GLOG(YELLOW("NEW") "Resource limit: %lld mb\n", 
-			(i64)TOMB(resource_limit.rlim_cur), (i64)resource_limit.rlim_max);
-		}
-	}
+    }
 }

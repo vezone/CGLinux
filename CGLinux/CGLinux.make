@@ -15,15 +15,15 @@ ifeq ($(config),debug)
   TARGETDIR = ../bin/Debug-linux-x86_64/CGLinux
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/CGLinux
-  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DEBUG\ =\ 1
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG\ =\ 1
   INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include -I../Dependencies/CImGUI
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99 -O3
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99 -O3
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a ../Dependencies/CImGUI/bin/Debug-linux-x86_64/CImGUI/libCImGUI.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a ../Dependencies/CImGUI/bin/Debug-linux-x86_64/CImGUI/libCImGUI.a
+  LIBS += ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lCImGui -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -42,15 +42,15 @@ ifeq ($(config),release)
   TARGETDIR = ../bin/Release-linux-x86_64/CGLinux
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/CGLinux
-  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DEBUG\ =\ 0
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DEBUG\ =\ 0
   INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include -I../Dependencies/CImGUI
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a ../Dependencies/CImGUI/bin/Release-linux-x86_64/CImGUI/libCImGUI.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a ../Dependencies/CImGUI/bin/Release-linux-x86_64/CImGUI/libCImGUI.a
+  LIBS += ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lCImGui -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -69,15 +69,15 @@ ifeq ($(config),dist)
   TARGETDIR = ../bin/Dist-linux-x86_64/CGLinux
   TARGET = $(TARGETDIR)/CGLinux
   OBJDIR = ../bin/Intermidiates/Dist-linux-x86_64/CGLinux
-  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DIST
+  DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCG_DIST
   INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include -I../Dependencies/CImGUI
   FORCE_INCLUDE +=
   ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
   ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
   ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
   ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
-  LIBS += ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a ../Dependencies/CImGUI/bin/Dist-linux-x86_64/CImGUI/libCImGUI.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
-  LDDEPS += ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a ../Dependencies/CImGUI/bin/Dist-linux-x86_64/CImGUI/libCImGUI.a
+  LIBS += ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a -lCImGui -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+  LDDEPS += ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a
   ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
   LINKCMD = $(CC) -o "$@" $(OBJECTS) $(RESOURCES) $(ALL_LDFLAGS) $(LIBS)
   define PREBUILDCMDS
@@ -94,10 +94,7 @@ endif
 OBJECTS := \
 	$(OBJDIR)/Application.o \
 	$(OBJDIR)/Sandbox.o \
-	$(OBJDIR)/EntryPoint.o \
 	$(OBJDIR)/Event.o \
-	$(OBJDIR)/cimgui_impl_glfw.o \
-	$(OBJDIR)/cimgui_impl_opengl3.o \
 	$(OBJDIR)/Buffer.o \
 	$(OBJDIR)/OpenGLBase.o \
 	$(OBJDIR)/OrthographicCamera.o \
@@ -111,7 +108,7 @@ OBJECTS := \
 	$(OBJDIR)/String.o \
 	$(OBJDIR)/stb_ds.o \
 	$(OBJDIR)/stb_image.o \
-	$(OBJDIR)/temp.o \
+	$(OBJDIR)/main.o \
 
 RESOURCES := \
 
@@ -176,16 +173,7 @@ $(OBJDIR)/Application.o: src/App/Application.c
 $(OBJDIR)/Sandbox.o: src/App/Sandbox.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/EntryPoint.o: src/EntryPoint.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Event.o: src/Event/Event.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/cimgui_impl_glfw.o: src/GUI/cimgui_impl_glfw.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/cimgui_impl_opengl3.o: src/GUI/cimgui_impl_opengl3.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Buffer.o: src/Graphics/Buffer.c
@@ -227,7 +215,7 @@ $(OBJDIR)/stb_ds.o: src/Utils/stb_ds.c
 $(OBJDIR)/stb_image.o: src/Utils/stb_image.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/temp.o: src/temp.c
+$(OBJDIR)/main.o: src/main.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

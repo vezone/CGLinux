@@ -1,3 +1,6 @@
 [submodule "Dependencies/GLFW"]
 	path = Dependencies/GLFW
 	url = https://github.com/vezone/glfw.git
+[submodule "Dependencies/CImGUI"]
+	path = Dependencies/CImGUI
+	url = https://github.com/vezone/cimgui

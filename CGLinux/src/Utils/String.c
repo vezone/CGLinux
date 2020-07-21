@@ -216,7 +216,7 @@ vstring_last_index_of(const char* input, char character)
 	
 	return -1;
 }
-#include "Logger.h"
+
 const char* 
 vstring_substring(const char* input, i32 start_index)
 {

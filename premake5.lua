@@ -15,40 +15,33 @@ IncludeDirs = {}
 IncludeDirs["GLFW"] = "Dependencies/GLFW/include" 
 IncludeDirs["GLAD"] = "Dependencies/glad/include" 
 IncludeDirs["CGLM"] = "Dependencies/CGLM/include" 
+IncludeDirs["CIMGUI"] = "Dependencies/CImGUI"
 
 group "Dependencies"
 	include "Dependencies/GLFW"
 	include "Dependencies/glad"
+	include "Dependencies/CImGUI"
 
 project "CGLinux"
 	location "CGLinux"
 	kind "ConsoleApp"
 	language "C"
 
-	buildoptions { "-std=c99" }
+	buildoptions { "-std=c99", "-O3" }
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin/Intermidiates/" .. outputdir .. "/%{prj.name}")
 
 	files
 	{
 		"%{prj.name}/src/**.h",
-		"%{prj.name}/src/**.c",
-		"%{prj.name}/src/App/**.h",
-		"%{prj.name}/src/App/**.c",
-		"%{prj.name}/src/Platform/Linux/**.h",
-		"%{prj.name}/src/Platform/Linux/**.c",
-		"%{prj.name}/src/Graphics/**.h",
-		"%{prj.name}/src/Graphics/**.c",
-		"%{prj.name}/src/Graphics/Renderer2D/**.h",
-		"%{prj.name}/src/Graphics/Renderer2D/**.c",
-		"%{prj.name}/src/Utils/**.h",
-		"%{prj.name}/src/Utils/**.c"
+		"%{prj.name}/src/**.c"
 	}
 
 	defines
 	{
 		"_CRT_SECURE_NO_WARNINGS",
-		"GLFW_INCLUDE_NONE"
+		"GLFW_INCLUDE_NONE",
+		"CIMGUI_DEFINE_ENUMS_AND_STRUCTS"
 	}
 
 	includedirs
@@ -56,18 +49,33 @@ project "CGLinux"
 		"%{prj.name}/src",
 		"%{IncludeDirs.GLFW}",
 		"%{IncludeDirs.GLAD}",
-		"%{IncludeDirs.CGLM}"
+		"%{IncludeDirs.CGLM}",
+		"%{IncludeDirs.CIMGUI}"
 	}
 
 	links
 	{
 		"GLAD",
 		"GLFW",
+		"CImGUI",
+		"stdc++",
 		"GL", "GLU",
 		"X11","dl",
 		"Xinerama", "Xcursor", "m",
 		"Xxf86vm", "Xrandr", "pthread", "Xi"
 	}
+
+	filter "system:linux"
+	       defines
+	       {
+	           LINUX_PLATFORM
+	       }
+
+	filter "system:windows"
+		defines
+		{
+		    WINDOWS_PLATFORM
+		}
 
 	filter "configurations:Debug"
 		defines "CG_DEBUG = 1"

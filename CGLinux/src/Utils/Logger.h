@@ -23,34 +23,46 @@
 #define ISSHADERDEBUG 0
 //Buffers
 #define ISBUFFERDEBUG 0
+//Textures
+#define ISTEXTUREDEBUG 0
+
+#define PLATFORM_LINUX 1
+
+#if PLATFORM_LINUX == 1
+#include "Platform/Linux/LinuxLogger.h"
+#else
+//Create windows logger
+#endif
+
+#define PRINT(format, ...) printf(format, ##__VA_ARGS__)
 
 #if ISGLOBALLOG == 1
-#define GLOG(format, ...) printf("[LOG] file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
+#define GLOG(format, ...) PLOG(format, ##__VA_ARGS__)
 #else
 #define GLOG(format, ...)
 #endif
 
 #if ISGLOBALERROR == 1
-#define GERROR(format, ...) printf(RED("[ERROR]")" file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
+#define GERROR(format, ...) PERROR(format, ##__VA_ARGS__)
 #else
 #define GERROR(format, ...)
 #endif
 
 #if ISGLOBALWARNING == 1
-#define GWARNING(format, ...) printf(YELLOW("[WARNING]")" file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
+#define GWARNING(format, ...) PWARNING(format, ##__VA_ARGS__)
 #else
 #define GWARNING(format, ...)
 #endif
 
 #if ISGLOBALDEBUG == 1
-#define GDEBUG(format, ...) printf("[DEBUG] file: %s, line: %d, message: ", __FILE__, __LINE__);printf(format, ##__VA_ARGS__)
-#define GLDEBUG(format, file, line, ...) printf(GREEN("[GL-DEBUG]")" file: %s, line: %d, message: ", file, line);printf(format, ##__VA_ARGS__)
+#define GDEBUG(format, ...) PDEBUG(format, ##__VA_ARGS__)
+#define GLDEBUG(format, file, line, ...) PGLDEBUG(format, file, line, ##__VA_ARGS__)
 #else
 #define GDEBUG(format, ...)
 #define GLDEBUG(format, file, line, ...)
 #endif
-#define GPRINTI32(var) const char* format = #var;\
-  GLOG(#var": %d\n", var)
+
+#define GPRINTI32(var) GLOG(#var": %d\n", var)
 
 #if ISFORMATTOSTRING == 1
 #define GFORMAT(string, format, ...) sprintf(string, format, __VA_ARGS__)
@@ -71,3 +83,9 @@
 #define BUFFERDEBUG(format, ...)
 #endif
 
+
+#if ISTEXTUREDEBUG == 1
+#define TEXTUREDEBUG(format, ...) GLOG(format, ##__VA_ARGS__)
+#else
+#define TEXTUREDEBUG(format, ...)
+#endif

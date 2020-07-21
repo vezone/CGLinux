@@ -17,7 +17,7 @@ graphics_texture2d_create(const char* path)
     Texture2D texture = {
         .Path = path
     };
-    GDEBUG("Texture path: %s\n", path);
+    TEXTUREDEBUG("Texture path: %s\n", path);
 
     //Enable blending
     GLCheck(glEnable(GL_BLEND));
@@ -28,14 +28,14 @@ graphics_texture2d_create(const char* path)
         &width, &height, &channels, 0);
     if (!data) 
     {
-        GLOG(RED("Failed to load a texture!"));
+        GERROR("Failed to load a texture!");
     }
 
     texture.Width = width;
     texture.Height = height;
     texture.Channels = channels;
 
-    GDEBUG("Channels: %d\n", channels);
+    TEXTUREDEBUG("Channels: %d\n", channels);
 
     if (channels == 3) 
     {
