@@ -1,5 +1,6 @@
-workspace "CGLinux"
+workspace "Engine"
 	architecture "x64"
+    startproject "Sandbox"
 
 	configurations
 	{
@@ -22,12 +23,12 @@ group "Dependencies"
 	include "Dependencies/glad"
 	include "Dependencies/CImGUI"
 
-project "CGLinux"
-	location "CGLinux"
-	kind "ConsoleApp"
+project "Engine"
+	location "Engine"
+	kind "StaticLib"
 	language "C"
-
-	buildoptions { "-std=c99", "-O3" }
+    staticruntime "on"
+	
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
 	objdir ("bin/Intermidiates/" .. outputdir .. "/%{prj.name}")
 
@@ -53,17 +54,7 @@ project "CGLinux"
 		"%{IncludeDirs.CIMGUI}"
 	}
 
-	links
-	{
-		"GLAD",
-		"GLFW",
-		"CImGUI",
-		"stdc++",
-		"GL", "GLU",
-		"X11","dl",
-		"Xinerama", "Xcursor", "m",
-		"Xxf86vm", "Xrandr", "pthread", "Xi"
-	}
+
 
 	filter "system:linux"
 	       defines
@@ -88,3 +79,63 @@ project "CGLinux"
 	filter "configurations:Dist"
 		defines "CG_DIST"
 		optimize "On"
+
+project "Sandbox"
+	location "Sandbox"
+	kind "ConsoleApp"
+	language "C"
+    staticruntime "on"
+	
+	buildoptions 
+	 { 
+	 	 "-std=c99"
+	     , "-O3" 
+	}
+
+	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin/Intermidiates/" .. outputdir .. "/%{prj.name}")
+	
+	files
+	{
+		"%{prj.name}/src/**.h",
+		"%{prj.name}/src/**.c"
+	}
+	
+    defines
+	{
+		"GLFW_INCLUDE_NONE"
+    }
+    
+	includedirs
+	{
+		"Engine/src",
+		"%{IncludeDirs.GLFW}",
+		"%{IncludeDirs.GLAD}",
+		"Dependencies",
+		"%{IncludeDirs.CGLM}"
+	}
+	
+	links
+	{
+		"Engine",
+        "glad",
+		"GLFW",
+		"CImGUI",
+		"stdc++",
+        "GL", "GLU",
+		"X11","dl",
+		"Xinerama", "Xcursor", "m",
+		"Xxf86vm", "Xrandr", "pthread", "Xi"
+	}
+	
+	filter "configurations:Debug"
+		defines "CG_DEBUG = 1"
+		symbols "On"
+	
+	filter "configurations:Release"
+		defines "CG_DEBUG = 0"
+		optimize "On"
+	
+	filter "configurations:Dist"
+		defines "CG_DIST"
+		optimize "On"	

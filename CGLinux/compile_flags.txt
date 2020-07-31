@@ -1,8 +1,0 @@
--I/home/bies/Documents/programming/c/CGLinux/CGLinux
--I/home/bies/Documents/programming/c/CGLinux/CGLinux/src
--I/home/bies/Documents/programming/c/CGLinux/Dependencies/GLFW/include
--I/home/bies/Documents/programming/c/CGLinux/Dependencies/glad/include
--I/home/bies/Documents/programming/c/CGLinux/Dependencies/CGLM/include
--D_CRT_SECURE_NO_WARNINGS
--DCG_DEBUG
--DGLFW_INCLUDE_NONE

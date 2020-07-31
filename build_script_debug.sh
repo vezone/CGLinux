@@ -1,5 +1,5 @@
 #!/bin/bash
 
-rm bin/Debug-linux-x86_64/CGLinux/CGLinux
+rm bin/Debug-linux-x86_64/Sandbox/Sandbox
 make config=debug
-bin/Debug-linux-x86_64/CGLinux/CGLinux
+bin/Debug-linux-x86_64/Sandbox/Sandbox
