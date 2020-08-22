@@ -187,8 +187,7 @@ static OrthographicCamera* g_Camera;
 static BatchRenderer2DData g_RendererData =
 {
     .DataCount = 0,
-    .IndexCount = 0,
-    .NextTextureIndex = 1
+    .IndexCount = 0
 };
 static Renderer2DStatistics* g_Statistics;
 
@@ -328,6 +327,54 @@ fill_rotated_data_array(f32* destination, vec3 positionsArray[4], vec4 color, i3
     ++g_Statistics->RectanglesCount;
 }
 
+force_inline void
+texture_list_set_immutable(TextureList* list, Texture2D* texture)
+{
+    list->Textures[list->StartIndex++] = *texture;
+}
+
+force_inline i8
+texture_list_is_full(TextureList* list)
+{
+    return list->NextTextureIndex >= list->MaxTextureSlot;
+}
+
+force_inline i32
+texture_list_contains(TextureList* list, Texture2D* texture)
+{
+    i8 isAlreadyInList = -1;
+    i32 i;
+    u32 id;
+
+    for (i = 1; i < list->NextTextureIndex; i++)
+    {
+        id = list->Textures[i].RendererID;
+        if (id == texture->RendererID)
+        {
+            return i;
+        }
+    }
+
+    return isAlreadyInList;
+}
+
+force_inline void
+texture_list_add(TextureList* list, Texture2D* texture, i32 textureId)
+{
+    list->Textures[textureId] = *texture;
+    ++list->NextTextureIndex;
+}
+
+force_inline void
+texture_list_bind(TextureList* list)
+{
+    i32 i;
+    for (i = 0; i < list->NextTextureIndex; i++)
+    {
+        graphics_texture2d_bind(&(list->Textures[i]), i);
+    }
+}
+
 void
 renderer_batch_init(Renderer2DStatistics* statistics, Shader* shader, Texture2D* whiteTexture, OrthographicCamera* camera)
 {
@@ -354,8 +401,12 @@ renderer_batch_init(Renderer2DStatistics* statistics, Shader* shader, Texture2D*
     graphics_vertex_array_add_vbo(&g_RendererData.Vao, vbo);
     graphics_vertex_array_add_ibo(&g_RendererData.Vao, ibo);
     graphics_vertex_array_bind(&g_RendererData.Vao);
-
-    g_RendererData.Textures[0] = *whiteTexture;
+    g_RendererData.List = (TextureList) {
+        .StartIndex = 0,
+        .MaxTextureSlot = 32,
+        .NextTextureIndex = 1
+    };
+    texture_list_set_immutable(&g_RendererData.List, whiteTexture);
 }
 
 void
@@ -364,39 +415,27 @@ renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture)
     i32 textureId;
     vec4 color = { 1.0f, 1.0f, 1.0f, 1.0f };
 
-    if (g_RendererData.NextTextureIndex < 31 &&
+    i8 isTextureListFull = texture_list_is_full(&g_RendererData.List);
+    if (!isTextureListFull &&
         ((g_RendererData.DataCount + QuadVerticesCount) < VerticesCount))
     {
-        i8 isAlreadyInArray = -1;
-        for (i32 i = 1;
-             i < g_RendererData.NextTextureIndex;
-             i++)
+        textureId = texture_list_contains(&g_RendererData.List, texture);
+        if (textureId == -1)
         {
-            u32 id = g_RendererData.Textures[i].RendererID;
-            if (id == texture->RendererID)
-            {
-                isAlreadyInArray = i;
-                break;
-            }
-        }
-
-        if (isAlreadyInArray != -1)
-        {
-            textureId = isAlreadyInArray;
-        }
-        else
-        {
-            textureId = g_RendererData.NextTextureIndex;
-            g_RendererData.Textures[textureId] = *texture;
-            ++g_RendererData.NextTextureIndex;
+            textureId = g_RendererData.List.NextTextureIndex;
+            texture_list_add(&g_RendererData.List, texture, textureId);
+            //g_RendererData.Textures[textureId] = *texture;
+            //++g_RendererData.NextTextureIndex;
         }
     }
     else
     {
         renderer_flush();
-        textureId = 1;
-        g_RendererData.Textures[textureId] = *texture;
-        ++g_RendererData.NextTextureIndex;
+        textureId = g_RendererData.List.StartIndex;
+        //textureId = 1;
+        texture_list_add(&g_RendererData.List, texture, textureId);
+        //g_RendererData.Textures[textureId] = *texture;
+        //++g_RendererData.NextTextureIndex;
     }
 
     fill_data_array(g_RendererData.Data, position, size, color, textureId, 1, g_RendererData.DataCount);
@@ -417,39 +456,22 @@ renderer_submit_rotated_rectangle(vec3 position, vec2 size, f32 angle, Texture2D
     mat4 rotationMat = GLM_MAT4_IDENTITY_INIT;
     mat4 scaleMat = GLM_MAT4_IDENTITY_INIT;
 
-    if (g_RendererData.NextTextureIndex < 31 &&
+    i8 isTextureListFull = texture_list_is_full(&g_RendererData.List);
+    if (!isTextureListFull &&
         ((g_RendererData.DataCount + QuadVerticesCount) < VerticesCount))
     {
-        i8 isAlreadyInArray = -1;
-        for (i32 i = 1;
-             i < g_RendererData.NextTextureIndex;
-             i++)
+        textureId = texture_list_contains(&g_RendererData.List, texture);
+        if (textureId == -1)
         {
-            u32 id = g_RendererData.Textures[i].RendererID;
-            if (id == texture->RendererID)
-            {
-                isAlreadyInArray = i;
-                break;
-            }
-        }
-
-        if (isAlreadyInArray != -1)
-        {
-            textureId = isAlreadyInArray;
-        }
-        else
-        {
-            textureId = g_RendererData.NextTextureIndex;
-            g_RendererData.Textures[textureId] = *texture;
-            ++g_RendererData.NextTextureIndex;	  
+            textureId = g_RendererData.List.NextTextureIndex;
+            texture_list_add(&g_RendererData.List, texture, textureId);
         }
     }
     else
     {
         renderer_flush();
-        textureId = 1;
-        g_RendererData.Textures[textureId] = *texture;
-        ++g_RendererData.NextTextureIndex;
+        textureId = g_RendererData.List.StartIndex;
+        texture_list_add(&g_RendererData.List, texture, textureId);
     }
 
     glm_translate(translationMat, position);
@@ -519,10 +541,7 @@ renderer_flush()
     graphics_shader_bind(g_Shader);
     graphics_vertex_array_bind(&g_RendererData.Vao);
 
-    for (i32 i = 0; i < g_RendererData.NextTextureIndex; i++)
-    {
-        graphics_texture2d_bind(&(g_RendererData.Textures[i]), i);
-    }
+    texture_list_bind(&g_RendererData.List);
 
     PRINT_ONESF(GDEBUG, "DataCount: %d\n", g_RendererData.DataCount);
 
@@ -534,7 +553,7 @@ renderer_flush()
     graphics_shader_set_mat4(g_Shader,
                              "u_ViewProjection", 1, 0,
                              g_Camera->ViewProjectionMatrix[0]);
-    graphics_shader_set_int1(g_Shader, "u_Textures", g_RendererData.NextTextureIndex, TextureIndices);
+    graphics_shader_set_int1(g_Shader, "u_Textures", g_RendererData.List.NextTextureIndex, TextureIndices);
 
     glDrawElements(GL_TRIANGLES,
                    g_RendererData.IndexCount,
@@ -543,7 +562,7 @@ renderer_flush()
 
     g_RendererData.DataCount  = 0;
     g_RendererData.IndexCount = 0;
-    g_RendererData.NextTextureIndex = 1;
+    g_RendererData.List.NextTextureIndex = 1;
 
     ++g_Statistics->DrawCalls;
 }

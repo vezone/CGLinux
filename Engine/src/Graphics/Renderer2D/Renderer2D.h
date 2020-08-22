@@ -59,7 +59,7 @@ renderer_clear(vec4 color)
 /*
   Batch renderers
 */
-#define MaxObjectToDraw (i64)1000000
+#define MaxObjectToDraw (i64)10000
 #define MaxTextureSlots 32
 
 #define QuadVertexElementCount (3 + 4 + 2 + 1 + 1)
@@ -82,14 +82,23 @@ renderer_reset_statistics(Renderer2DStatistics* statistics)
     statistics->RectanglesCount = 0;
 }
 
+typedef struct TextureList
+{
+    u32 MaxTextureSlot;
+    u32 NextTextureIndex;
+    u32 StartIndex;
+    Texture2D Textures[32];
+} TextureList;
+
 typedef struct BatchRenderer2DData
 {
     u32 DataCount;
-    u32 NextTextureIndex;
+    //u32 NextTextureIndex;
     u32 IndexCount;
     VertexArray Vao;
     Shader Shader;
-    Texture2D Textures[32];
+    //Texture2D Textures[32];
+    TextureList List;
     u32 Indices[IndicesCount];
     f32 Data[VerticesCount];
 } BatchRenderer2DData;

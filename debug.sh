@@ -1,5 +1,5 @@
 #!/bin/bash
 
 
-gdb bin/Debug-linux-x86_64/CGLinux/CGLinux
+gdb bin/Release-linux-x86_64/SandboxApp/SandboxApp
 

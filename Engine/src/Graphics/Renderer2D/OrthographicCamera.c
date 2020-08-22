@@ -1,19 +1,19 @@
 #include "OrthographicCamera.h"
 
-OrthographicCamera 
+OrthographicCamera
 orthographic_camera_create(f32 left, f32 right, f32 bot, f32 top)
 {
     OrthographicCamera camera = {};
-	
+
     camera.Speed = 1.0f;
     camera.Rotation = 0.0f;
     glm_vec3_zero(camera.Position);
     glm_ortho(left, right, bot, top, -1.0f, 1.0f, camera.ProjectionMatrix);
     glm_mat4_identity(camera.ViewMatrix);
-    glm_mat4_mul(camera.ProjectionMatrix, 
-		 camera.ViewMatrix, 
-		 camera.ViewProjectionMatrix);
-				 
+    glm_mat4_mul(camera.ProjectionMatrix,
+                 camera.ViewMatrix,
+                 camera.ViewProjectionMatrix);
+
     return camera;
 }
 
