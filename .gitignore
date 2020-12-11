@@ -1,6 +1,20 @@
+#Bin directories
 bin/
+Dependencies/glad/bin/
+Dependencies/GLFW/bin/
+
+#Makefiles
+Makefile
+Engine2/Dependencies/glad/Makefile
+Engine2/Dependencies/GLFW/Makefile
+Engine2/Dependencies/glad/Makefile
+Engine2/EngineEditor/Makefile
+Engine2/SandboxApp/Makefile
+
 valgrind
 vgcore.*
+
+#Emacs backup files
 *.c#
 *.h#
 
