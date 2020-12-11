@@ -1,2 +1,0 @@
--I/home/bies/Documents/programming/c/CGLinux/Dependencies/glad
--I/home/bies/Documents/programming/c/CGLinux/Dependencies/glad/include
