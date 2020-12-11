@@ -19,7 +19,7 @@ endif
 # #############################################
 
 RESCOMP = windres
-INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include -I../Dependencies/CImGUI
+INCLUDES += -Isrc -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -37,7 +37,7 @@ ifeq ($(config),debug)
 TARGETDIR = ../bin/Debug-linux-x86_64/Engine
 TARGET = $(TARGETDIR)/libEngine.a
 OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/Engine
-DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DEBUG\ =\ 1
+DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DENGINE_DEBUG\ =\ 1
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
@@ -46,7 +46,7 @@ else ifeq ($(config),release)
 TARGETDIR = ../bin/Release-linux-x86_64/Engine
 TARGET = $(TARGETDIR)/libEngine.a
 OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/Engine
-DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DEBUG\ =\ 0
+DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DENGINE_DEBUG\ =\ 0
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
@@ -55,13 +55,11 @@ else ifeq ($(config),dist)
 TARGETDIR = ../bin/Dist-linux-x86_64/Engine
 TARGET = $(TARGETDIR)/libEngine.a
 OBJDIR = ../bin/Intermidiates/Dist-linux-x86_64/Engine
-DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DIST
+DEFINES += -D_CRT_SECURE_NO_WARNINGS -DGLFW_INCLUDE_NONE -DENGINE_DIST
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
 
-else
-  $(error "invalid configuration $(config)")
 endif
 
 # Per File Configurations
@@ -71,12 +69,36 @@ endif
 # File sets
 # #############################################
 
+GENERATED :=
 OBJECTS :=
 
+GENERATED += $(OBJDIR)/Application.o
+GENERATED += $(OBJDIR)/Array.o
+GENERATED += $(OBJDIR)/Buffer.o
+GENERATED += $(OBJDIR)/EditorApplication.o
+GENERATED += $(OBJDIR)/Event.o
+GENERATED += $(OBJDIR)/FrameBuffer.o
+GENERATED += $(OBJDIR)/IO.o
+GENERATED += $(OBJDIR)/Linux.o
+GENERATED += $(OBJDIR)/OpenGLBase.o
+GENERATED += $(OBJDIR)/OrthographicCamera.o
+GENERATED += $(OBJDIR)/Renderer2D.o
+GENERATED += $(OBJDIR)/Shader.o
+GENERATED += $(OBJDIR)/String.o
+GENERATED += $(OBJDIR)/Texture2D.o
+GENERATED += $(OBJDIR)/Vector2.o
+GENERATED += $(OBJDIR)/Window.o
+GENERATED += $(OBJDIR)/stb_ds.o
+GENERATED += $(OBJDIR)/stb_image.o
+GENERATED += $(OBJDIR)/stb_truetype.o
+GENERATED += $(OBJDIR)/ui.o
 OBJECTS += $(OBJDIR)/Application.o
 OBJECTS += $(OBJDIR)/Array.o
 OBJECTS += $(OBJDIR)/Buffer.o
+OBJECTS += $(OBJDIR)/EditorApplication.o
 OBJECTS += $(OBJDIR)/Event.o
+OBJECTS += $(OBJDIR)/FrameBuffer.o
+OBJECTS += $(OBJDIR)/IO.o
 OBJECTS += $(OBJDIR)/Linux.o
 OBJECTS += $(OBJDIR)/OpenGLBase.o
 OBJECTS += $(OBJDIR)/OrthographicCamera.o
@@ -84,14 +106,12 @@ OBJECTS += $(OBJDIR)/Renderer2D.o
 OBJECTS += $(OBJDIR)/Shader.o
 OBJECTS += $(OBJDIR)/String.o
 OBJECTS += $(OBJDIR)/Texture2D.o
-OBJECTS += $(OBJDIR)/TextureAtlas.o
 OBJECTS += $(OBJDIR)/Vector2.o
 OBJECTS += $(OBJDIR)/Window.o
-OBJECTS += $(OBJDIR)/cimgui_impl_glfw.o
-OBJECTS += $(OBJDIR)/cimgui_impl_opengl3.o
 OBJECTS += $(OBJDIR)/stb_ds.o
 OBJECTS += $(OBJDIR)/stb_image.o
-OBJECTS += $(OBJDIR)/temp.o
+OBJECTS += $(OBJDIR)/stb_truetype.o
+OBJECTS += $(OBJDIR)/ui.o
 
 # Rules
 # #############################################
@@ -99,7 +119,7 @@ OBJECTS += $(OBJDIR)/temp.o
 all: $(TARGET)
 	@:
 
-$(TARGET): $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
+$(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
 	@echo Linking Engine
 	$(SILENT) $(LINKCMD)
@@ -125,9 +145,11 @@ clean:
 	@echo Cleaning Engine
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
+	$(SILENT) rm -rf $(GENERATED)
 	$(SILENT) rm -rf $(OBJDIR)
 else
 	$(SILENT) if exist $(subst /,\\,$(TARGET)) del $(subst /,\\,$(TARGET))
+	$(SILENT) if exist $(subst /,\\,$(GENERATED)) rmdir /s /q $(subst /,\\,$(GENERATED))
 	$(SILENT) if exist $(subst /,\\,$(OBJDIR)) rmdir /s /q $(subst /,\\,$(OBJDIR))
 endif
 
@@ -156,16 +178,16 @@ endif
 $(OBJDIR)/Application.o: src/App/Application.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/EditorApplication.o: src/App/EditorApplication.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Event.o: src/Event/Event.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/cimgui_impl_glfw.o: src/GUI/cimgui_impl_glfw.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/cimgui_impl_opengl3.o: src/GUI/cimgui_impl_opengl3.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Buffer.o: src/Graphics/Buffer.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/FrameBuffer.o: src/Graphics/FrameBuffer.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/OpenGLBase.o: src/Graphics/OpenGLBase.c
@@ -183,9 +205,6 @@ $(OBJDIR)/Shader.o: src/Graphics/Shader.c
 $(OBJDIR)/Texture2D.o: src/Graphics/Texture2D.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/TextureAtlas.o: src/Graphics/TextureAtlas.c
-	@echo $(notdir $<)
-	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Window.o: src/Graphics/Window.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
@@ -195,7 +214,13 @@ $(OBJDIR)/Vector2.o: src/Math/Vector2.c
 $(OBJDIR)/Linux.o: src/Platform/Linux/Linux.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/ui.o: src/UI/ui.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/Array.o: src/Utils/Array.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/IO.o: src/Utils/IO.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 $(OBJDIR)/String.o: src/Utils/String.c
@@ -207,7 +232,7 @@ $(OBJDIR)/stb_ds.o: src/Utils/stb_ds.c
 $(OBJDIR)/stb_image.o: src/Utils/stb_image.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/temp.o: src/temp.c
+$(OBJDIR)/stb_truetype.o: src/Utils/stb_truetype.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

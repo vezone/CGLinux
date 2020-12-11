@@ -2,18 +2,28 @@
 
 #include <cglm/cglm.h>
 #include <unistd.h>
+#include <stdarg.h>
 
 // GLOBAL
 #define HD 1
 #define FULLHD 0
 #define DRAW_BASE_SCENE 1
-#define BASE_PATH "assets"
+#define UI_TEST 1
+
+#if CG_DEBUG == 1
+ #define BASE_PATH "SandboxApp/assets"
+#else
+ #define BASE_PATH "assets"
+#endif
+
 #define KENNY_BASE_PACK BASE_PATH"/textures/full_packs/kenney_assets_forest/foliagePack_"
 #define PACK_TEXTURES_COUNT 50
 
+#define RENDER_TO_FRAMEBUFFER 0
+
 #define STOP() static i32 numberfordebugpurposes; scanf("%d", &numberfordebugpurposes)
 
-Window g_Window;
+static NativeWindow g_Window;
 char WindowTitle[32];
 #if HD == 1
 f32 Width = 1280.0f;
@@ -29,6 +39,7 @@ f32 Height = 640.0f;
 Renderer2DStatistics Statistics;
 OrthographicCamera Camera;
 Shader batchedTextureShader;
+FrameBuffer Framebuffer;
 
 //Textures
 const char* shader_batched_texture_path = BASE_PATH"/batched_texture_shader.glsl";
@@ -36,16 +47,14 @@ const char* texture_anime_chibi = BASE_PATH"/anime_chibi.png";
 const char* texture_cherno_hazel_logo = BASE_PATH"/hazel.png";
 const char* texture_hotline_miami = BASE_PATH"/textures/other/hotline_miami.png";
 const char* white_texture_path = BASE_PATH"/textures/default/white_texture.png";
-
-const char* shader_srcs = BASE_PATH"/simple_rotation_color_shader.glsl";
-const char* shader_scs = BASE_PATH"/simple_color_shader.glsl";
-const char* shader_ss = BASE_PATH"/simple_shader.glsl";
-const char* shader_sts = BASE_PATH"/simple_texture_shader.glsl";
+const char* atlas_texture_path = BASE_PATH"/textures/atlas/RPGpack_sheet.png";
 
 Texture2D hazelLogoTexture;
 Texture2D chibiTexture;
 Texture2D hotlineMiamiTexture;
 Texture2D packTextures[PACK_TEXTURES_COUNT];
+Texture2D atlasTexture;
+TextureAtlas atlas;
 
 vec4 RedColor    = { 0.8f, 0.1f, 0.1f, 1.0f };
 vec4 YellowColor = { 1.0f, 1.0f, 0.0f, 1.0f };
@@ -54,31 +63,40 @@ vec4 BlueColor   = { 0.1f, 0.1f, 0.8f, 1.0f };
 vec4 GreenColor  = { 0.2f, 0.7f, 0.2f, 0.3f };
 
 void
-sandbox_on_attach(Window window)
+sandbox_on_attach(NativeWindow window)
 {
     f32 aspectRatio;
     f32 zoomLevel;
     i32 offset;
     char path[512];
+    char buffer[1024];
+    ShaderSource shaderSource;
+    Texture2D whiteTexture;
+
     g_Window = window;
     aspectRatio = Width / Height;
     zoomLevel = 5.0f;
+    //f32 left, f32 right, f32 bot, f32 top
     Camera = orthographic_camera_create(-aspectRatio * zoomLevel, aspectRatio * zoomLevel, -zoomLevel, zoomLevel);
     Camera.AspectRatio = aspectRatio;
     Camera.ZoomLevel = zoomLevel;
     Camera.Speed = 5.0f;
-    Camera.Position[1] += 2.0f;
+    //Camera.Position[1] += 2.0f;
 
     window_set_vsync(0);
     GFORMAT(WindowTitle, "Demo %f", Camera.ZoomLevel);
     window_set_title(&g_Window, WindowTitle);
 
-    char buffer[1024];
     getcwd(buffer, sizeof(buffer));
     GLOG(GREEN("directory: %s\n"), buffer);
 
-    batchedTextureShader = graphics_shader_compile(
-        graphics_shader_load(shader_batched_texture_path));
+    shaderSource = graphics_shader_load(shader_batched_texture_path);
+    batchedTextureShader = graphics_shader_compile(shaderSource);
+    if (batchedTextureShader.ShaderID == -1)
+    {
+	GERROR("We fucked up with shader sources!!!\n");
+	return;
+    }
 
     hazelLogoTexture = graphics_texture2d_create(texture_cherno_hazel_logo);
     chibiTexture = graphics_texture2d_create(texture_anime_chibi);
@@ -97,27 +115,93 @@ sandbox_on_attach(Window window)
 
         packTextures[i] = graphics_texture2d_create(path);
     }
-    Texture2D whiteTexture = graphics_texture2d_create(white_texture_path);
+
+    texture_atlas_create(&atlas, atlas_texture_path, (vec2) { 1280.0f, 832.0f }, (vec2) { 64.0f, 64.0f });
+
+    whiteTexture = graphics_texture2d_create(white_texture_path);
     renderer_batch_init(&Statistics, &batchedTextureShader, &whiteTexture, &Camera);
+
+    if (atlasTexture.Slot == -2)
+    {
+        atlasTexture = whiteTexture;
+    }
+
+#if RENDER_TO_FRAMEBUFFER == 1
+    framebuffer_invalidate(&Framebuffer, Width, Height, 1);
+#endif
+
+    GDEBUG("sandbox_on_attach:"GREEN(" succeed")"\n");
+
 }
 
+#if UI_TEST == 1
 void sandbox_on_update(f32 timestep)
 {
+    renderer_reset_statistics(&Statistics);
+
+    orthographic_camera_on_update(&Camera, &g_Window, timestep);
+    Camera.Timestep = timestep;
+    renderer_clear((vec4) { 0.2f, 0.245f, 0.356f, 1.0f });
+
+    renderer_submit_rectangle((vec3) { -3.0f, -1.5f, 0.0f }, (vec2) {1.5f,1.5f}, NULL, &chibiTexture);
+    renderer_submit_colored_rectangle((vec3) {-2.0f, 1.0f, 0.0f}, (vec2) { 1.0f, 1.0f }, BlueColor);
+    renderer_submit_colored_rotated_rectangle((vec3) {-7.0f, 1.0f, 0.0f}, (vec2) { 1.f, 1.f }, GreenColor, 45);
+    renderer_submit_rectangle((vec3) {-3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, NULL, &hotlineMiamiTexture);
+
+    renderer_flush();
+
+}
+
+void sandbox_on_ui_render(struct nk_context* ctx)
+{
+#if 1
+    if (nk_begin(ctx, "Nucklear window (Movable)", nk_rect(10, 50, 350, 350), NK_WINDOW_BORDER | NK_WINDOW_MOVABLE | NK_WINDOW_SCALABLE | NK_WINDOW_MINIMIZABLE | NK_WINDOW_TITLE))
+    {
+	nk_layout_row_dynamic(ctx, 120, 1);
+	nk_label(ctx, "Label name", NK_TEXT_CENTERED);
+
+	nk_layout_row_dynamic(ctx, 50, 1);
+	nk_label(ctx, "", NK_TEXT_LEFT);
+
+	nk_layout_row_static(ctx, 30, 80, 1);
+	if (nk_button_label(ctx, "AnyButton"))
+	    PRINT("button pressed\n");
+    }
+    nk_end(ctx);
+
+    if (nk_begin(ctx, "Nucklear window (Static)", nk_rect(650, 50, 350, 350), NK_WINDOW_BORDER | NK_WINDOW_TITLE))
+    {
+	nk_layout_row_dynamic(ctx, 50, 1);
+	nk_label(ctx, "Label name", NK_TEXT_LEFT);
+
+	nk_layout_row_static(ctx, 30, 80, 1);
+	if (nk_button_label(ctx, "AnyButton"))
+	    PRINT("button pressed\n");
+    }
+    nk_end(ctx);
+#endif
+}
+
+#else
+void sandbox_on_update(f32 timestep)
+{
+#if RENDER_TO_FRAMEBUFFER == 1
+    framebuffer_bind(&Framebuffer);
+#endif
     renderer_reset_statistics(&Statistics);
 
     orthographic_camera_on_update(&Camera, &g_Window, timestep);
 
     renderer_clear((vec4) { 0.2f, 0.245f, 0.356f, 1.0f });
 
-    renderer_submit_rectangle((vec3) {-1.5f, -0.5f, 0.0f}, (vec2) {1.0f, 1.0f}, &hazelLogoTexture);
-    renderer_submit_rectangle((vec3) {-1.5f, -2.5f, 0.0f}, (vec2) {2.0f, 2.0f}, &chibiTexture);
-    renderer_submit_rectangle((vec3) {-3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &chibiTexture);
-    renderer_submit_rectangle((vec3) {3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &hotlineMiamiTexture);
-    renderer_submit_rectangle((vec3) {3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, &hotlineMiamiTexture);
+    renderer_submit_rectangle((vec3) {-1.5f, -0.5f, 0.0f}, (vec2) {1.0f, 1.0f}, NULL, &hazelLogoTexture);
+    renderer_submit_rectangle((vec3) {-1.5f, -2.5f, 0.0f}, (vec2) {2.0f, 2.0f}, NULL, &chibiTexture);
+    renderer_submit_rectangle((vec3) {-3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, NULL, &chibiTexture);
+    renderer_submit_rectangle((vec3) {3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, NULL, &hotlineMiamiTexture);
+    renderer_submit_rectangle((vec3) {3.0f, -2.5f, 0.0f}, (vec2) {1.5f, 1.5f}, NULL, &hotlineMiamiTexture);
 
-#if 1
     {
-        i32 i = 0;
+	i32 i = 0;
         f32 size_of_each_quad = 0.19;
         f32 distance_between_quads = size_of_each_quad + 0.01;
         f32 x_begin_pos = -6.0;
@@ -129,11 +213,10 @@ void sandbox_on_update(f32 timestep)
                 i = 0;
             }
 
-            renderer_submit_rectangle((vec3) {x, 6.0f, 0.0f}, (vec2){size_of_each_quad, size_of_each_quad}, &packTextures[i]);
+            renderer_submit_rectangle((vec3) {x, 6.0f, 0.0f}, (vec2){size_of_each_quad, size_of_each_quad}, NULL, &packTextures[i]);
             i++;
         }
     }
-#endif
 
     renderer_submit_colored_rectangle((vec3) {1.0f, 1.0f, 0.0f}, (vec2) { 1.5f, 1.5f }, YellowColorAlpha);
     renderer_submit_colored_rectangle((vec3) {-2.0f, 1.0f, 0.0f}, (vec2) { 1.0f, 1.0f }, BlueColor);
@@ -151,7 +234,6 @@ void sandbox_on_update(f32 timestep)
         renderer_submit_rotated_rectangle((vec3) { -6.0f, 2.0f, 0.0f }, (vec2) { 0.5f, 0.5f }, angle, &chibiTexture);
     }
 
-#if 1
     {
         static i32 counter = 0;
         f64 tileSize = 0.3f;
@@ -165,29 +247,30 @@ void sandbox_on_update(f32 timestep)
             for (f64 x = startX; x < endX; x += tileShift)
             {
                 ++counter;
-                renderer_submit_rectangle((vec3) {x, y, 0.0f}, (vec2) { tileSize, tileSize }, &chibiTexture);
+                renderer_submit_rectangle((vec3) {x, y, 0.0f}, (vec2) { tileSize, tileSize }, NULL, &chibiTexture);
             }
         }
 
         PRINT_ONESF(GLOG, "Counter: %10.5d\n", counter);
     }
-#endif
+
+    renderer_submit_atlas((vec3) {1.0f, 1.0f, 0.0f}, (vec2) {2.0f, 2.0f}, &atlas, 3, 2);
 
     renderer_flush();
 
 #if 1
     PRINT("Timestep: %fms, Frames: %d, DrawCalls: %d, RectanglesCount: %d\r", 1000*timestep, (i32)(1 / timestep), Statistics.DrawCalls, Statistics.RectanglesCount);
 #endif
+
+#if RENDER_TO_FRAMEBUFFER == 1
+    framebuffer_unbind();
+#endif
 }
+#endif
 
 void
 sandbox_on_event(Event* event)
 {
-    if (event->IsHandled == 1)
-    {
-        return;
-    }
-
     orthographic_camera_on_event(&Camera, event);
 
     if (event->Category == KeyCategory)
@@ -200,39 +283,10 @@ sandbox_on_event(Event* event)
 
         event->IsHandled = 1;
     }
-    else if (event->Category == MouseCategory)
+    else if (event->Category == MouseCategory && event->Type == MouseScrolled)
     {
-        if (event->Type == MouseButtonPressed)
-        {
-            MouseButtonEvent* mevent = (MouseButtonEvent*) event;
-            if (mevent->MouseCode == MOUSE_BUTTON_1)
-            {
-                if (Camera.ZoomLevel > 1.0f)
-                {
-                    Camera.ZoomLevel -= 1.0f;
-                }
-                else if (Camera.ZoomLevel == 1.0f)
-                {
-                    Camera.ZoomLevel = 0.1f;
-                }
-            }
-            else if (mevent->MouseCode == MOUSE_BUTTON_2)
-            {
-                if (Camera.ZoomLevel != 0.1f)
-                {
-                    Camera.ZoomLevel += 1.0f;
-                }
-                else
-                {
-                    Camera.ZoomLevel = 1.0f;
-                }
-            }
-        }
-
         GFORMAT(WindowTitle, "Demo %f", Camera.ZoomLevel);
         window_set_title(&g_Window, WindowTitle);
-
-        event->IsHandled = 1;
     }
 }
 

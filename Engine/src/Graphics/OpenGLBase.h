@@ -1,14 +1,13 @@
 #ifndef OPENGLBASE
-
 #define OPENGLBASE
-#include <glad/glad.h>
 
-#if CG_DEBUG == 1
-void opengl_get_error();
-#define GLClearErrors() while (glGetError() != GL_NO_ERROR);
-#define GLCheck(x) GLClearErrors(); x; opengl_get_error(__FILE__, __LINE__)
-#else
-#define GLCheck(x) x
-#endif
+#define GLCheck(x) (x)
+
+#include <glad/glad.h>
+#include "Utils/Logger.h"
+
+int opengl_context_init(void (*gladLoadProc)(const char* procnName));
+void opengl_error_callback(GLenum source, GLenum error, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* userParam);
+
 
 #endif

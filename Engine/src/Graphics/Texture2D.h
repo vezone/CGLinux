@@ -1,5 +1,7 @@
-#pragma once
+#ifndef TEXTURE_2D_H
+#define TEXTURE_2D_H
 
+#include "cglm/cglm.h"
 #include "Utils/Types.h"
 
 typedef struct Texture2D {
@@ -19,3 +21,17 @@ void
 graphics_texture2d_unbind(Texture2D* texture);
 void
 graphics_texture2d_delete(Texture2D* texture);
+
+typedef struct TextureAtlas
+{
+    f32 AtlasWidth;
+    f32 AtlasHeight;
+    f32 TextureWidth;
+    f32 TextureHeight;
+    Texture2D Texture;
+} TextureAtlas;
+
+void
+texture_atlas_create(TextureAtlas* atlas, const char* path, vec2 atlasSize, vec2 textureSize);
+
+#endif

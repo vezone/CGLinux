@@ -52,7 +52,7 @@ internal_key_callback(GLFWwindow* window, i32 key, i32 scancode, i32 action, i32
 	event.Base.Type = KeyRealeased;
 	event.RepeatCount = 0;
     }
-  
+
     internal_window_on_event_function(&event);
 }
 
@@ -72,12 +72,60 @@ internal_mouse_button_callback(GLFWwindow* window, i32 button, i32 action, i32 m
     {
 	event.Base.Type = MouseButtonReleased;
     }
-  
+
+    internal_window_on_event_function(&event);
+}
+
+static void
+internal_window_minimized(GLFWwindow* window, i32 isMinimized)
+{
+    if (isMinimized)
+    {
+	Event event = {
+	    .IsHandled = 0,
+	    .Type = WindowMinimized,
+	    .Category = WindowCategory
+	};
+	internal_window_on_event_function(&event);
+    }
+    else
+    {
+	Event event = {
+	    .IsHandled = 0,
+	    .Type = WindowRestored,
+	    .Category = WindowCategory
+	};
+	internal_window_on_event_function(&event);
+    }
+}
+
+static void
+internal_window_maximized(GLFWwindow* window, i32 isMaximized)
+{
+    if (isMaximized)
+    {
+	Event event = {
+	    .IsHandled = 0,
+	    .Type = WindowMaximized,
+	    .Category = WindowCategory
+	};
+	internal_window_on_event_function(&event);
+    }
+}
+
+static void
+internal_window_refreshed(GLFWwindow* window)
+{
+    Event event = {
+	.IsHandled = 0,
+	.Type = WindowRestored,
+	.Category = WindowCategory
+    };
     internal_window_on_event_function(&event);
 }
 
 i32
-window_create(Window* window, u32 width, u32 height, const char* tittle, void (*onEvent)(Event* event))
+window_create(NativeWindow* window, u32 width, u32 height, const char* tittle, void (*onEvent)(Event* event))
 {
     i32 major, minor, revision;
 
@@ -96,13 +144,15 @@ window_create(Window* window, u32 width, u32 height, const char* tittle, void (*
     window->GlfwWindow = glfwCreateWindow(width, height, tittle, 0, 0);
     window->OnEvent = onEvent;
     internal_window_on_event_function = onEvent;
-	
+
     glfwMakeContextCurrent(window->GlfwWindow);
 
     glfwSetKeyCallback(window->GlfwWindow, internal_key_callback);
     glfwSetMouseButtonCallback(window->GlfwWindow, internal_mouse_button_callback);
     glfwSetScrollCallback(window->GlfwWindow, internal_scroll_callback);
     glfwSetWindowSizeCallback(window->GlfwWindow, internal_window_size_callback);
-	
+    glfwSetWindowIconifyCallback(window->GlfwWindow, internal_window_minimized);
+    glfwSetWindowMaximizeCallback(window->GlfwWindow, internal_window_maximized);
+
     return(1);
 }

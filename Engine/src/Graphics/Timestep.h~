@@ -1,8 +1,0 @@
-#pragma once
-
-#include "Utils/Types.h"
-
-typedef struct TimeStep
-{
-	f32 time
-} TimeStep;

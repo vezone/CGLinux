@@ -8,39 +8,6 @@
 #include "Utils/Types.h"
 #include "Utils/Array.h"
 
-typedef struct BaseGeometry
-{
-    vec3 Position;
-    mat4 Transform;
-} BaseGeometry;
-
-typedef struct BaseObject
-{
-    BaseGeometry Geometry;
-    VertexArray VertexArray;
-} BaseObject;
-
-static void
-base_geometry_update_position(BaseObject* object)
-{
-    glm_translate(object->Geometry.Transform, object->Geometry.Position);
-}
-
-BaseObject renderer_create_colored_triangle();
-void renderer_draw_colored_triangle(BaseObject* objectToDraw, Shader* shader, vec4 color, OrthographicCamera* camera);
-
-BaseObject renderer_create_colored_rectangle(f32 x1, f32 x2, f32 y1, f32 y2);
-void renderer_draw_colored_rectangle(BaseObject* objectToDraw, Shader* shader, vec4 color, OrthographicCamera* camera);
-
-BaseObject renderer_create_textured_rectangle(f32 x, f32 y);
-void renderer_draw_textured_rectangle(BaseObject* objectToDraw, Shader* shader, Texture2D* texture, OrthographicCamera* camera);
-
-static void
-renderer_destroy_base_object(BaseObject* object)
-{
-    graphics_vertex_array_destroy(&object->VertexArray);
-}
-
 static void
 renderer_set_viewport(u32 width, u32 height)
 {
@@ -96,7 +63,6 @@ typedef struct BatchRenderer2DData
     //u32 NextTextureIndex;
     u32 IndexCount;
     VertexArray Vao;
-    Shader Shader;
     //Texture2D Textures[32];
     TextureList List;
     u32 Indices[IndicesCount];
@@ -105,10 +71,13 @@ typedef struct BatchRenderer2DData
 
 void renderer_batch_init(Renderer2DStatistics* statistics, Shader* shader, Texture2D* whiteTexture, OrthographicCamera* camera);
 
-void renderer_submit_rectangle(vec3 position, vec2 size, Texture2D* texture);
+void renderer_submit_rectangle(vec3 position, vec2 size, vec2* coords, Texture2D* texture);
 void renderer_submit_rotated_rectangle(vec3 position, vec2 size, f32 angle, Texture2D* texture);
 void renderer_submit_colored_rectangle(vec3 position, vec2 size, vec4 color);
 void renderer_submit_colored_rotated_rectangle(vec3 position, vec2 size, vec4 color, f32 angle);
+
+//functions for texture atlas
+void renderer_submit_atlas(vec3 position, vec2 size, TextureAtlas* atlas, i32 row, i32 col);
 
 void renderer_flush();
 

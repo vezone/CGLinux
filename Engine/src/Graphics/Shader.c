@@ -1,79 +1,13 @@
 #include "Shader.h"
+
 #include <stdlib.h>
 #include <stdio.h>
+#include "Utils/IO.h"
 #include "Utils/String.h"
 #include "Utils/Array.h"
 #include "Utils/Logger.h"
 
 Shader* ShadersCollection = NULL;
-
-static char*
-file_get_name_with_extension(const char* path)
-{
-    i32 i, last_index = 0, name_index, new_length;
-    i32 path_length = vstring_length(path);
-    char* file_name;
-
-    for (i = 0; i < path_length; i++)
-    {
-        if (path[i] == '/')
-        {
-            last_index = i;
-        }
-    }
-
-    if (last_index != 0)
-    {
-        name_index = (last_index + 1);
-    }
-    else
-    {
-        name_index = 0;
-    }
-
-    new_length = path_length - name_index;
-    file_name = malloc((new_length + 1) * sizeof(char));
-    for (i = name_index; i < path_length; i++)
-    {
-        file_name[i - name_index] = path[i];
-    }
-    file_name[new_length] = '\0';
-    return file_name;
-}
-
-static void
-file_write_string(char* file_path, char* data, i32 len)
-{
-    FILE* file;
-    file = fopen(file_path, "w");
-    fwrite(data, 1, len, file);
-    fclose(file);
-}
-
-static char*
-file_read_string(const char* file_path)
-{
-    FILE* file;
-    char* result;
-    i32 file_length;
-
-    file = fopen(file_path, "r");
-    if (file)
-    {
-        fseek(file, 0, SEEK_END);
-        file_length = (ftell(file));
-        fseek(file, 0, SEEK_SET);
-        result = malloc((file_length + 1) * sizeof(char));
-
-        fread(result, sizeof(char), (file_length), file);
-        result[file_length] = '\0';
-
-        fclose(file);
-        return((char*)result);
-    }
-
-    return NULL;
-}
 
 ShaderSource
 graphics_shader_load(const char* shader_path)
@@ -94,6 +28,7 @@ graphics_shader_load(const char* shader_path)
     if (shader_source == NULL)
     {
         GERROR("shader file open error!");
+	return (ShaderSource) { };
     }
 
     vertex_index   = vstring_index_of_string(shader_source, "#vertex shader");
@@ -146,6 +81,18 @@ graphics_shader_compile(ShaderSource source)
     u32 shader_program_id;
 
     SHADERDEBUG(GREEN5("SHADER")" %s\n", source.name);
+
+    if (source.vertex_shader == NULL ||
+	source.fragment_shader == NULL ||
+	vstring_length(source.vertex_shader) < 0 ||
+	vstring_length(source.fragment_shader) < 0)
+    {
+	GERROR("Shader source is not loaded correctly!\n");
+	return (Shader) {
+	    .ShaderID = -1,
+	    .UniformTable = NULL
+	};
+    }
 
     SHADERDEBUG(GREEN("Compiling")" vertex shader\n");
     GLCheck(vertex_shader_id = glCreateShader(GL_VERTEX_SHADER));

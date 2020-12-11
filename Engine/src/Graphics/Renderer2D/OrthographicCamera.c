@@ -7,6 +7,10 @@ orthographic_camera_create(f32 left, f32 right, f32 bot, f32 top)
 
     camera.Speed = 1.0f;
     camera.Rotation = 0.0f;
+    camera.Left = left;
+    camera.Right = right;
+    camera.Bot = bot;
+    camera.Top = top;
     glm_vec3_zero(camera.Position);
     glm_ortho(left, right, bot, top, -1.0f, 1.0f, camera.ProjectionMatrix);
     glm_mat4_identity(camera.ViewMatrix);
@@ -20,6 +24,11 @@ orthographic_camera_create(f32 left, f32 right, f32 bot, f32 top)
 void
 orthographic_camera_set_projection(OrthographicCamera* camera, f32 left, f32 right, f32 bot, f32 top)
 {
+    camera->Left = left;
+    camera->Right = right;
+    camera->Bot = bot;
+    camera->Top = top;
+
     glm_ortho(left, right, bot, top, -1.0f, 1.0f, camera->ProjectionMatrix);
     glm_mat4_mul(camera->ProjectionMatrix, camera->ViewMatrix, camera->ViewProjectionMatrix);
 }

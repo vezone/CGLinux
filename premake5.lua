@@ -16,12 +16,10 @@ IncludeDirs = {}
 IncludeDirs["GLFW"] = "Dependencies/GLFW/include"
 IncludeDirs["GLAD"] = "Dependencies/glad/include"
 IncludeDirs["CGLM"] = "Dependencies/CGLM/include"
-IncludeDirs["CIMGUI"] = "Dependencies/CImGUI"
 
 group "Dependencies"
 include "Dependencies/GLFW"
 include "Dependencies/glad"
-include "Dependencies/CImGUI"
 
 project "Engine"
     location "Engine"
@@ -41,8 +39,7 @@ project "Engine"
     defines
     {
       "_CRT_SECURE_NO_WARNINGS",
-      "GLFW_INCLUDE_NONE",
-      "CIMGUI_DEFINE_ENUMS_AND_STRUCTS"
+      "GLFW_INCLUDE_NONE"
     }
 
     includedirs
@@ -50,8 +47,7 @@ project "Engine"
       "%{prj.name}/src",
       "%{IncludeDirs.GLFW}",
       "%{IncludeDirs.GLAD}",
-      "%{IncludeDirs.CGLM}",
-      "%{IncludeDirs.CIMGUI}"
+      "%{IncludeDirs.CGLM}"
     }
 
     filter "system:linux"
@@ -67,15 +63,15 @@ project "Engine"
     }
 
     filter "configurations:Debug"
-    defines "CG_DEBUG = 1"
+    defines "ENGINE_DEBUG = 1"
     symbols "On"
 
     filter "configurations:Release"
-    defines "CG_DEBUG = 0"
+    defines "ENGINE_DEBUG = 0"
     optimize "On"
 
     filter "configurations:Dist"
-    defines "CG_DIST"
+    defines "ENGINE_DIST"
     optimize "On"
 
 project "SandboxApp"
@@ -107,9 +103,9 @@ project "SandboxApp"
     includedirs
     {
       "Engine/src",
+      "Dependencies",
       "%{IncludeDirs.GLFW}",
       "%{IncludeDirs.GLAD}",
-      "Dependencies",
       "%{IncludeDirs.CGLM}"
     }
 
@@ -118,7 +114,6 @@ project "SandboxApp"
       "Engine",
       "glad",
       "GLFW",
-      "CImGUI",
       "stdc++",
       "GL", "GLU",
       "X11","dl",

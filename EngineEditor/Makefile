@@ -19,7 +19,7 @@ endif
 # #############################################
 
 RESCOMP = windres
-INCLUDES += -I../Engine/src -I../Dependencies -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/CGLM/include
+INCLUDES += -I../Engine/src -I../Dependencies/GLFW/include -I../Dependencies/glad/include -I../Dependencies/nucklear -I../Dependencies -I../Dependencies/CGLM/include -I/usr/include/harfbuzz -I/usr/include/gtk-3.0 -I/usr/include/glib-2.0 -I/usr/include/pango-1.0 -I/usr/include/cairo -I/usr/include/gdk-pixbuf-2.0 -I/usr/include/atk-1.0
 FORCE_INCLUDE +=
 ALL_CPPFLAGS += $(CPPFLAGS) -MMD -MP $(DEFINES) $(INCLUDES)
 ALL_RESFLAGS += $(RESFLAGS) $(DEFINES) $(INCLUDES)
@@ -32,35 +32,35 @@ define POSTBUILDCMDS
 endef
 
 ifeq ($(config),debug)
-TARGETDIR = ../bin/Debug-linux-x86_64/SandboxApp
-TARGET = $(TARGETDIR)/SandboxApp
-OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/SandboxApp
-DEFINES += -DGLFW_INCLUDE_NONE -DCG_DEBUG\ =\ 1
+TARGETDIR = ../bin/Debug-linux-x86_64/EngineEditor
+TARGET = $(TARGETDIR)/EngineEditor
+OBJDIR = ../bin/Intermidiates/Debug-linux-x86_64/EngineEditor
+DEFINES += -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DEBUG\ =\ 1
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99 -O3
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -g -std=c99 -O3
-LIBS += ../bin/Debug-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+LIBS += ../bin/Debug-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi -lgtk-3 -lgdk-3 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0
 LDDEPS += ../bin/Debug-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Debug-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Debug-linux-x86_64/GLFW/libGLFW.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
 
 else ifeq ($(config),release)
-TARGETDIR = ../bin/Release-linux-x86_64/SandboxApp
-TARGET = $(TARGETDIR)/SandboxApp
-OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/SandboxApp
-DEFINES += -DGLFW_INCLUDE_NONE -DCG_DEBUG\ =\ 0
+TARGETDIR = ../bin/Release-linux-x86_64/EngineEditor
+TARGET = $(TARGETDIR)/EngineEditor
+OBJDIR = ../bin/Intermidiates/Release-linux-x86_64/EngineEditor
+DEFINES += -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DEBUG\ =\ 0
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
-LIBS += ../bin/Release-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+LIBS += ../bin/Release-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi -lgtk-3 -lgdk-3 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0
 LDDEPS += ../bin/Release-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Release-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Release-linux-x86_64/GLFW/libGLFW.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
 
 else ifeq ($(config),dist)
-TARGETDIR = ../bin/Dist-linux-x86_64/SandboxApp
-TARGET = $(TARGETDIR)/SandboxApp
-OBJDIR = ../bin/Intermidiates/Dist-linux-x86_64/SandboxApp
-DEFINES += -DGLFW_INCLUDE_NONE -DCG_DIST
+TARGETDIR = ../bin/Dist-linux-x86_64/EngineEditor
+TARGET = $(TARGETDIR)/EngineEditor
+OBJDIR = ../bin/Intermidiates/Dist-linux-x86_64/EngineEditor
+DEFINES += -DGLFW_INCLUDE_NONE -DCIMGUI_DEFINE_ENUMS_AND_STRUCTS -DCG_DIST
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -std=c99 -O3
-LIBS += ../bin/Dist-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi
+LIBS += ../bin/Dist-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a -lstdc++ -lGL -lGLU -lX11 -ldl -lXinerama -lXcursor -lm -lXxf86vm -lXrandr -lpthread -lXi -lgtk-3 -lgdk-3 -latk-1.0 -lgio-2.0 -lpangoft2-1.0 -lgdk_pixbuf-2.0 -lpangocairo-1.0 -lcairo -lpango-1.0 -lfreetype -lfontconfig -lgobject-2.0 -lgmodule-2.0 -lgthread-2.0 -lrt -lglib-2.0
 LDDEPS += ../bin/Dist-linux-x86_64/Engine/libEngine.a ../Dependencies/glad/bin/Dist-linux-x86_64/glad/libglad.a ../Dependencies/GLFW/bin/Dist-linux-x86_64/GLFW/libGLFW.a
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
 
@@ -76,10 +76,16 @@ endif
 GENERATED :=
 OBJECTS :=
 
-GENERATED += $(OBJDIR)/Sandbox.o
-GENERATED += $(OBJDIR)/SandboxLayer.o
-OBJECTS += $(OBJDIR)/Sandbox.o
-OBJECTS += $(OBJDIR)/SandboxLayer.o
+GENERATED += $(OBJDIR)/EditorMenuBar.o
+GENERATED += $(OBJDIR)/EditorViewport.o
+GENERATED += $(OBJDIR)/EditorWindow.o
+GENERATED += $(OBJDIR)/EngineEditor.o
+GENERATED += $(OBJDIR)/EngineEditorLayer.o
+OBJECTS += $(OBJDIR)/EditorMenuBar.o
+OBJECTS += $(OBJDIR)/EditorViewport.o
+OBJECTS += $(OBJDIR)/EditorWindow.o
+OBJECTS += $(OBJDIR)/EngineEditor.o
+OBJECTS += $(OBJDIR)/EngineEditorLayer.o
 
 # Rules
 # #############################################
@@ -89,7 +95,7 @@ all: $(TARGET)
 
 $(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
-	@echo Linking SandboxApp
+	@echo Linking EngineEditor
 	$(SILENT) $(LINKCMD)
 	$(POSTBUILDCMDS)
 
@@ -110,7 +116,7 @@ else
 endif
 
 clean:
-	@echo Cleaning SandboxApp
+	@echo Cleaning EngineEditor
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
 	$(SILENT) rm -rf $(GENERATED)
@@ -143,10 +149,19 @@ endif
 # File Rules
 # #############################################
 
-$(OBJDIR)/Sandbox.o: src/Sandbox.c
+$(OBJDIR)/EditorMenuBar.o: src/EditorMenuBar.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
-$(OBJDIR)/SandboxLayer.o: src/SandboxLayer.c
+$(OBJDIR)/EditorViewport.o: src/EditorViewport.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/EditorWindow.o: src/EditorWindow.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/EngineEditor.o: src/EngineEditor.c
+	@echo $(notdir $<)
+	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
+$(OBJDIR)/EngineEditorLayer.o: src/EngineEditorLayer.c
 	@echo $(notdir $<)
 	$(SILENT) $(CC) $(ALL_CFLAGS) $(FORCE_INCLUDE) -o "$@" -MF "$(@:%.o=%.d)" -c "$<"
 

@@ -9,22 +9,22 @@
 //#define window_get_cursor_position(window, xPos, yPos) glfwGetCursorPos((window)->GlfwWindow, xPos, yPos);
 //#define window_set_drop_callback(window, callback) glfwSetDropCallback((window)->GlfwWindow, callback)
 
-typedef struct Window {
+typedef struct NativeWindow {
     u32 Width;
     u32 Height;
     const char* Title;
     void (*OnEvent)(Event* event);
     GLFWwindow* GlfwWindow;
-} Window;
+} NativeWindow;
 
 force_inline i32
-window_should_close(Window* window)
+window_should_close(NativeWindow* window)
 {
     return glfwWindowShouldClose(window->GlfwWindow);
 }
 
 force_inline void
-window_set_should_close(Window* window, i8 shouldClose)
+window_set_should_close(NativeWindow* window, i8 shouldClose)
 {
     glfwSetWindowShouldClose(window->GlfwWindow, shouldClose);
 }
@@ -36,29 +36,29 @@ window_terminate()
 }
 
 force_inline void
-window_set_title(Window* window, const char* title)
+window_set_title(NativeWindow* window, const char* title)
 {
-    glfwSetWindowTitle(window->GlfwWindow, title); 
+    glfwSetWindowTitle(window->GlfwWindow, title);
 }
 
 force_inline void
-window_set_resize_callback(Window* window, void (*callback) (GLFWwindow* window, i32 width, i32 height))
+window_set_resize_callback(NativeWindow* window, void (*callback) (GLFWwindow* window, i32 width, i32 height))
 {
     glfwSetWindowSizeCallback(window->GlfwWindow, callback);
 }
 
 i32
-window_create(Window* window, u32 width, u32 height, const char* tittle, void (*onEvent)(Event* event));
+window_create(NativeWindow* window, u32 width, u32 height, const char* tittle, void (*onEvent)(Event* event));
 
 force_inline i32
-window_is_key_pressed(Window* window, i32 key)
+window_is_key_pressed(NativeWindow* window, i32 key)
 {
     i32 state = glfwGetKey(window->GlfwWindow, key);
-    return(state == GLFW_PRESS || state == GLFW_REPEAT);        
+    return(state == GLFW_PRESS || state == GLFW_REPEAT);
 }
 
-force_inline i32 
-window_is_mouse_pressed(Window* window, i32 key)
+force_inline i32
+window_is_mouse_pressed(NativeWindow* window, i32 key)
 {
     i32 state = glfwGetMouseButton(window->GlfwWindow, key);
     return(state == GLFW_PRESS);
@@ -71,8 +71,32 @@ window_set_vsync(i32 isVsync)
 }
 
 force_inline void
-window_on_update(Window* window)
+window_on_update(NativeWindow* window)
 {
     glfwSwapBuffers(window->GlfwWindow);
     glfwPollEvents();
+}
+
+force_inline void
+window_get_cursor_position(NativeWindow* window, double* xpos, double* ypos)
+{
+    glfwGetCursorPos(window->GlfwWindow, xpos, ypos);
+}
+
+force_inline void
+window_minimize(NativeWindow* window)
+{
+    glfwIconifyWindow(window->GlfwWindow);
+}
+
+force_inline void
+window_restore(NativeWindow* window)
+{
+    glfwRestoreWindow(window->GlfwWindow);
+}
+
+force_inline void
+window_maximize(NativeWindow* window)
+{
+    glfwMaximizeWindow(window->GlfwWindow);
 }

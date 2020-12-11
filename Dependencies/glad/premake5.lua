@@ -2,9 +2,9 @@ project "glad"
 	kind "StaticLib"
 	language "C"
 	staticruntime "on"
-	
+
 	targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-	objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+	objdir ("bin/Intermidiates" .. outputdir .. "/%{prj.name}")
 
 	includedirs
 	{

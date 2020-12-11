@@ -9,7 +9,7 @@
 
 u32* TexturesCollection = NULL;
 
-Texture2D 
+Texture2D
 graphics_texture2d_create(const char* path)
 {
     i32 width, height, channels;
@@ -24,11 +24,19 @@ graphics_texture2d_create(const char* path)
     GLCheck(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     stbi_set_flip_vertically_on_load(1);
-    stbi_uc* data = stbi_load(path, 
-        &width, &height, &channels, 0);
-    if (!data) 
+    stbi_uc* data = stbi_load(path, &width, &height, &channels, 0);
+    if (data == NULL)
     {
         GERROR("Failed to load a texture!");
+        texture.Slot = -1;
+        return texture;
+    }
+
+    i32 stw = 0;
+    if (width <= 0 || height <= 0)
+    {
+        stw = 1;
+        GWARNING("width or height of texture == 0!\n");
     }
 
     texture.Width = width;
@@ -37,12 +45,12 @@ graphics_texture2d_create(const char* path)
 
     TEXTUREDEBUG("Channels: %d\n", channels);
 
-    if (channels == 3) 
+    if (channels == 3)
     {
         dataFormat = GL_RGB;
         internalFormat = GL_RGB8;
     }
-    else if (channels == 4) 
+    else if (channels == 4)
     {
         dataFormat = GL_RGBA;
         internalFormat = GL_RGBA8;
@@ -50,26 +58,26 @@ graphics_texture2d_create(const char* path)
 
     GLCheck(glCreateTextures(GL_TEXTURE_2D, 1, &texture.RendererID));
     GLCheck(glTextureStorage2D(texture.RendererID, 1, internalFormat,
-        texture.Width, texture.Height));
-    
-    GLCheck(glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    GLCheck(glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_MAG_FILTER, GL_NEAREST));
-    GLCheck(glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_WRAP_S, GL_REPEAT));
-	GLCheck(glTextureParameteri(texture.RendererID, 
-        GL_TEXTURE_WRAP_T, GL_REPEAT));
+                               texture.Width, texture.Height));
 
-    GLCheck(glTextureSubImage2D(texture.RendererID, 0, 0, 0, 
-        texture.Width, texture.Height,
-        dataFormat, GL_UNSIGNED_BYTE, data));
+    GLCheck(glTextureParameteri(texture.RendererID,
+                                GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    GLCheck(glTextureParameteri(texture.RendererID,
+                                GL_TEXTURE_MAG_FILTER, GL_NEAREST));
+    GLCheck(glTextureParameteri(texture.RendererID,
+                                GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GLCheck(glTextureParameteri(texture.RendererID,
+                                GL_TEXTURE_WRAP_T, GL_REPEAT));
 
-    if (data) 
+    GLCheck(glTextureSubImage2D(texture.RendererID, 0, 0, 0,
+                                texture.Width, texture.Height,
+                                dataFormat, GL_UNSIGNED_BYTE, data));
+
+    if (data)
     {
         stbi_image_free(data);
     }
-    
+
     array_push(TexturesCollection, texture.RendererID);
 
     return texture;
@@ -92,4 +100,14 @@ void
 graphics_texture2d_delete(Texture2D* texture)
 {
     GLCheck(glDeleteTextures(1, &texture->RendererID));
+}
+
+void
+texture_atlas_create(TextureAtlas* atlas, const char* path, vec2 atlasSize, vec2 textureSize)
+{
+    atlas->AtlasWidth = atlasSize[0];
+    atlas->AtlasHeight = atlasSize[1];
+    atlas->TextureWidth = textureSize[0];
+    atlas->TextureHeight = textureSize[1];
+    atlas->Texture = graphics_texture2d_create(path);
 }

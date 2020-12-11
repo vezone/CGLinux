@@ -37,7 +37,7 @@ endef
 ifeq ($(config),debug)
 TARGETDIR = bin/Debug-linux-x86_64/glad
 TARGET = $(TARGETDIR)/libglad.a
-OBJDIR = bin-int/Debug-linux-x86_64/glad
+OBJDIR = bin/IntermidiatesDebug-linux-x86_64/glad
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -g -std=c99
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -g -std=c99
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
@@ -45,7 +45,7 @@ ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64
 else ifeq ($(config),release)
 TARGETDIR = bin/Release-linux-x86_64/glad
 TARGET = $(TARGETDIR)/libglad.a
-OBJDIR = bin-int/Release-linux-x86_64/glad
+OBJDIR = bin/IntermidiatesRelease-linux-x86_64/glad
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC -std=c99
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -O2 -fPIC -std=c99
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
@@ -53,13 +53,11 @@ ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
 else ifeq ($(config),dist)
 TARGETDIR = bin/Dist-linux-x86_64/glad
 TARGET = $(TARGETDIR)/libglad.a
-OBJDIR = bin-int/Dist-linux-x86_64/glad
+OBJDIR = bin/IntermidiatesDist-linux-x86_64/glad
 ALL_CFLAGS += $(CFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -std=c99
 ALL_CXXFLAGS += $(CXXFLAGS) $(ALL_CPPFLAGS) -m64 -fPIC -std=c99
 ALL_LDFLAGS += $(LDFLAGS) -L/usr/lib64 -m64 -s
 
-else
-  $(error "invalid configuration $(config)")
 endif
 
 # Per File Configurations
@@ -69,8 +67,10 @@ endif
 # File sets
 # #############################################
 
+GENERATED :=
 OBJECTS :=
 
+GENERATED += $(OBJDIR)/glad.o
 OBJECTS += $(OBJDIR)/glad.o
 
 # Rules
@@ -79,7 +79,7 @@ OBJECTS += $(OBJDIR)/glad.o
 all: $(TARGET)
 	@:
 
-$(TARGET): $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
+$(TARGET): $(GENERATED) $(OBJECTS) $(LDDEPS) | $(TARGETDIR)
 	$(PRELINKCMDS)
 	@echo Linking glad
 	$(SILENT) $(LINKCMD)
@@ -105,9 +105,11 @@ clean:
 	@echo Cleaning glad
 ifeq (posix,$(SHELLTYPE))
 	$(SILENT) rm -f  $(TARGET)
+	$(SILENT) rm -rf $(GENERATED)
 	$(SILENT) rm -rf $(OBJDIR)
 else
 	$(SILENT) if exist $(subst /,\\,$(TARGET)) del $(subst /,\\,$(TARGET))
+	$(SILENT) if exist $(subst /,\\,$(GENERATED)) rmdir /s /q $(subst /,\\,$(GENERATED))
 	$(SILENT) if exist $(subst /,\\,$(OBJDIR)) rmdir /s /q $(subst /,\\,$(OBJDIR))
 endif
 

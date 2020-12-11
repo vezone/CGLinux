@@ -1,4 +1,5 @@
-#pragma once
+#ifndef SHADER_H
+#define SHADER_H
 
 #include <glad/glad.h>
 #include "OpenGLBase.h"
@@ -99,7 +100,7 @@ graphics_shader_set_3float(Shader* shader, const char* uniformName, f32 v0, f32 
 
     if (location >= 0)
     {
-        GLCheck(glUniform3f(location, v0, v1, v2));	
+        GLCheck(glUniform3f(location, v0, v1, v2));
     }
 }
 
@@ -298,7 +299,7 @@ graphics_shader_set_float1(Shader* shader, const char* uniformName, i32 count, f
     {
         location = shget(shader->UniformTable, uniformName);
     }
-	
+
     if (location >= 0)
     {
         GLCheck(glUniform1fv(location, count, values));
@@ -584,3 +585,5 @@ graphics_shader_set_mat4(Shader* shader, const char* uniformName, i32 count, i8 
         GLCheck(glUniformMatrix4fv(location, count, transpose, values));
     }
 }
+
+#endif

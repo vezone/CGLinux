@@ -11,21 +11,18 @@ endif
 ifeq ($(config),debug)
   GLFW_config = debug
   glad_config = debug
-  CImGUI_config = debug
   Engine_config = debug
   SandboxApp_config = debug
 
 else ifeq ($(config),release)
   GLFW_config = release
   glad_config = release
-  CImGUI_config = release
   Engine_config = release
   SandboxApp_config = release
 
 else ifeq ($(config),dist)
   GLFW_config = dist
   glad_config = dist
-  CImGUI_config = dist
   Engine_config = dist
   SandboxApp_config = dist
 
@@ -33,13 +30,13 @@ else
   $(error "invalid configuration $(config)")
 endif
 
-PROJECTS := GLFW glad CImGUI Engine SandboxApp
+PROJECTS := GLFW glad Engine SandboxApp
 
 .PHONY: all clean help $(PROJECTS) Dependencies
 
 all: $(PROJECTS)
 
-Dependencies: CImGUI Engine GLFW SandboxApp glad
+Dependencies: Engine GLFW SandboxApp glad
 
 GLFW:
 ifneq (,$(GLFW_config))
@@ -53,19 +50,13 @@ ifneq (,$(glad_config))
 	@${MAKE} --no-print-directory -C Dependencies/glad -f Makefile config=$(glad_config)
 endif
 
-CImGUI: GLFW
-ifneq (,$(CImGUI_config))
-	@echo "==== Building CImGUI ($(CImGUI_config)) ===="
-	@${MAKE} --no-print-directory -C Dependencies/CImGUI -f Makefile config=$(CImGUI_config)
-endif
-
 Engine:
 ifneq (,$(Engine_config))
 	@echo "==== Building Engine ($(Engine_config)) ===="
 	@${MAKE} --no-print-directory -C Engine -f Makefile config=$(Engine_config)
 endif
 
-SandboxApp: Engine glad GLFW CImGUI
+SandboxApp: Engine glad GLFW
 ifneq (,$(SandboxApp_config))
 	@echo "==== Building SandboxApp ($(SandboxApp_config)) ===="
 	@${MAKE} --no-print-directory -C SandboxApp -f Makefile config=$(SandboxApp_config)
@@ -74,7 +65,6 @@ endif
 clean:
 	@${MAKE} --no-print-directory -C Dependencies/GLFW -f Makefile clean
 	@${MAKE} --no-print-directory -C Dependencies/glad -f Makefile clean
-	@${MAKE} --no-print-directory -C Dependencies/CImGUI -f Makefile clean
 	@${MAKE} --no-print-directory -C Engine -f Makefile clean
 	@${MAKE} --no-print-directory -C SandboxApp -f Makefile clean
 
@@ -91,7 +81,6 @@ help:
 	@echo "   clean"
 	@echo "   GLFW"
 	@echo "   glad"
-	@echo "   CImGUI"
 	@echo "   Engine"
 	@echo "   SandboxApp"
 	@echo ""

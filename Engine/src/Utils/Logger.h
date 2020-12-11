@@ -63,6 +63,7 @@
 #endif
 
 #define GPRINTI32(var) GLOG(#var": %d\n", var)
+#define GLOGS(x) { int loggerLock123 = 1; if (loggerLock123){ PLOG(x); } }
 
 #if ISFORMATTOSTRING == 1
 #define GFORMAT(string, format, ...) sprintf(string, format, __VA_ARGS__)
